@@ -2547,6 +2547,267 @@ async function translateChunk(text, lang) {
 }
 
 
+// ===== Hope Detective Game =====
+
+const detectiveClues = {
+    elementary: [
+        {
+            story: 'The River Cleanup',
+            clues: [
+                { text: '"I feel so sad when I see the fish can\'t swim here anymore," said Maya.', marker: 'motivation' },
+                { text: '"This isn\'t fair to the animals. We HAVE to do something!"', marker: 'motivation' },
+                { text: 'Maya remembered that the kids in the next town cleaned up THEIR river last year.', marker: 'belief' },
+                { text: '"If they could do it, so can we!" she told her friends.', marker: 'belief' },
+                { text: 'They made a list: Monday — bring bags, Tuesday — sort recycling, Wednesday — plant flowers along the bank.', marker: 'plans' },
+                { text: 'Maya drew a big chart showing each step of their plan.', marker: 'plans' },
+                { text: 'On Saturday, twenty kids showed up with gloves and trash bags.', marker: 'agency' },
+                { text: 'By the end of the day, they had filled 15 bags and the water was already clearer.', marker: 'agency' },
+            ]
+        },
+        {
+            story: 'The School Garden',
+            clues: [
+                { text: 'Leo looked at the empty dirt lot behind school and frowned. "Nothing grows here."', marker: 'motivation' },
+                { text: '"It makes me sad that we have nowhere green to play," said his friend.', marker: 'motivation' },
+                { text: 'Ms. Garcia showed them photos of another school that turned a parking lot into a beautiful garden.', marker: 'belief' },
+                { text: '"See? It really works! Their garden even grows food for the cafeteria now."', marker: 'belief' },
+                { text: 'The class voted on what to plant and made a timeline: seeds in March, transplant in April, harvest in June.', marker: 'plans' },
+                { text: 'They assigned jobs — waterers, weeders, seed planters — and put it all on a calendar.', marker: 'plans' },
+                { text: 'Every morning before school, two students watered the garden.', marker: 'agency' },
+                { text: 'By May, tomatoes, sunflowers, and lettuce were growing tall.', marker: 'agency' },
+            ]
+        }
+    ],
+    middle: [
+        {
+            story: 'The Creek Investigation',
+            clues: [
+                { text: 'When Amir saw the "No Swimming" sign at the creek where he grew up fishing, something inside him broke.', marker: 'motivation' },
+                { text: '"My grandma used to catch trout here. Now it smells like chemicals. This can\'t be normal."', marker: 'motivation' },
+                { text: 'The EPA database showed that three other communities in the state had successfully cleaned up contaminated waterways using bioremediation.', marker: 'belief' },
+                { text: '"If Riverside County\'s restoration brought back 12 fish species in three years, our creek has a chance too."', marker: 'belief' },
+                { text: 'The science club drafted a proposal: Phase 1 — water testing, Phase 2 — identify pollution source, Phase 3 — present findings to city council.', marker: 'plans' },
+                { text: 'They set a timeline of eight weeks with weekly checkpoints and a budget of $200 from the school activities fund.', marker: 'plans' },
+                { text: 'Amir and three classmates collected water samples every Tuesday for six weeks, documenting pH levels, dissolved oxygen, and bacteria counts.', marker: 'agency' },
+                { text: 'Their report was published in the school paper and cited by a city council member during a public hearing on water quality.', marker: 'agency' },
+            ]
+        },
+        {
+            story: 'The Heat Island Project',
+            clues: [
+                { text: 'During the third heat wave of the summer, Priya watched her elderly neighbor get taken away in an ambulance. "This keeps happening. It\'s not okay."', marker: 'motivation' },
+                { text: 'She looked up heat-related ER visits in her zip code and felt sick — a 40% increase over five years.', marker: 'motivation' },
+                { text: 'A case study from Phoenix showed that strategic tree planting reduced surface temperatures by 8°F in targeted neighborhoods.', marker: 'belief' },
+                { text: '"The data is clear — urban canopy coverage directly correlates with reduced heat mortality."', marker: 'belief' },
+                { text: 'Priya mapped every block in her neighborhood, marking heat-vulnerable households, existing shade, and potential planting sites.', marker: 'plans' },
+                { text: 'She wrote a three-phase proposal: immediate shade structures, medium-term tree planting, long-term cool roof incentives.', marker: 'plans' },
+                { text: 'The neighborhood association adopted her plan and planted 50 trees in the first month, focusing on bus stops and senior housing.', marker: 'agency' },
+                { text: 'Six months later, thermal imaging showed measurable cooling at every planting site.', marker: 'agency' },
+            ]
+        }
+    ],
+    high: [
+        {
+            story: 'The Watershed Analysis',
+            clues: [
+                { text: 'The longitudinal data was devastating: 60% wetland loss over two decades, migratory bird populations halved, dissolved oxygen at hypoxic levels.', marker: 'motivation' },
+                { text: '"We are witnessing the functional collapse of an ecosystem that took millennia to develop. The moral weight of this demands response."', marker: 'motivation' },
+                { text: 'A meta-analysis of 47 wetland restoration projects demonstrated mean biodiversity recovery of 86% within 15 years when using constructed wetland methodology.', marker: 'belief' },
+                { text: '"The precedent is robust and peer-reviewed. The question is not whether restoration works, but whether we have the will to implement it."', marker: 'belief' },
+                { text: 'The team developed a systems model integrating hydrological flow, nutrient cycling, and species reintroduction timelines with quarterly benchmarks and adaptive management triggers.', marker: 'plans' },
+                { text: 'Phase 1: baseline monitoring (3 months). Phase 2: constructed wetland installation (6 months). Phase 3: species reintroduction and monitoring (ongoing). Budget: $1.2M secured through EPA Clean Water Act grants.', marker: 'plans' },
+                { text: 'The research team published baseline data in the Journal of Environmental Management, which was subsequently cited in the regional EPA assessment, triggering a formal remediation order.', marker: 'agency' },
+                { text: 'At 18 months post-intervention, biomarker analysis demonstrated a 34% increase in macroinvertebrate diversity and the return of three previously extirpated bird species.', marker: 'agency' },
+            ]
+        },
+        {
+            story: 'The Environmental Justice Campaign',
+            clues: [
+                { text: 'Epidemiological data revealed that childhood asthma rates in the industrial corridor were 3.2x the county average, with the burden falling disproportionately on communities of color.', marker: 'motivation' },
+                { text: '"This isn\'t a technical problem — it\'s a moral one. The distribution of environmental harm tracks precisely with historical patterns of racial and economic marginalization."', marker: 'motivation' },
+                { text: 'The Richmond, California precedent demonstrated that community-led air monitoring networks, combined with legal advocacy, achieved a 20% reduction in refinery emissions over five years.', marker: 'belief' },
+                { text: '"The evidence from environmental justice movements globally confirms that organized community action can shift the calculus of power."', marker: 'belief' },
+                { text: 'The coalition developed a four-phase strategy: citizen science air monitoring network, legal challenge through the Environmental Law Clinic, legislative advocacy for emission caps, and a community health fund.', marker: 'plans' },
+                { text: 'Each phase included specific milestones, responsible parties, funding mechanisms, and contingency plans for political resistance.', marker: 'plans' },
+                { text: 'Youth organizers deployed 40 air quality sensors across the district and presented data at three consecutive city council meetings, building an irrefutable public record.', marker: 'agency' },
+                { text: 'The campaign resulted in new emission standards, a $5M community health investment, and a precedent-setting environmental justice ordinance adopted by two neighboring municipalities.', marker: 'agency' },
+            ]
+        }
+    ]
+};
+
+let detectiveCase = 0;
+let detectiveCorrect = 0;
+let detectiveTotal = 0;
+let selectedClue = null;
+
+function initDetective() {
+    const cases = detectiveClues[currentAge];
+    detectiveCase = detectiveCase % cases.length;
+    detectiveCorrect = 0;
+    const clueData = cases[detectiveCase];
+    detectiveTotal = clueData.clues.length;
+    selectedClue = null;
+
+    document.getElementById('detective-score').textContent = '0';
+    document.getElementById('detective-total').textContent = detectiveTotal;
+    document.getElementById('detective-fill').style.width = '0%';
+    document.getElementById('detective-solved').classList.add('hidden');
+    document.getElementById('detective-title').textContent = `🔍 Case: ${clueData.story}`;
+
+    // Clear zones
+    document.querySelectorAll('.detective-zone-drop').forEach(zone => {
+        zone.innerHTML = '<span class="detective-zone-hint">Drop clues here</span>';
+    });
+
+    // Shuffle clues
+    const shuffled = [...clueData.clues];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+
+    // Render clue cards
+    const list = document.getElementById('detective-clue-list');
+    list.innerHTML = shuffled.map((clue, i) => `
+        <div class="detective-clue" draggable="true" data-marker="${clue.marker}" data-idx="${i}" id="clue-${i}">
+            "${escapeHtml(clue.text)}"
+        </div>
+    `).join('');
+
+    // Setup drag/drop and tap-to-place
+    setupDetectiveDragDrop();
+}
+
+function setupDetectiveDragDrop() {
+    const clues = document.querySelectorAll('.detective-clue');
+    const zones = document.querySelectorAll('.detective-zone-drop');
+
+    // Drag events on clues
+    clues.forEach(clue => {
+        clue.addEventListener('dragstart', (e) => {
+            clue.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', clue.id);
+            e.dataTransfer.effectAllowed = 'move';
+        });
+        clue.addEventListener('dragend', () => {
+            clue.classList.remove('dragging');
+        });
+
+        // Tap-to-select for touch devices
+        clue.addEventListener('click', () => {
+            if (clue.classList.contains('placed')) return;
+            if (selectedClue === clue) {
+                clue.classList.remove('selected');
+                selectedClue = null;
+            } else {
+                document.querySelectorAll('.detective-clue.selected').forEach(c => c.classList.remove('selected'));
+                clue.classList.add('selected');
+                selectedClue = clue;
+            }
+        });
+    });
+
+    // Drop events on zones
+    zones.forEach(zone => {
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            zone.closest('.detective-zone').classList.add('drag-over');
+        });
+        zone.addEventListener('dragleave', () => {
+            zone.closest('.detective-zone').classList.remove('drag-over');
+        });
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.closest('.detective-zone').classList.remove('drag-over');
+            const clueId = e.dataTransfer.getData('text/plain');
+            const clue = document.getElementById(clueId);
+            if (clue) handleClueDrop(clue, zone);
+        });
+
+        // Tap-to-place: clicking a zone places the selected clue
+        zone.addEventListener('click', () => {
+            if (selectedClue && !selectedClue.classList.contains('placed')) {
+                handleClueDrop(selectedClue, zone);
+                selectedClue = null;
+            }
+        });
+    });
+}
+
+function handleClueDrop(clue, zone) {
+    const clueMarker = clue.dataset.marker;
+    const zoneMarker = zone.dataset.marker;
+
+    if (clueMarker === zoneMarker) {
+        // Correct!
+        questSFX.fragment();
+        clue.classList.remove('selected', 'dragging');
+        clue.classList.add('placed');
+        clue.draggable = false;
+        clue.removeAttribute('data-idx');
+
+        // Remove hint text if present
+        const hint = zone.querySelector('.detective-zone-hint');
+        if (hint) hint.remove();
+
+        // Move clue into the zone
+        zone.appendChild(clue);
+
+        detectiveCorrect++;
+        document.getElementById('detective-score').textContent = detectiveCorrect;
+        document.getElementById('detective-fill').style.width = `${(detectiveCorrect / detectiveTotal) * 100}%`;
+
+        // Check if case is solved
+        if (detectiveCorrect >= detectiveTotal) {
+            setTimeout(() => solveDetective(), 600);
+        }
+    } else {
+        // Wrong!
+        questSFX.wrong();
+        clue.classList.add('wrong-drop');
+        clue.classList.remove('selected');
+        setTimeout(() => clue.classList.remove('wrong-drop'), 500);
+    }
+}
+
+function solveDetective() {
+    document.querySelector('.detective-board').style.display = 'none';
+    document.querySelector('.detective-header').style.display = 'none';
+
+    const msgs = {
+        elementary: 'Amazing detective work! You pinned every clue to the right marker. You can spot Motivation, Belief, Plans, and Agency like a pro! 🌟',
+        middle: 'Case closed! You correctly identified all four HOPE markers in the evidence. Each clue connected to a specific type of hope — and together, they tell the full story.',
+        high: 'Investigation complete. You\'ve demonstrated the ability to deconstruct a narrative and classify textual evidence against the four markers of hope theory. This analytical skill transfers directly to literary analysis and critical reading of climate narratives.'
+    };
+
+    document.getElementById('detective-solved-msg').textContent = msgs[currentAge];
+    document.getElementById('detective-solved').classList.remove('hidden');
+    questSFX.victory();
+    triggerCelebration();
+}
+
+// Navigation
+document.getElementById('btn-detective').addEventListener('click', () => {
+    detectiveCase = 0;
+    initDetective();
+    showScreen('detective-screen');
+});
+document.getElementById('btn-back-detective').addEventListener('click', () => {
+    showScreen('welcome-screen');
+});
+document.getElementById('btn-detective-next').addEventListener('click', () => {
+    detectiveCase++;
+    document.querySelector('.detective-board').style.display = '';
+    document.querySelector('.detective-header').style.display = '';
+    initDetective();
+});
+document.getElementById('btn-detective-home').addEventListener('click', () => {
+    showScreen('welcome-screen');
+});
+
+
 // ===== Hope Walk Sound Effects (Web Audio API) =====
 const walkSFX = (function() {
     let ctx = null;

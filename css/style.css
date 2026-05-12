@@ -993,6 +993,151 @@ button.resource-card-action {
 
 
 /* ================================================
+   HOPE DETECTIVE GAME
+   ================================================ */
+.detective-header { text-align: center; margin-bottom: 1.25rem; }
+.detective-header h2 { font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 0.3rem; }
+.detective-progress {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-size: 0.85rem; color: var(--color-text-light); margin-top: 0.5rem;
+}
+.detective-progress-bar {
+    width: 120px; height: 6px; background: var(--color-surface-solid);
+    border-radius: 3px; overflow: hidden;
+}
+.detective-progress-fill {
+    height: 100%; width: 0%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-plans));
+    transition: width 0.4s ease;
+}
+
+.detective-board {
+    display: grid; grid-template-columns: 1fr 300px; gap: 1.25rem;
+    max-width: 1000px; margin: 0 auto;
+}
+@media (max-width: 768px) {
+    .detective-board { grid-template-columns: 1fr; }
+    .detective-clues { order: -1; }
+}
+
+/* Drop zones - the case board */
+.detective-zones {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+}
+@media (max-width: 500px) { .detective-zones { grid-template-columns: 1fr; } }
+
+.detective-zone {
+    background: var(--color-surface); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+    border: 2px dashed var(--color-border); border-radius: var(--card-radius);
+    padding: 0.75rem; min-height: 160px;
+    display: flex; flex-direction: column; transition: all 0.3s ease;
+}
+.detective-zone[data-marker="motivation"] { border-color: var(--color-motivation-border); }
+.detective-zone[data-marker="belief"] { border-color: var(--color-belief-border); }
+.detective-zone[data-marker="plans"] { border-color: var(--color-plans-border); }
+.detective-zone[data-marker="agency"] { border-color: var(--color-agency-border); }
+
+.detective-zone.drag-over {
+    background: rgba(52,211,153,0.08);
+    border-style: solid;
+    box-shadow: 0 0 20px rgba(52,211,153,0.1);
+}
+
+.detective-zone-header {
+    display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.5rem;
+    padding-bottom: 0.4rem; border-bottom: 1px solid var(--color-border);
+}
+.detective-zone-icon { font-size: 1.2rem; }
+.detective-zone-label { font-family: var(--font-heading); font-weight: 700; font-size: 0.9rem; }
+.detective-zone[data-marker="motivation"] .detective-zone-label { color: var(--color-motivation); }
+.detective-zone[data-marker="belief"] .detective-zone-label { color: var(--color-belief); }
+.detective-zone[data-marker="plans"] .detective-zone-label { color: var(--color-plans); }
+.detective-zone[data-marker="agency"] .detective-zone-label { color: var(--color-agency); }
+
+.detective-zone-drop {
+    flex: 1; display: flex; flex-direction: column; gap: 0.4rem;
+    min-height: 60px;
+}
+.detective-zone-hint {
+    font-size: 0.75rem; color: var(--color-text-light); opacity: 0.5;
+    text-align: center; padding: 1rem 0;
+}
+
+/* Clue pile */
+.detective-clues {
+    background: var(--color-surface); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+    border: 1px solid var(--color-border); border-radius: var(--card-radius);
+    padding: 1rem; max-height: 500px; overflow-y: auto;
+}
+.detective-clues-title {
+    font-family: var(--font-heading); font-size: 0.95rem; font-weight: 700;
+    margin-bottom: 0.75rem; padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+.detective-clue-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+/* Individual clue cards */
+.detective-clue {
+    background: var(--color-surface-solid); border: 1px solid var(--color-border);
+    border-radius: var(--radius); padding: 0.6rem 0.75rem;
+    font-size: 0.82rem; line-height: 1.5; color: var(--color-text);
+    cursor: grab; transition: all 0.2s ease;
+    user-select: none; position: relative;
+}
+.detective-clue:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transform: translateY(-1px);
+}
+.detective-clue:active { cursor: grabbing; opacity: 0.8; }
+.detective-clue.dragging { opacity: 0.4; }
+.detective-clue.placed {
+    background: rgba(52,211,153,0.08); border-color: var(--color-agency-border);
+    cursor: default; font-size: 0.78rem; padding: 0.4rem 0.6rem;
+}
+.detective-clue.placed::before {
+    content: '📌 '; font-size: 0.7rem;
+}
+.detective-clue.wrong-drop {
+    animation: clue-shake 0.4s ease;
+    border-color: var(--color-motivation) !important;
+}
+@keyframes clue-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+}
+
+/* Touch-friendly: tap to select, then tap zone */
+.detective-clue.selected {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(52,211,153,0.2);
+    background: rgba(52,211,153,0.06);
+}
+
+/* Solved state */
+.detective-solved {
+    text-align: center; padding: 2.5rem 1rem; max-width: 500px; margin: 0 auto;
+    animation: screen-in 0.5s ease;
+}
+.detective-solved-icon { font-size: 4rem; margin-bottom: 0.75rem; animation: gentle-bounce 2s infinite ease-in-out; }
+.detective-solved h3 {
+    font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-plans));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.detective-solved p { color: var(--color-text-light); line-height: 1.6; margin-bottom: 1.25rem; }
+.detective-solved-actions { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+
+/* Age overrides */
+.age-elementary .detective-clue { font-size: 0.95rem; padding: 0.75rem 1rem; border-radius: 16px; }
+.age-elementary .detective-zone { border-radius: 24px; }
+.age-high .detective-clue { font-size: 0.78rem; }
+
+
+/* ================================================
    HOPE QUEST GAME
    ================================================ */
 

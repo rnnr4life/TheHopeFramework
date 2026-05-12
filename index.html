@@ -193,6 +193,14 @@
                     </div>
                     <button class="btn btn-small btn-game-2" id="btn-walk" aria-label="Play Hope Walk">Play</button>
                 </div>
+                <div class="welcome-activity-card" id="card-detective">
+                    <div class="welcome-card-icon">🔍</div>
+                    <div class="welcome-card-body">
+                        <div class="welcome-card-title" id="btn-detective-text">Hope Detective</div>
+                        <div class="welcome-card-desc">Investigate clues from a story and pin them to the right HOPE marker on the case board.</div>
+                    </div>
+                    <button class="btn btn-small btn-game" id="btn-detective" aria-label="Play Hope Detective">Investigate</button>
+                </div>
                 <div class="welcome-activity-card" id="card-resources">
                     <div class="welcome-card-icon">📚</div>
                     <div class="welcome-card-body">
@@ -560,6 +568,84 @@
                         </div>
                     </div>
                 </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Hope Detective Game ===== -->
+    <section id="detective-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-detective">&larr; Back</button>
+                <div class="step-indicator">🔍 Hope Detective</div>
+            </div>
+
+            <div class="detective-header">
+                <h2 id="detective-title">🔍 Case Board</h2>
+                <p class="section-intro" id="detective-intro">Drag each clue to the HOPE marker it belongs to. Can you crack the case?</p>
+                <div class="detective-progress">
+                    <span id="detective-score">0</span> / <span id="detective-total">0</span> clues solved
+                    <div class="detective-progress-bar"><div class="detective-progress-fill" id="detective-fill"></div></div>
+                </div>
+            </div>
+
+            <div class="detective-board">
+                <!-- Marker drop zones -->
+                <div class="detective-zones">
+                    <div class="detective-zone" data-marker="motivation" id="zone-motivation">
+                        <div class="detective-zone-header">
+                            <span class="detective-zone-icon">🔥</span>
+                            <span class="detective-zone-label">Motivation</span>
+                        </div>
+                        <div class="detective-zone-drop" data-marker="motivation">
+                            <span class="detective-zone-hint">Drop clues here</span>
+                        </div>
+                    </div>
+                    <div class="detective-zone" data-marker="belief" id="zone-belief">
+                        <div class="detective-zone-header">
+                            <span class="detective-zone-icon">✨</span>
+                            <span class="detective-zone-label">Belief</span>
+                        </div>
+                        <div class="detective-zone-drop" data-marker="belief">
+                            <span class="detective-zone-hint">Drop clues here</span>
+                        </div>
+                    </div>
+                    <div class="detective-zone" data-marker="plans" id="zone-plans">
+                        <div class="detective-zone-header">
+                            <span class="detective-zone-icon">🗺️</span>
+                            <span class="detective-zone-label">Plans</span>
+                        </div>
+                        <div class="detective-zone-drop" data-marker="plans">
+                            <span class="detective-zone-hint">Drop clues here</span>
+                        </div>
+                    </div>
+                    <div class="detective-zone" data-marker="agency" id="zone-agency">
+                        <div class="detective-zone-header">
+                            <span class="detective-zone-icon">💪</span>
+                            <span class="detective-zone-label">Agency</span>
+                        </div>
+                        <div class="detective-zone-drop" data-marker="agency">
+                            <span class="detective-zone-hint">Drop clues here</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clue pile -->
+                <div class="detective-clues" id="detective-clues">
+                    <h4 class="detective-clues-title">📌 Evidence Pile</h4>
+                    <div class="detective-clue-list" id="detective-clue-list"></div>
+                </div>
+            </div>
+
+            <!-- Solved state -->
+            <div class="detective-solved hidden" id="detective-solved">
+                <div class="detective-solved-icon">🏆</div>
+                <h3>Case Closed!</h3>
+                <p id="detective-solved-msg"></p>
+                <div class="detective-solved-actions">
+                    <button class="btn btn-primary" id="btn-detective-next">Next Case →</button>
+                    <button class="btn btn-small" id="btn-detective-home">← Back to Home</button>
                 </div>
             </div>
         </div>
