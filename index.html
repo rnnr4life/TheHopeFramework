@@ -614,13 +614,35 @@
 
             <!-- Victory -->
             <div class="quest-victory hidden" id="quest-victory">
+                <div class="quest-victory-glow"></div>
                 <div class="quest-victory-icon">🌍</div>
                 <h3 id="quest-victory-title">Quest Complete!</h3>
-                <p id="quest-victory-msg"></p>
+                <p class="quest-victory-sub">You collected all four Hope Fragments</p>
                 <div class="quest-victory-fragments">
-                    <span>🔥</span><span>✨</span><span>🗺️</span><span>💪</span>
+                    <div class="quest-victory-frag">
+                        <span class="quest-victory-frag-icon">🔥</span>
+                        <span class="quest-victory-frag-label">Motivation</span>
+                    </div>
+                    <div class="quest-victory-frag">
+                        <span class="quest-victory-frag-icon">✨</span>
+                        <span class="quest-victory-frag-label">Belief</span>
+                    </div>
+                    <div class="quest-victory-frag">
+                        <span class="quest-victory-frag-icon">🗺️</span>
+                        <span class="quest-victory-frag-label">Plans</span>
+                    </div>
+                    <div class="quest-victory-frag">
+                        <span class="quest-victory-frag-icon">💪</span>
+                        <span class="quest-victory-frag-label">Agency</span>
+                    </div>
                 </div>
-                <button class="btn btn-primary btn-lg" id="btn-quest-restart">Play Again</button>
+                <div class="quest-victory-msg-box">
+                    <p id="quest-victory-msg"></p>
+                </div>
+                <div class="quest-victory-actions">
+                    <button class="btn btn-primary btn-lg" id="btn-quest-restart">🎮 Play Again</button>
+                    <button class="btn btn-small" id="btn-quest-home">← Back to Home</button>
+                </div>
             </div>
         </div>
     </section>

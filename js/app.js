@@ -1682,7 +1682,7 @@ function handleQuestChoice(btn, scenario) {
         // Mark correct
         btn.classList.add('correct');
         document.querySelectorAll('.quest-choice').forEach(b => {
-            if (b !== btn) b.classList.add('wrong');
+            if (b !== btn) b.classList.add('dimmed-choice');
         });
 
         // Collect fragment
@@ -1696,21 +1696,23 @@ function handleQuestChoice(btn, scenario) {
         resultEl.innerHTML = `
             <div class="quest-result-title">✅ Hope Fragment collected!</div>
             <p>${scenario.correct}</p>
-            <div class="quest-continue">
-                <button class="btn btn-primary btn-small" id="btn-quest-next">
-                    ${questStage < 3 ? 'Continue Journey →' : 'Complete Quest →'}
-                </button>
-            </div>
         `;
         resultEl.classList.remove('hidden');
 
+        // Auto-advance after a delay
+        const advanceDelay = setTimeout(() => advanceQuest(), 4000);
+
+        // Also allow clicking to skip the wait
+        resultEl.insertAdjacentHTML('beforeend', `
+            <div class="quest-continue">
+                <button class="btn btn-primary btn-small" id="btn-quest-next">
+                    ${questStage < 3 ? 'Continue →' : 'See Results →'}
+                </button>
+            </div>
+        `);
         document.getElementById('btn-quest-next').addEventListener('click', () => {
-            questStage++;
-            if (questStage >= 4) {
-                showQuestVictory();
-            } else {
-                renderQuestStage();
-            }
+            clearTimeout(advanceDelay);
+            advanceQuest();
         });
     } else {
         // Wrong
@@ -1724,6 +1726,15 @@ function handleQuestChoice(btn, scenario) {
             btn.classList.remove('wrong');
             resultEl.classList.add('hidden');
         }, 2500);
+    }
+}
+
+function advanceQuest() {
+    questStage++;
+    if (questStage >= 4) {
+        showQuestVictory();
+    } else {
+        renderQuestStage();
     }
 }
 
@@ -1758,6 +1769,9 @@ document.getElementById('btn-back-quest').addEventListener('click', () => {
 });
 document.getElementById('btn-quest-restart').addEventListener('click', () => {
     initQuest();
+});
+document.getElementById('btn-quest-home').addEventListener('click', () => {
+    showScreen('welcome-screen');
 });
 
 
