@@ -3132,7 +3132,7 @@ button.resource-card-action {
     max-height: 240px; overflow-y: auto;
     background: #1e293b; border: 1px solid var(--color-border);
     border-radius: 0 0 var(--radius) var(--radius);
-    box-shadow: var(--shadow-md); z-index: 50;
+    box-shadow: var(--shadow-md); z-index: 999;
     margin-top: -1px;
 }
 .searchable-dropdown.open { display: block; }
@@ -3252,7 +3252,7 @@ button.resource-card-action {
     border-radius: var(--card-radius);
     padding: 0;
     box-shadow: var(--shadow);
-    overflow: hidden;
+    overflow: visible;
 }
 
 .guided-text-header {
@@ -3264,6 +3264,7 @@ button.resource-card-action {
     background: var(--color-surface-solid);
     flex-wrap: wrap;
     gap: 0.5rem;
+    border-radius: var(--card-radius) var(--card-radius) 0 0;
 }
 
 .guided-text-header h3 {
