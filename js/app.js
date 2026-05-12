@@ -1658,47 +1658,172 @@ document.getElementById('btn-edit-text').addEventListener('click', () => {
 });
 
 
+// ===== Searchable Dropdown Component =====
+function initSearchableSelect(inputId, hiddenId, dropdownId, options) {
+    const input = document.getElementById(inputId);
+    const hidden = document.getElementById(hiddenId);
+    const dropdown = document.getElementById(dropdownId);
+    let highlighted = -1;
+    let flatOptions = [];
+
+    function render(filter) {
+        flatOptions = [];
+        let html = '';
+        const q = (filter || '').toLowerCase();
+        let hasResults = false;
+
+        options.forEach(group => {
+            const filtered = group.items.filter(item =>
+                item.label.toLowerCase().includes(q) || (group.group && group.group.toLowerCase().includes(q))
+            );
+            if (filtered.length === 0) return;
+            hasResults = true;
+            if (group.group) {
+                html += `<div class="searchable-group-label">${escapeHtml(group.group)}</div>`;
+            }
+            filtered.forEach(item => {
+                const idx = flatOptions.length;
+                const sel = item.value === hidden.value ? ' selected' : '';
+                html += `<div class="searchable-option${sel}" data-value="${escapeHtml(item.value)}" data-idx="${idx}">${escapeHtml(item.label)}</div>`;
+                flatOptions.push(item);
+            });
+        });
+
+        if (!hasResults) {
+            html = '<div class="searchable-no-results">No results found</div>';
+        }
+        dropdown.innerHTML = html;
+        highlighted = -1;
+    }
+
+    function open() {
+        render(input.value);
+        dropdown.classList.add('open');
+    }
+
+    function close() {
+        dropdown.classList.remove('open');
+        highlighted = -1;
+    }
+
+    function selectItem(value, label) {
+        hidden.value = value;
+        input.value = label;
+        close();
+    }
+
+    input.addEventListener('focus', () => {
+        input.select();
+        open();
+    });
+
+    input.addEventListener('input', () => {
+        render(input.value);
+        dropdown.classList.add('open');
+    });
+
+    input.addEventListener('keydown', (e) => {
+        const opts = dropdown.querySelectorAll('.searchable-option');
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            highlighted = Math.min(highlighted + 1, opts.length - 1);
+            opts.forEach((o, i) => o.classList.toggle('highlighted', i === highlighted));
+            if (opts[highlighted]) opts[highlighted].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            highlighted = Math.max(highlighted - 1, 0);
+            opts.forEach((o, i) => o.classList.toggle('highlighted', i === highlighted));
+            if (opts[highlighted]) opts[highlighted].scrollIntoView({ block: 'nearest' });
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (highlighted >= 0 && flatOptions[highlighted]) {
+                selectItem(flatOptions[highlighted].value, flatOptions[highlighted].label);
+            }
+        } else if (e.key === 'Escape') {
+            close();
+            input.blur();
+        }
+    });
+
+    dropdown.addEventListener('click', (e) => {
+        const opt = e.target.closest('.searchable-option');
+        if (opt) {
+            const idx = parseInt(opt.dataset.idx);
+            if (flatOptions[idx]) {
+                selectItem(flatOptions[idx].value, flatOptions[idx].label);
+            }
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#' + inputId) && !e.target.closest('#' + dropdownId)) {
+            close();
+        }
+    });
+
+    // Set initial display text
+    if (hidden.value) {
+        const found = options.flatMap(g => g.items).find(i => i.value === hidden.value);
+        if (found) input.value = found.label;
+    }
+
+    return { render, selectItem, setOptions: (newOpts) => { options = newOpts; } };
+}
+
 // ===== Read Aloud =====
 let readAloudUtterance = null;
 let availableVoices = [];
+let voiceSearchable = null;
 
 function populateVoicePicker() {
     availableVoices = window.speechSynthesis.getVoices();
-    const picker = document.getElementById('voice-picker');
     if (!availableVoices.length) return;
 
-    // Group by language, prioritize English
     const english = availableVoices.filter(v => v.lang.startsWith('en'));
     const other = availableVoices.filter(v => !v.lang.startsWith('en'));
 
-    let html = '<optgroup label="English">';
-    english.forEach((v, i) => {
-        const label = v.name.replace(/Microsoft |Google |Apple /g, '');
-        const isDefault = v.default ? ' (default)' : '';
-        html += `<option value="${v.name}" ${v.default ? 'selected' : ''}>${label}${isDefault}</option>`;
-    });
-    html += '</optgroup>';
+    const groups = [];
+
+    if (english.length) {
+        groups.push({
+            group: 'English',
+            items: english.map(v => ({
+                value: v.name,
+                label: v.name.replace(/Microsoft |Google |Apple /g, '') + (v.default ? ' (default)' : '')
+            }))
+        });
+    }
 
     if (other.length) {
-        // Group by language
         const langGroups = {};
         other.forEach(v => {
             const langName = v.lang;
             if (!langGroups[langName]) langGroups[langName] = [];
             langGroups[langName].push(v);
         });
-
         Object.keys(langGroups).sort().forEach(lang => {
-            html += `<optgroup label="${lang}">`;
-            langGroups[lang].forEach(v => {
-                const label = v.name.replace(/Microsoft |Google |Apple /g, '');
-                html += `<option value="${v.name}">${label}</option>`;
+            groups.push({
+                group: lang,
+                items: langGroups[lang].map(v => ({
+                    value: v.name,
+                    label: v.name.replace(/Microsoft |Google |Apple /g, '')
+                }))
             });
-            html += '</optgroup>';
         });
     }
 
-    picker.innerHTML = html;
+    if (voiceSearchable) {
+        voiceSearchable.setOptions(groups);
+    } else {
+        voiceSearchable = initSearchableSelect('voice-search', 'voice-picker-value', 'voice-dropdown', groups);
+    }
+
+    // Select default voice
+    const defaultVoice = availableVoices.find(v => v.default);
+    if (defaultVoice && !document.getElementById('voice-picker-value').value) {
+        const label = defaultVoice.name.replace(/Microsoft |Google |Apple /g, '') + ' (default)';
+        voiceSearchable.selectItem(defaultVoice.name, label);
+    }
 }
 
 // Voices load async in some browsers
@@ -1707,8 +1832,42 @@ if ('speechSynthesis' in window) {
     window.speechSynthesis.onvoiceschanged = populateVoicePicker;
 }
 
+// Init translate searchable dropdown
+const translateOptions = [
+    { group: '', items: [
+        { value: '', label: 'Original (English)' }
+    ]},
+    { group: 'Languages', items: [
+        { value: 'es', label: 'Español (Spanish)' },
+        { value: 'fr', label: 'Français (French)' },
+        { value: 'de', label: 'Deutsch (German)' },
+        { value: 'pt', label: 'Português (Portuguese)' },
+        { value: 'zh', label: '中文 (Chinese)' },
+        { value: 'ar', label: 'العربية (Arabic)' },
+        { value: 'vi', label: 'Tiếng Việt (Vietnamese)' },
+        { value: 'ko', label: '한국어 (Korean)' },
+        { value: 'ja', label: '日本語 (Japanese)' },
+        { value: 'hi', label: 'हिन्दी (Hindi)' },
+        { value: 'tl', label: 'Filipino (Tagalog)' },
+        { value: 'sw', label: 'Kiswahili (Swahili)' },
+        { value: 'ru', label: 'Русский (Russian)' },
+        { value: 'uk', label: 'Українська (Ukrainian)' },
+        { value: 'it', label: 'Italiano (Italian)' },
+        { value: 'pl', label: 'Polski (Polish)' },
+        { value: 'tr', label: 'Türkçe (Turkish)' },
+        { value: 'th', label: 'ไทย (Thai)' },
+        { value: 'id', label: 'Bahasa Indonesia' },
+        { value: 'ms', label: 'Bahasa Melayu (Malay)' },
+        { value: 'bn', label: 'বাংলা (Bengali)' },
+        { value: 'am', label: 'አማርኛ (Amharic)' },
+        { value: 'so', label: 'Soomaali (Somali)' },
+        { value: 'ha', label: 'Hausa' },
+    ]}
+];
+initSearchableSelect('translate-search', 'translate-lang', 'translate-dropdown', translateOptions);
+
 function getSelectedVoice() {
-    const pickerValue = document.getElementById('voice-picker').value;
+    const pickerValue = document.getElementById('voice-picker-value').value;
     return availableVoices.find(v => v.name === pickerValue) || null;
 }
 

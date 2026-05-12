@@ -1015,30 +1015,22 @@
                             <button class="btn btn-small" id="btn-stop-reading" aria-label="Stop reading" style="display:none">
                                 ⏹️ Stop
                             </button>
-                            <select id="voice-picker" class="voice-picker" aria-label="Choose a voice">
-                                <option value="">Default voice</option>
-                            </select>
+                            <div class="searchable-select" id="voice-picker-wrap">
+                                <input type="text" class="searchable-input" id="voice-search" placeholder="🔊 Search voice..." autocomplete="off" aria-label="Search for a voice">
+                                <input type="hidden" id="voice-picker-value" value="">
+                                <div class="searchable-dropdown" id="voice-dropdown"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="guided-text" id="guided-text"></div>
                     <!-- Translate bar -->
                     <div class="guided-translate-bar">
-                        <label for="translate-lang" class="voice-picker-label">🌐 Translate:</label>
-                        <select id="translate-lang" class="voice-picker">
-                            <option value="">Original (English)</option>
-                            <option value="es">Español (Spanish)</option>
-                            <option value="fr">Français (French)</option>
-                            <option value="de">Deutsch (German)</option>
-                            <option value="pt">Português (Portuguese)</option>
-                            <option value="zh">中文 (Chinese)</option>
-                            <option value="ar">العربية (Arabic)</option>
-                            <option value="vi">Tiếng Việt (Vietnamese)</option>
-                            <option value="ko">한국어 (Korean)</option>
-                            <option value="ja">日本語 (Japanese)</option>
-                            <option value="hi">हिन्दी (Hindi)</option>
-                            <option value="tl">Filipino (Tagalog)</option>
-                            <option value="sw">Kiswahili (Swahili)</option>
-                        </select>
+                        <label class="voice-picker-label">🌐 Translate:</label>
+                        <div class="searchable-select" id="translate-picker-wrap">
+                            <input type="text" class="searchable-input" id="translate-search" placeholder="Search language..." autocomplete="off" aria-label="Search for a language">
+                            <input type="hidden" id="translate-lang" value="">
+                            <div class="searchable-dropdown" id="translate-dropdown"></div>
+                        </div>
                         <button class="btn btn-small btn-primary" id="btn-translate">Translate</button>
                     </div>
                 </div>

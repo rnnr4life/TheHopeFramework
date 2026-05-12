@@ -3111,6 +3111,54 @@ button.resource-card-action {
 }
 .voice-picker:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(52,211,153,0.15); }
 
+/* Searchable dropdown */
+.searchable-select {
+    position: relative; flex: 1; min-width: 0;
+}
+.searchable-input {
+    width: 100%; padding: 0.4rem 0.6rem;
+    border: 1px solid var(--color-border); border-radius: var(--radius);
+    background: var(--color-surface); color: var(--color-text);
+    font-family: var(--font-body); font-size: 0.82rem;
+    transition: border-color var(--transition);
+}
+.searchable-input:focus {
+    outline: none; border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(52,211,153,0.15);
+}
+.searchable-input::placeholder { color: var(--color-text-light); }
+.searchable-dropdown {
+    display: none; position: absolute; top: 100%; left: 0; right: 0;
+    max-height: 240px; overflow-y: auto;
+    background: #1e293b; border: 1px solid var(--color-border);
+    border-radius: 0 0 var(--radius) var(--radius);
+    box-shadow: var(--shadow-md); z-index: 50;
+    margin-top: -1px;
+}
+.searchable-dropdown.open { display: block; }
+.searchable-group-label {
+    padding: 0.35rem 0.6rem; font-size: 0.7rem; font-weight: 700;
+    color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.05em;
+    background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--color-border);
+    position: sticky; top: 0;
+}
+.searchable-option {
+    padding: 0.4rem 0.75rem; font-size: 0.82rem; cursor: pointer;
+    color: var(--color-text-light); transition: background 0.15s ease;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.searchable-option:hover, .searchable-option.highlighted {
+    background: rgba(52,211,153,0.12); color: var(--color-text);
+}
+.searchable-option.selected {
+    background: rgba(52,211,153,0.15); color: var(--color-primary);
+    font-weight: 600;
+}
+.searchable-no-results {
+    padding: 0.75rem; text-align: center; font-size: 0.8rem;
+    color: var(--color-text-light);
+}
+
 
 /* ================================================
    GUIDED EXAMPLE — Redesigned
@@ -3229,9 +3277,12 @@ button.resource-card-action {
     gap: 0.4rem;
 }
 
-.guided-tools .voice-picker {
-    max-width: 140px;
+.guided-tools .voice-picker, .guided-tools .searchable-select {
+    max-width: 180px;
     font-size: 0.72rem;
+}
+.guided-tools .searchable-input {
+    font-size: 0.75rem;
     padding: 0.3rem 0.4rem;
 }
 
