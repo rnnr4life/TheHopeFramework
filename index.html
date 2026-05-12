@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>The HOPE Framework</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="age-middle" role="application" aria-label="The HOPE Framework - Interactive Learning Tool">
+    <!-- Skip navigation -->
+    <a href="#age-screen" class="skip-nav">Skip to main content</a>
+
+    <!-- Floating nature decorations (CSS-driven) -->
+    <div class="nature-deco" aria-hidden="true">
+        <div class="leaf leaf-1">🍃</div>
+        <div class="leaf leaf-2">🌿</div>
+        <div class="leaf leaf-3">🍂</div>
+        <div class="leaf leaf-4">🌱</div>
+        <div class="leaf leaf-5">🦋</div>
+    </div>
+
+    <!-- ===== Age Selector Screen ===== -->
+    <section id="age-screen" class="screen active" role="main">
+        <div class="container center-content">
+            <div class="welcome-hero">
+                <div class="hero-icon">🌍</div>
+                <h1>The HOPE Framework</h1>
+                <p class="subtitle">Healing Opportunities for Processing Eco-grief</p>
+            </div>
+            <div class="framework-about">
+                <p>The HOPE Framework is a literacy strategy for identifying hope in narratives as a response to eco-grief. It helps readers find four markers of hope in stories about the environment: <strong>Motivation for Change</strong>, <strong>Belief that Change is Possible</strong>, <strong>Plans for a Path Forward</strong>, and <strong>Agency to Take Action</strong>.</p>
+                <p class="framework-credit">Developed by <strong>Colleen Redmond</strong>, University of Minnesota. Published in <em>Climate Literacy in Education</em>, Vol. 2, No. 1, 2024.</p>
+            </div>
+            <div class="age-picker">
+                <p class="age-picker-label">I'm in...</p>
+                <div class="age-options">
+                    <button class="age-btn" data-age="elementary">
+                        <span class="age-btn-icon">🌻</span>
+                        <span class="age-btn-title">Elementary</span>
+                        <span class="age-btn-sub">Grades K–5</span>
+                    </button>
+                    <button class="age-btn" data-age="middle">
+                        <span class="age-btn-icon">🧭</span>
+                        <span class="age-btn-title">Middle School</span>
+                        <span class="age-btn-sub">Grades 6–8</span>
+                    </button>
+                    <button class="age-btn" data-age="high">
+                        <span class="age-btn-icon">🔬</span>
+                        <span class="age-btn-title">High School</span>
+                        <span class="age-btn-sub">Grades 9–12</span>
+                    </button>
+                </div>
+            </div>
+            <div class="teacher-link">
+                <button class="btn btn-small btn-muted" id="btn-teacher-mode" aria-label="Open teacher setup">
+                    🍎 Teacher Setup
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Welcome Screen ===== -->
+    <section id="welcome-screen" class="screen">
+        <div class="container-wide">
+            <!-- Top bar -->
+            <div class="welcome-topbar">
+                <div class="welcome-topbar-left">
+                    <span class="welcome-topbar-icon">🌍</span>
+                    <span class="welcome-topbar-title" id="welcome-topbar-title">The HOPE Framework</span>
+                </div>
+                <button class="btn btn-small btn-muted" id="btn-change-age" aria-label="Change grade level">
+                    ⚙️ Change Grade Level
+                </button>
+            </div>
+
+            <!-- Hero -->
+            <div class="welcome-hero-section">
+                <div class="welcome-hero-text">
+                    <h1 id="welcome-title">The HOPE Framework</h1>
+                    <p class="subtitle" id="welcome-subtitle">Healing Opportunities for Processing Eco-grief</p>
+                    <p class="description" id="welcome-desc">
+                        Discover hope in the stories we read. Use four markers to find 
+                        how authors show us that change is possible and that we can make a difference.
+                    </p>
+                </div>
+                <!-- Compact marker pills -->
+                <div class="welcome-markers">
+                    <div class="welcome-marker-pill" data-marker="motivation"><span>🔥</span> Motivation</div>
+                    <div class="welcome-marker-pill" data-marker="belief"><span>✨</span> Belief</div>
+                    <div class="welcome-marker-pill" data-marker="plans"><span>🗺️</span> Plans</div>
+                    <div class="welcome-marker-pill" data-marker="agency"><span>💪</span> Agency</div>
+                </div>
+            </div>
+
+            <!-- Primary action — Start Learning -->
+            <div class="welcome-primary">
+                <button class="btn btn-primary btn-xl" id="btn-start" aria-label="Start learning">
+                    <span id="btn-start-text">Start Learning</span>
+                    <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+                </button>
+                <span class="welcome-primary-hint" id="welcome-primary-hint">Learn the markers → Practice matching → Analyze a story</span>
+            </div>
+
+            <!-- Activity cards -->
+            <div class="welcome-activities">
+                <div class="welcome-activity-card" id="card-guided">
+                    <div class="welcome-card-icon">🎬</div>
+                    <div class="welcome-card-body">
+                        <div class="welcome-card-title" id="btn-guided-text">Guided Example</div>
+                        <div class="welcome-card-desc">Watch a story get analyzed step-by-step with think-aloud explanations.</div>
+                    </div>
+                    <button class="btn btn-small" id="btn-guided" aria-label="Watch a guided example">Open</button>
+                </div>
+                <div class="welcome-activity-card" id="card-quest">
+                    <div class="welcome-card-icon">🎮</div>
+                    <div class="welcome-card-body">
+                        <div class="welcome-card-title" id="btn-quest-text">Hope Quest</div>
+                        <div class="welcome-card-desc">Adventure through four environments and collect Hope Fragments.</div>
+                    </div>
+                    <button class="btn btn-small btn-game" id="btn-quest" aria-label="Play Hope Quest">Play</button>
+                </div>
+                <div class="welcome-activity-card" id="card-walk">
+                    <div class="welcome-card-icon">🚶</div>
+                    <div class="welcome-card-body">
+                        <div class="welcome-card-title" id="btn-walk-text">Hope Walk</div>
+                        <div class="welcome-card-desc">Walk through scenes and find hidden hope in distressing environments.</div>
+                    </div>
+                    <button class="btn btn-small btn-game-2" id="btn-walk" aria-label="Play Hope Walk">Play</button>
+                </div>
+                <div class="welcome-activity-card" id="card-resources">
+                    <div class="welcome-card-icon">📚</div>
+                    <div class="welcome-card-body">
+                        <div class="welcome-card-title" id="btn-resources-text">Resources</div>
+                        <div class="welcome-card-desc">Books, shows, websites, and more to keep exploring.</div>
+                    </div>
+                    <button class="btn btn-small" id="btn-resources" aria-label="View resources">Browse</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Learn Screen ===== -->
+    <section id="learn-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-learn">&larr; Back</button>
+                <div class="step-indicator">Step 1 of 3</div>
+            </div>
+
+            <div class="learn-layout">
+                <div class="learn-header">
+                    <h2 id="learn-title">The Four Markers of Hope</h2>
+                    <p class="section-intro" id="learn-intro">
+                        When we read stories about the environment, we can look for these 
+                        four signs of hope. Click each one to learn more.
+                    </p>
+                </div>
+
+            <div class="markers-grid">
+                <div class="marker-card" data-marker="motivation">
+                    <div class="marker-card-top">
+                        <div class="marker-card-icon">🔥</div>
+                        <div class="marker-card-letter">H</div>
+                    </div>
+                    <h3 id="card-title-motivation">Motivation for Change</h3>
+                    <p class="marker-summary" id="card-summary-motivation">Something in the story makes characters (or us) want things to be different.</p>
+                    <div class="marker-detail hidden">
+                        <p><strong>Look for:</strong></p>
+                        <ul>
+                            <li>A character feeling upset about something in the environment</li>
+                            <li>A moment that sparks a desire to do something</li>
+                            <li>Words like "we need to," "I wish," or "something has to change"</li>
+                        </ul>
+                        <p class="marker-question"><strong>Ask yourself:</strong> What made this character want to make a difference?</p>
+                    </div>
+                    <div class="card-expand-hint">Click to explore</div>
+                </div>
+
+                <div class="marker-card" data-marker="belief">
+                    <div class="marker-card-top">
+                        <div class="marker-card-icon">✨</div>
+                        <div class="marker-card-letter">O</div>
+                    </div>
+                    <h3 id="card-title-belief">Belief that Change is Possible</h3>
+                    <p class="marker-summary" id="card-summary-belief">The story shows that things can actually get better.</p>
+                    <div class="marker-detail hidden">
+                        <p><strong>Look for:</strong></p>
+                        <ul>
+                            <li>Examples of positive change that already happened</li>
+                            <li>Characters who believe they can make a difference</li>
+                            <li>Evidence that efforts are working</li>
+                        </ul>
+                        <p class="marker-question"><strong>Ask yourself:</strong> What gives the characters (or you) hope that change can happen?</p>
+                    </div>
+                    <div class="card-expand-hint">Click to explore</div>
+                </div>
+
+                <div class="marker-card" data-marker="plans">
+                    <div class="marker-card-top">
+                        <div class="marker-card-icon">🗺️</div>
+                        <div class="marker-card-letter">P</div>
+                    </div>
+                    <h3 id="card-title-plans">Plans for a Path Forward</h3>
+                    <p class="marker-summary" id="card-summary-plans">There are real steps or ideas for how to make things better.</p>
+                    <div class="marker-detail hidden">
+                        <p><strong>Look for:</strong></p>
+                        <ul>
+                            <li>Specific actions characters plan to take</li>
+                            <li>Strategies or solutions described in the text</li>
+                            <li>Ideas for what could be done next</li>
+                        </ul>
+                        <p class="marker-question"><strong>Ask yourself:</strong> What plan or pathway does this story suggest?</p>
+                    </div>
+                    <div class="card-expand-hint">Click to explore</div>
+                </div>
+
+                <div class="marker-card" data-marker="agency">
+                    <div class="marker-card-top">
+                        <div class="marker-card-icon">💪</div>
+                        <div class="marker-card-letter">E</div>
+                    </div>
+                    <h3 id="card-title-agency">Agency to Take Action</h3>
+                    <p class="marker-summary" id="card-summary-agency">Characters or people actually do something — they take action.</p>
+                    <div class="marker-detail hidden">
+                        <p><strong>Look for:</strong></p>
+                        <ul>
+                            <li>Characters who step up and act</li>
+                            <li>Real people making a difference</li>
+                            <li>Moments where someone moves from thinking to doing</li>
+                        </ul>
+                        <p class="marker-question"><strong>Ask yourself:</strong> Who is taking action, and what are they doing?</p>
+                    </div>
+                    <div class="card-expand-hint">Click to explore</div>
+                </div>
+            </div>
+
+                <button class="btn btn-primary btn-lg" id="btn-to-activity">
+                    <span id="btn-activity-text">Try the Activity</span>
+                    <span class="btn-arrow">&rarr;</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Match Screen — Sort phrases into markers ===== -->
+    <section id="match-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-match">&larr; Back</button>
+                <div class="step-indicator">Step 2 of 3</div>
+            </div>
+
+            <div class="match-header">
+                <h2 id="match-title">Marker Match</h2>
+                <p class="section-intro" id="match-intro">
+                    Read each phrase and decide which HOPE marker it belongs to. Tap the phrase, then tap the marker.
+                </p>
+            </div>
+
+            <div class="match-workspace">
+                <!-- Phrase queue -->
+                <div class="match-phrase-area">
+                    <div class="match-progress-bar">
+                        <div class="match-progress-fill" id="match-progress-fill"></div>
+                    </div>
+                    <div id="match-phrase" class="match-phrase">
+                        <p class="match-phrase-text" id="match-phrase-text"></p>
+                    </div>
+                    <div class="match-choices">
+                        <button class="match-choice" data-marker="motivation">
+                            <span class="match-choice-icon">🔥</span>
+                            <span class="match-choice-label" id="match-label-motivation">Motivation</span>
+                        </button>
+                        <button class="match-choice" data-marker="belief">
+                            <span class="match-choice-icon">✨</span>
+                            <span class="match-choice-label" id="match-label-belief">Belief</span>
+                        </button>
+                        <button class="match-choice" data-marker="plans">
+                            <span class="match-choice-icon">🗺️</span>
+                            <span class="match-choice-label" id="match-label-plans">Plans</span>
+                        </button>
+                        <button class="match-choice" data-marker="agency">
+                            <span class="match-choice-icon">💪</span>
+                            <span class="match-choice-label" id="match-label-agency">Agency</span>
+                        </button>
+                    </div>
+                    <div id="match-feedback-msg" class="match-feedback-msg hidden"></div>
+                </div>
+
+                <!-- Sorted buckets — shows what's been sorted -->
+                <div class="match-buckets">
+                    <div class="match-bucket" data-marker="motivation">
+                        <div class="match-bucket-header">
+                            <span>🔥</span>
+                            <span class="match-bucket-title">Motivation</span>
+                            <span class="match-bucket-count" id="bucket-count-motivation">0</span>
+                        </div>
+                        <div class="match-bucket-items" id="bucket-motivation"></div>
+                    </div>
+                    <div class="match-bucket" data-marker="belief">
+                        <div class="match-bucket-header">
+                            <span>✨</span>
+                            <span class="match-bucket-title">Belief</span>
+                            <span class="match-bucket-count" id="bucket-count-belief">0</span>
+                        </div>
+                        <div class="match-bucket-items" id="bucket-belief"></div>
+                    </div>
+                    <div class="match-bucket" data-marker="plans">
+                        <div class="match-bucket-header">
+                            <span>🗺️</span>
+                            <span class="match-bucket-title">Plans</span>
+                            <span class="match-bucket-count" id="bucket-count-plans">0</span>
+                        </div>
+                        <div class="match-bucket-items" id="bucket-plans"></div>
+                    </div>
+                    <div class="match-bucket" data-marker="agency">
+                        <div class="match-bucket-header">
+                            <span>💪</span>
+                            <span class="match-bucket-title">Agency</span>
+                            <span class="match-bucket-count" id="bucket-count-agency">0</span>
+                        </div>
+                        <div class="match-bucket-items" id="bucket-agency"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Complete state -->
+            <div id="match-complete" class="match-complete hidden">
+                <div class="match-complete-icon">🌟</div>
+                <h3 id="match-complete-title">Great work!</h3>
+                <p id="match-complete-msg">You matched all the phrases. Now try finding these markers in a real story!</p>
+                <button class="btn btn-primary btn-lg" id="btn-to-find-hope">
+                    <span id="btn-find-hope-text">Find the Hope</span>
+                    <span class="btn-arrow">&rarr;</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Activity Screen ===== -->
+    <section id="activity-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-activity">&larr; Back</button>
+                <div class="step-indicator">Step 3 of 3</div>
+            </div>
+
+            <!-- Sticky marker toolbar at top -->
+            <div class="marker-toolbar-sticky">
+                <div class="activity-title-bar">
+                    <h2 id="activity-title">Find the Hope</h2>
+                    <p class="section-intro" id="activity-intro">
+                        Read the passage. Select text and tag it with a HOPE marker.
+                    </p>
+                </div>
+                <div class="toolbar-divider"></div>
+                <p class="toolbar-label" id="toolbar-label">Select text, then pick a marker:</p>
+                <div class="toolbar-buttons">
+                    <button class="marker-btn" data-marker="motivation" title="Motivation for Change">
+                        <span class="marker-icon">🔥</span>
+                        <span class="marker-label">Motivation</span>
+                    </button>
+                    <button class="marker-btn" data-marker="belief" title="Belief that Change is Possible">
+                        <span class="marker-icon">✨</span>
+                        <span class="marker-label">Belief</span>
+                    </button>
+                    <button class="marker-btn" data-marker="plans" title="Plans for a Path Forward">
+                        <span class="marker-icon">🗺️</span>
+                        <span class="marker-label">Plans</span>
+                    </button>
+                    <button class="marker-btn" data-marker="agency" title="Agency to Take Action">
+                        <span class="marker-icon">💪</span>
+                        <span class="marker-label">Agency</span>
+                    </button>
+                    <div class="toolbar-divider"></div>
+                    <button class="btn btn-small" id="btn-glossary" aria-label="Open marker definitions">
+                        📖 Glossary
+                    </button>
+                </div>
+            </div>
+
+            <div class="activity-workspace">
+                <!-- Left: reading panel -->
+                <div class="text-panel">
+                    <div class="text-controls">
+                        <button class="btn btn-small btn-fun" id="btn-sample-text">
+                            <span class="btn-icon">📖</span> Sample Story
+                        </button>
+                        <button class="btn btn-small btn-fun" id="btn-paste-text">
+                            <span class="btn-icon">📋</span> Paste Your Own
+                        </button>
+                        <button class="btn btn-small btn-fun" id="btn-edit-text" aria-label="Edit the story">
+                            ✏️ Edit
+                        </button>
+                        <button class="btn btn-small btn-fun btn-danger" id="btn-clear-highlights">
+                            <span class="btn-icon">🧹</span> Start Over
+                        </button>
+                    </div>
+                    <!-- Drag symbols tray -->
+                    <div class="drag-symbols-tray" id="drag-symbols-tray">
+                        <span class="drag-symbol-label">Drag markers to the margin:</span>
+                        <div class="drag-symbol" draggable="true" data-marker="motivation" title="Motivation for Change">
+                            <svg viewBox="0 0 24 24" class="marker-svg motivation-svg"><path d="M12 2C8 2 6 6 6 10c0 3 2 5 3 7h6c1-2 3-4 3-7 0-4-2-8-6-8z" fill="currentColor"/><rect x="9" y="19" width="6" height="2" rx="1" fill="currentColor"/></svg>
+                        </div>
+                        <div class="drag-symbol" draggable="true" data-marker="belief" title="Belief that Change is Possible">
+                            <svg viewBox="0 0 24 24" class="marker-svg belief-svg"><polygon points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9" fill="currentColor"/></svg>
+                        </div>
+                        <div class="drag-symbol" draggable="true" data-marker="plans" title="Plans for a Path Forward">
+                            <svg viewBox="0 0 24 24" class="marker-svg plans-svg"><path d="M3 3h18v18H3V3zm2 4h14M5 11h14M5 15h10" stroke="currentColor" fill="none" stroke-width="1.5"/><rect x="5" y="7" width="14" height="0.5" fill="currentColor"/><rect x="5" y="11" width="14" height="0.5" fill="currentColor"/><rect x="5" y="15" width="10" height="0.5" fill="currentColor"/></svg>
+                        </div>
+                        <div class="drag-symbol" draggable="true" data-marker="agency" title="Agency to Take Action">
+                            <svg viewBox="0 0 24 24" class="marker-svg agency-svg"><path d="M12 2L2 12h5v8h10v-8h5L12 2z" fill="currentColor"/></svg>
+                        </div>
+                    </div>
+                    <div id="text-content" class="text-content" contenteditable="false">
+                        <div class="placeholder-empty">
+                            <div class="placeholder-icon">📖</div>
+                            <p class="placeholder-text" id="placeholder-msg">Pick a story to get started!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: sidebar -->
+                <div class="activity-sidebar">
+                <div class="results-panel">
+                    <h3>Your Findings</h3>
+
+                    <!-- Visual progress — collect all 4 markers -->
+                    <div class="collection-tracker" id="collection-tracker">
+                        <div class="collection-item dimmed" data-marker="motivation" id="collect-motivation">
+                            <span class="collection-icon">🔥</span>
+                        </div>
+                        <div class="collection-item dimmed" data-marker="belief" id="collect-belief">
+                            <span class="collection-icon">✨</span>
+                        </div>
+                        <div class="collection-item dimmed" data-marker="plans" id="collect-plans">
+                            <span class="collection-icon">🗺️</span>
+                        </div>
+                        <div class="collection-item dimmed" data-marker="agency" id="collect-agency">
+                            <span class="collection-icon">💪</span>
+                        </div>
+                    </div>
+
+                    <div id="findings-list" class="findings-list">
+                        <p class="placeholder-text">Your tagged passages will appear here.</p>
+                    </div>
+                    <div class="results-summary hidden" id="results-summary">
+                        <h4>Markers Found</h4>
+                        <div class="summary-bar">
+                            <div class="summary-item" data-marker="motivation">
+                                <span>🔥 Motivation</span>
+                                <span class="count" id="count-motivation">0</span>
+                            </div>
+                            <div class="summary-item" data-marker="belief">
+                                <span>✨ Belief</span>
+                                <span class="count" id="count-belief">0</span>
+                            </div>
+                            <div class="summary-item" data-marker="plans">
+                                <span>🗺️ Plans</span>
+                                <span class="count" id="count-plans">0</span>
+                            </div>
+                            <div class="summary-item" data-marker="agency">
+                                <span>💪 Agency</span>
+                                <span class="count" id="count-agency">0</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="btn-get-feedback" aria-label="Get feedback on your findings">
+                            <span class="btn-icon" aria-hidden="true">💬</span> Get Feedback
+                        </button>
+                        <button class="btn" id="btn-reflect" aria-label="Write a reflection">
+                            <span class="btn-icon" aria-hidden="true">✍️</span> <span id="btn-reflect-text">Reflect</span>
+                        </button>
+                    </div>
+
+                    <!-- Feedback panel -->
+                    <div id="feedback-panel" class="feedback-panel hidden">
+                        <div class="feedback-header">
+                            <h4>Feedback</h4>
+                            <button class="btn-back" id="btn-close-feedback">&times; Close</button>
+                        </div>
+                        <div id="feedback-content"></div>
+                        <div class="feedback-actions">
+                            <button class="btn btn-small" id="btn-export" aria-label="Print or save your work">
+                                <span class="btn-icon" aria-hidden="true">🖨️</span> <span id="btn-export-text">Print My Work</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Hope Quest Game ===== -->
+    <section id="quest-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-quest">&larr; Back</button>
+                <div class="step-indicator">🎮 Hope Quest</div>
+            </div>
+
+            <!-- Journey Map -->
+            <div class="quest-map" id="quest-map">
+                <div class="quest-node" data-stage="0" id="quest-node-0">
+                    <div class="quest-node-icon">🔥</div>
+                    <div class="quest-node-label">Ember Cave</div>
+                </div>
+                <div class="quest-path" id="quest-path-0"></div>
+                <div class="quest-node" data-stage="1" id="quest-node-1">
+                    <div class="quest-node-icon">✨</div>
+                    <div class="quest-node-label">Crystal Falls</div>
+                </div>
+                <div class="quest-path" id="quest-path-1"></div>
+                <div class="quest-node" data-stage="2" id="quest-node-2">
+                    <div class="quest-node-icon">🗺️</div>
+                    <div class="quest-node-label">Blueprint Summit</div>
+                </div>
+                <div class="quest-path" id="quest-path-2"></div>
+                <div class="quest-node" data-stage="3" id="quest-node-3">
+                    <div class="quest-node-icon">💪</div>
+                    <div class="quest-node-label">Action Valley</div>
+                </div>
+            </div>
+
+            <!-- Scene area -->
+            <div class="quest-scene" id="quest-scene">
+                <div class="quest-scene-header">
+                    <div class="quest-location" id="quest-location"></div>
+                    <div class="quest-fragments" id="quest-fragments">
+                        <span class="quest-fragment dimmed" id="frag-0">🔥</span>
+                        <span class="quest-fragment dimmed" id="frag-1">✨</span>
+                        <span class="quest-fragment dimmed" id="frag-2">🗺️</span>
+                        <span class="quest-fragment dimmed" id="frag-3">💪</span>
+                    </div>
+                </div>
+                <div class="quest-narrative" id="quest-narrative"></div>
+                <div class="quest-choices" id="quest-choices"></div>
+                <div class="quest-result hidden" id="quest-result"></div>
+            </div>
+
+            <!-- Victory -->
+            <div class="quest-victory hidden" id="quest-victory">
+                <div class="quest-victory-icon">🌍</div>
+                <h3 id="quest-victory-title">Quest Complete!</h3>
+                <p id="quest-victory-msg"></p>
+                <div class="quest-victory-fragments">
+                    <span>🔥</span><span>✨</span><span>🗺️</span><span>💪</span>
+                </div>
+                <button class="btn btn-primary btn-lg" id="btn-quest-restart">Play Again</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Hope Walk Game ===== -->
+    <section id="walk-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-walk">&larr; Back</button>
+                <div class="step-indicator">🚶 Hope Walk</div>
+            </div>
+
+            <!-- Scene viewport -->
+            <div class="walk-viewport" id="walk-viewport">
+                <!-- Sky -->
+                <div class="walk-sky" id="walk-sky"></div>
+
+                <!-- Scene layers (populated by JS) -->
+                <div class="walk-scene" id="walk-scene">
+                    <!-- Background elements -->
+                    <div class="walk-ground" id="walk-ground"></div>
+                </div>
+
+                <!-- Character -->
+                <div class="walk-character" id="walk-character">
+                    <div class="walk-char-body">
+                        <div class="walk-char-head"></div>
+                        <div class="walk-char-torso"></div>
+                        <div class="walk-char-legs">
+                            <div class="walk-char-leg walk-char-leg-l"></div>
+                            <div class="walk-char-leg walk-char-leg-r"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hope sparks (clickable glowing dots hidden in scene) -->
+                <div class="walk-sparks" id="walk-sparks"></div>
+
+                <!-- Scene overlay text -->
+                <div class="walk-overlay" id="walk-overlay">
+                    <div class="walk-overlay-content" id="walk-overlay-content"></div>
+                </div>
+            </div>
+
+            <!-- Bottom panel: narrative + marker identification -->
+            <div class="walk-panel" id="walk-panel">
+                <div class="walk-narrative" id="walk-narrative"></div>
+                <div class="walk-marker-pick hidden" id="walk-marker-pick">
+                    <p class="walk-marker-prompt" id="walk-marker-prompt">What kind of hope did you find?</p>
+                    <div class="walk-marker-buttons">
+                        <button class="walk-marker-btn" data-marker="motivation">🔥 Motivation</button>
+                        <button class="walk-marker-btn" data-marker="belief">✨ Belief</button>
+                        <button class="walk-marker-btn" data-marker="plans">🗺️ Plans</button>
+                        <button class="walk-marker-btn" data-marker="agency">💪 Agency</button>
+                    </div>
+                </div>
+                <div class="walk-feedback hidden" id="walk-feedback"></div>
+                <div class="walk-progress">
+                    <div class="walk-progress-dots" id="walk-progress-dots"></div>
+                    <button class="btn btn-primary btn-small hidden" id="btn-walk-next">Keep Walking →</button>
+                </div>
+            </div>
+
+            <!-- Walk victory -->
+            <div class="walk-victory hidden" id="walk-victory">
+                <div class="walk-victory-icon">🌅</div>
+                <h3>You Found the Hope</h3>
+                <p id="walk-victory-msg"></p>
+                <button class="btn btn-primary btn-lg" id="btn-walk-restart">Walk Again</button>
+                <button class="btn btn-lg" id="btn-walk-to-home" aria-label="Return to main menu">← Back to Main Menu</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Reflection Screen ===== -->
+    <section id="reflect-screen" class="screen">
+        <div class="container">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-reflect">&larr; Back</button>
+                <div class="step-indicator">✍️ Reflection</div>
+            </div>
+
+            <div class="reflect-layout">
+                <div class="reflect-header">
+                    <h2 id="reflect-title">Reflect</h2>
+                    <p class="section-intro" id="reflect-intro">Take a moment to think about what you read and how it made you feel.</p>
+                </div>
+
+                <div class="reflect-prompts">
+                    <div class="reflect-prompt-card" id="reflect-prompt-1">
+                        <label class="reflect-label" for="reflect-q1" id="reflect-q1-label">How did the story make you feel about the environment?</label>
+                        <textarea id="reflect-q1" class="reflect-textarea" rows="3" placeholder="Type your thoughts here..."></textarea>
+                    </div>
+                    <div class="reflect-prompt-card" id="reflect-prompt-2">
+                        <label class="reflect-label" for="reflect-q2" id="reflect-q2-label">Which HOPE marker stood out to you most? Why?</label>
+                        <textarea id="reflect-q2" class="reflect-textarea" rows="3" placeholder="Type your thoughts here..."></textarea>
+                    </div>
+                    <div class="reflect-prompt-card" id="reflect-prompt-3">
+                        <label class="reflect-label" for="reflect-q3" id="reflect-q3-label">What is one thing you could do to make a difference?</label>
+                        <textarea id="reflect-q3" class="reflect-textarea" rows="3" placeholder="Type your thoughts here..."></textarea>
+                    </div>
+                </div>
+
+                <div class="reflect-actions">
+                    <button class="btn btn-primary" id="btn-print-reflect" aria-label="Print reflection">
+                        <span class="btn-icon" aria-hidden="true">🖨️</span> <span id="btn-print-reflect-text">Print My Reflection</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Resources Screen ===== -->
+    <section id="resources-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-resources">&larr; Back</button>
+                <div class="step-indicator" id="resources-badge">📚 Resources</div>
+            </div>
+
+            <div class="resources-header">
+                <h2 id="resources-title">Keep Exploring</h2>
+                <p class="section-intro" id="resources-intro">Books, websites, shows, and more to help you learn about the environment and find hope.</p>
+            </div>
+
+            <!-- Spotlight: featured pick -->
+            <div id="resources-spotlight" class="resources-spotlight"></div>
+
+            <!-- Category filter tabs -->
+            <div class="resources-tabs" id="resources-tabs"></div>
+
+            <!-- Cards grid -->
+            <div id="resources-grid" class="resources-cards-grid"></div>
+
+            <div class="resources-footer">
+                <p id="resources-footer-text">Want to learn more about the HOPE Framework itself?</p>
+                <a href="https://doi.org/10.24926/cle.v2i1.6231" target="_blank" rel="noopener noreferrer" class="btn btn-small">
+                    <span class="btn-icon">📄</span> Read the Original Paper
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Guided Example Screen ===== -->
+    <section id="guided-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-guided">&larr; Back</button>
+                <div class="step-indicator">🎬 Guided Example</div>
+            </div>
+
+            <div class="guided-hero">
+                <h2 id="guided-hero-title">Watch How It Works</h2>
+                <p class="section-intro" id="guided-hero-intro">Follow along as we read a story and find the HOPE markers together, one paragraph at a time.</p>
+            </div>
+
+            <!-- Progress steps -->
+            <div class="guided-progress" id="guided-progress">
+                <div class="guided-prog-step" data-step="0">
+                    <div class="guided-prog-dot">🔥</div>
+                    <span>Motivation</span>
+                </div>
+                <div class="guided-prog-line"></div>
+                <div class="guided-prog-step" data-step="1">
+                    <div class="guided-prog-dot">✨</div>
+                    <span>Belief</span>
+                </div>
+                <div class="guided-prog-line"></div>
+                <div class="guided-prog-step" data-step="2">
+                    <div class="guided-prog-dot">🗺️</div>
+                    <span>Plans</span>
+                </div>
+                <div class="guided-prog-line"></div>
+                <div class="guided-prog-step" data-step="3">
+                    <div class="guided-prog-dot">💪</div>
+                    <span>Agency</span>
+                </div>
+            </div>
+
+            <div class="guided-layout">
+                <!-- Left: Story text -->
+                <div class="guided-text-panel">
+                    <div class="guided-text-header">
+                        <h3 id="guided-story-title">📖 The Creek Behind School</h3>
+                        <!-- Tools row -->
+                        <div class="guided-tools">
+                            <button class="btn btn-small" id="btn-read-aloud" aria-label="Read story aloud">
+                                🔊 Read Aloud
+                            </button>
+                            <button class="btn btn-small" id="btn-stop-reading" aria-label="Stop reading" style="display:none">
+                                ⏹️ Stop
+                            </button>
+                            <select id="voice-picker" class="voice-picker" aria-label="Choose a voice">
+                                <option value="">Default voice</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="guided-text" id="guided-text"></div>
+                    <!-- Translate bar -->
+                    <div class="guided-translate-bar">
+                        <label for="translate-lang" class="voice-picker-label">🌐 Translate:</label>
+                        <select id="translate-lang" class="voice-picker">
+                            <option value="">Original (English)</option>
+                            <option value="es">Español (Spanish)</option>
+                            <option value="fr">Français (French)</option>
+                            <option value="de">Deutsch (German)</option>
+                            <option value="pt">Português (Portuguese)</option>
+                            <option value="zh">中文 (Chinese)</option>
+                            <option value="ar">العربية (Arabic)</option>
+                            <option value="vi">Tiếng Việt (Vietnamese)</option>
+                            <option value="ko">한국어 (Korean)</option>
+                            <option value="ja">日本語 (Japanese)</option>
+                            <option value="hi">हिन्दी (Hindi)</option>
+                            <option value="tl">Filipino (Tagalog)</option>
+                            <option value="sw">Kiswahili (Swahili)</option>
+                        </select>
+                        <button class="btn btn-small btn-primary" id="btn-translate">Translate</button>
+                    </div>
+                </div>
+
+                <!-- Right: Control center -->
+                <div class="guided-sidebar">
+                    <!-- Main action -->
+                    <div class="guided-action-card">
+                        <div class="guided-controls">
+                            <button class="btn btn-primary btn-lg guided-play-btn" id="btn-guided-play">▶ Start Guided Reading</button>
+                            <button class="btn btn-lg" id="btn-guided-pause" style="display:none">⏸ Pause</button>
+                        </div>
+                        <button class="btn btn-small btn-muted" id="btn-guided-reset">↺ Start Over</button>
+                    </div>
+
+                    <!-- Think-aloud panel — the main feedback area -->
+                    <div class="guided-thinkaloud" id="guided-thinkaloud">
+                        <div class="guided-thinkaloud-header">
+                            <span class="guided-thinkaloud-icon">💭</span>
+                            <h4>Think-Aloud</h4>
+                        </div>
+                        <div class="guided-thinkaloud-body">
+                            <p class="guided-placeholder">Press the green button above to start.<br>I'll walk you through the story and explain each HOPE marker as we find it.</p>
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="guided-legend">
+                        <div class="guided-legend-item"><span class="guided-swatch motivation-swatch"></span> Motivation</div>
+                        <div class="guided-legend-item"><span class="guided-swatch belief-swatch"></span> Belief</div>
+                        <div class="guided-legend-item"><span class="guided-swatch plans-swatch"></span> Plans</div>
+                        <div class="guided-legend-item"><span class="guided-swatch agency-swatch"></span> Agency</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Glossary Drawer -->
+    <div id="glossary-drawer" class="glossary-drawer hidden">
+        <div class="glossary-header">
+            <h3>📖 Marker Glossary</h3>
+            <button class="btn-back" id="btn-close-glossary">&times;</button>
+        </div>
+        <div class="glossary-content" id="glossary-content"></div>
+    </div>
+
+    <!-- Paste Modal -->
+    <div id="paste-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Paste Your Text</h3>
+            <textarea id="paste-input" placeholder="Paste or type your text here..."></textarea>
+            <div class="modal-actions">
+                <button class="btn btn-small" id="btn-cancel-paste">Cancel</button>
+                <button class="btn btn-primary btn-small" id="btn-confirm-paste">Use This Text</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Celebration overlay -->
+    <div id="celebration" class="celebration hidden" aria-hidden="true">
+        <div class="confetti-piece">🌟</div>
+        <div class="confetti-piece">🌿</div>
+        <div class="confetti-piece">🦋</div>
+        <div class="confetti-piece">🌻</div>
+        <div class="confetti-piece">💚</div>
+        <div class="confetti-piece">🌍</div>
+        <div class="confetti-piece">✨</div>
+        <div class="confetti-piece">🌱</div>
+    </div>
+
+    <!-- Tutorial Overlay -->
+    <div id="tutorial-overlay" class="tutorial-overlay hidden" role="dialog" aria-label="How to use the highlighting tool">
+        <div class="tutorial-backdrop"></div>
+        <div class="tutorial-tooltip" id="tutorial-tooltip">
+            <div class="tutorial-step-indicator" id="tutorial-step-num">Step 1 of 3</div>
+            <p class="tutorial-text" id="tutorial-text"></p>
+            <div class="tutorial-actions">
+                <button class="btn btn-small" id="btn-tutorial-skip">Skip</button>
+                <button class="btn btn-primary btn-small" id="btn-tutorial-next">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Text Picker Modal -->
+    <div id="text-picker-modal" class="modal hidden" role="dialog" aria-label="Choose a story">
+        <div class="modal-content modal-wide">
+            <h3 id="text-picker-title">Choose a Story</h3>
+            <div id="text-picker-grid" class="text-picker-grid">
+                <!-- Populated by JS -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-small" id="btn-cancel-picker">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Mode Modal -->
+    <div id="teacher-modal" class="modal hidden" role="dialog" aria-label="Teacher setup">
+        <div class="modal-content">
+            <h3>🍎 Teacher Setup</h3>
+            <p class="teacher-desc">Pre-configure the app for your students. They'll skip the age selector and go straight to the activity.</p>
+
+            <label class="teacher-label" for="teacher-age">Grade Level</label>
+            <select id="teacher-age" class="teacher-select">
+                <option value="elementary">Elementary (K–5)</option>
+                <option value="middle" selected>Middle School (6–8)</option>
+                <option value="high">High School (9–12)</option>
+            </select>
+
+            <label class="teacher-label" for="teacher-text">Paste Your Text (optional)</label>
+            <textarea id="teacher-text" class="reflect-textarea" rows="5" placeholder="Paste the text you want students to analyze..."></textarea>
+
+            <label class="teacher-label">
+                <input type="checkbox" id="teacher-skip-learn" /> Skip the Learn & Match steps
+            </label>
+
+            <div class="modal-actions">
+                <button class="btn btn-small" id="btn-cancel-teacher">Cancel</button>
+                <button class="btn btn-primary btn-small" id="btn-apply-teacher">Set Up for Students</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- In-app resource preview modal -->
+    <div id="browser-modal" class="browser-modal" style="display:none" role="dialog" aria-label="Resource preview">
+        <div class="browser-modal-content">
+            <button class="browser-modal-close" id="browser-modal-close" aria-label="Close">&times;</button>
+            <div class="browser-preview-emoji" id="browser-modal-emoji"></div>
+            <h3 class="browser-preview-title" id="browser-modal-title"></h3>
+            <p class="browser-preview-desc" id="browser-modal-desc"></p>
+            <span class="browser-preview-meta" id="browser-modal-meta"></span>
+            <a class="btn btn-primary browser-preview-btn" id="browser-modal-visit" href="#" target="_blank" rel="noopener noreferrer">
+                ↗ Visit Site
+            </a>
+            <button class="btn btn-small browser-preview-back" id="browser-modal-back">← Back to Resources</button>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
