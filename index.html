@@ -57,9 +57,70 @@
                 </div>
             </div>
             <div class="teacher-link">
-                <button class="btn btn-small btn-muted" id="btn-teacher-mode" aria-label="Open teacher setup">
-                    🍎 Teacher Setup
+                <div class="teacher-divider">
+                    <span class="teacher-divider-line"></span>
+                    <span class="teacher-divider-text">or</span>
+                    <span class="teacher-divider-line"></span>
+                </div>
+                <button class="teacher-entry-btn" id="btn-teacher-hub" aria-label="I'm a teacher">
+                    <span class="teacher-entry-icon">🍎</span>
+                    <span class="teacher-entry-label">I'm a Teacher</span>
+                    <span class="teacher-entry-sub">Planning tools, worksheets & discussion guides</span>
                 </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Teacher Hub Screen ===== -->
+    <section id="teacher-hub-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-teacher-hub">&larr; Back</button>
+                <div class="step-indicator">🍎 Teacher Resources</div>
+            </div>
+
+            <div class="teacher-hub-header">
+                <h2>🍎 Teacher Resources</h2>
+                <p class="section-intro">Everything you need to bring the HOPE Framework into your classroom.</p>
+            </div>
+
+            <div class="teacher-hub-grid">
+                <div class="teacher-hub-card">
+                    <div class="teacher-hub-card-icon">⚙️</div>
+                    <h3>Classroom Setup</h3>
+                    <p>Pre-configure the app for your students — pick a grade level, paste a story, and skip steps.</p>
+                    <button class="btn btn-small btn-primary" id="btn-teacher-hub-setup">Set Up</button>
+                </div>
+                <div class="teacher-hub-card">
+                    <div class="teacher-hub-card-icon">📋</div>
+                    <h3>Teacher Planning Page</h3>
+                    <p>Record HOPE markers while reading climate literature — a structured planning tool.</p>
+                    <button class="btn btn-small" id="btn-teacher-hub-planning">Open</button>
+                </div>
+                <div class="teacher-hub-card">
+                    <div class="teacher-hub-card-icon">💬</div>
+                    <h3>Climate Conversations</h3>
+                    <p>Discussion prompts for each HOPE marker to spark meaningful student dialogue.</p>
+                    <button class="btn btn-small" id="btn-teacher-hub-convo">Open</button>
+                </div>
+                <div class="teacher-hub-card">
+                    <div class="teacher-hub-card-icon">📝</div>
+                    <h3>Student Worksheets</h3>
+                    <p>Printable, fillable worksheets for students to find HOPE markers in any story.</p>
+                    <button class="btn btn-small" id="btn-teacher-hub-worksheets">Browse</button>
+                </div>
+                <div class="teacher-hub-card">
+                    <div class="teacher-hub-card-icon">📄</div>
+                    <h3>Original Research Paper</h3>
+                    <p>Read Dr. Colleen Redmond's published article in <em>Climate Literacy in Education</em>.</p>
+                    <a href="https://doi.org/10.24926/cle.v2i1.6231" target="_blank" rel="noopener noreferrer" class="btn btn-small">Read Paper</a>
+                </div>
+                <div class="teacher-hub-card">
+                    <div class="teacher-hub-card-icon">🎬</div>
+                    <h3>Guided Example</h3>
+                    <p>Watch a story get analyzed step-by-step — great for modeling the framework in class.</p>
+                    <button class="btn btn-small" id="btn-teacher-hub-guided">Open</button>
+                </div>
             </div>
         </div>
     </section>

@@ -3249,8 +3249,31 @@ document.getElementById('btn-print-reflect').addEventListener('click', () => {
 
 // ===== Teacher Mode =====
 
-document.getElementById('btn-teacher-mode').addEventListener('click', () => {
+// Teacher Hub navigation
+document.getElementById('btn-teacher-hub').addEventListener('click', () => {
+    showScreen('teacher-hub-screen');
+});
+document.getElementById('btn-back-teacher-hub').addEventListener('click', () => {
+    showScreen('age-screen');
+});
+
+// Teacher Hub card buttons
+document.getElementById('btn-teacher-hub-setup').addEventListener('click', () => {
     document.getElementById('teacher-modal').classList.remove('hidden');
+});
+document.getElementById('btn-teacher-hub-planning').addEventListener('click', () => {
+    showScreen('worksheet-teacher-screen');
+});
+document.getElementById('btn-teacher-hub-convo').addEventListener('click', () => {
+    showScreen('worksheet-conversations-screen');
+});
+document.getElementById('btn-teacher-hub-worksheets').addEventListener('click', () => {
+    showScreen('worksheet-literature-screen');
+});
+document.getElementById('btn-teacher-hub-guided').addEventListener('click', () => {
+    setAge('middle'); // Default to middle for teacher guided example
+    initGuided();
+    showScreen('guided-screen');
 });
 
 document.getElementById('btn-cancel-teacher').addEventListener('click', () => {
