@@ -978,7 +978,7 @@ const resources = {
                 { title: 'Yale Climate Connections', desc: 'Research-backed reporting on climate science, impacts, and solutions.', url: 'https://yaleclimateconnections.org/' },
                 { title: 'IPCC Reports', desc: 'The Intergovernmental Panel on Climate Change — the definitive source for climate science.', url: 'https://www.ipcc.ch/' },
                 { title: 'Project Drawdown', desc: 'A comprehensive plan for the most effective solutions to reverse global warming.', url: 'https://drawdown.org/' },
-                { title: 'The HOPE Framework (paper)', desc: 'Colleen Redmond\'s original research article in Climate Literacy in Education.', url: 'https://doi.org/10.24926/cle.v2i1.6231', meta: 'Academic Paper' },
+                { title: 'The HOPE Framework (paper)', desc: 'Dr. Colleen Redmond\'s original research article in Climate Literacy in Education.', url: 'https://doi.org/10.24926/cle.v2i1.6231', meta: 'Academic Paper' },
             ]
         },
         {
