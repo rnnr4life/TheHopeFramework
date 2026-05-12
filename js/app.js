@@ -2078,65 +2078,100 @@ document.getElementById('btn-translate').addEventListener('click', async () => {
         return;
     }
 
-    // Get plain text paragraphs
-    const paragraphs = [];
-    textEl.querySelectorAll('p').forEach(p => {
-        paragraphs.push(p.innerText);
-    });
-    const fullText = paragraphs.join('\n\n');
+    // Get plain text from each paragraph
+    const pElements = Array.from(textEl.querySelectorAll('p'));
+    const paragraphs = pElements.map(p => p.innerText.trim()).filter(t => t.length > 0);
 
-    // Use the free MyMemory translation API
     const btn = document.getElementById('btn-translate');
     const origBtnText = btn.textContent;
     btn.textContent = 'Translating...';
     btn.disabled = true;
 
     try {
-        const response = await fetch(
-            `https://api.mymemory.translated.net/get?q=${encodeURIComponent(fullText.substring(0, 5000))}&langpair=en|${lang}`
-        );
-        const data = await response.json();
+        // Translate each paragraph individually to stay within API limits
+        const translated = [];
+        for (let i = 0; i < paragraphs.length; i++) {
+            const text = paragraphs[i];
+            btn.textContent = `Translating ${i + 1}/${paragraphs.length}...`;
 
-        if (data.responseStatus === 200 && data.responseData.translatedText) {
-            const translated = data.responseData.translatedText;
-            const translatedParas = translated.split(/\n\n|\n/);
-
-            // Replace text content but keep structure
-            const pElements = textEl.querySelectorAll('p');
-            pElements.forEach((p, i) => {
-                if (translatedParas[i]) {
-                    // Keep any guided-hl spans structure but replace text
-                    const hlSpans = p.querySelectorAll('.guided-hl');
-                    if (hlSpans.length === 0) {
-                        p.textContent = translatedParas[i];
+            // MyMemory API has a ~500 char limit per request
+            // Split long paragraphs into sentences and translate in chunks
+            let result = '';
+            if (text.length <= 450) {
+                result = await translateChunk(text, lang);
+            } else {
+                // Split on sentence boundaries
+                const sentences = text.match(/[^.!?]+[.!?]+\s*/g) || [text];
+                let chunk = '';
+                const chunks = [];
+                for (const s of sentences) {
+                    if ((chunk + s).length > 450) {
+                        if (chunk) chunks.push(chunk.trim());
+                        chunk = s;
                     } else {
-                        // Simple replacement — clear highlights for translated text
-                        p.textContent = translatedParas[i];
+                        chunk += s;
                     }
                 }
-            });
+                if (chunk) chunks.push(chunk.trim());
 
-            // Add notice
-            const langNames = { es: 'Spanish', fr: 'French', de: 'German', pt: 'Portuguese',
-                zh: 'Chinese', ar: 'Arabic', vi: 'Vietnamese', ko: 'Korean',
-                ja: 'Japanese', hi: 'Hindi', tl: 'Filipino', sw: 'Swahili' };
-            const existing = textEl.querySelector('.translated-notice');
-            if (existing) existing.remove();
-            const notice = document.createElement('div');
-            notice.className = 'translated-notice';
-            notice.textContent = `🌐 Translated to ${langNames[lang] || lang}. Select "Original (English)" and click Translate to revert.`;
-            textEl.parentNode.insertBefore(notice, textEl.nextSibling);
-
-        } else {
-            showToast('Translation unavailable. Try again later.');
+                const translatedChunks = [];
+                for (const c of chunks) {
+                    translatedChunks.push(await translateChunk(c, lang));
+                }
+                result = translatedChunks.join(' ');
+            }
+            translated.push(result);
         }
+
+        // Apply translations
+        let tIdx = 0;
+        pElements.forEach(p => {
+            const text = p.innerText.trim();
+            if (text.length > 0 && tIdx < translated.length) {
+                p.textContent = translated[tIdx];
+                tIdx++;
+            }
+        });
+
+        // Add notice
+        const langNames = { es: 'Spanish', fr: 'French', de: 'German', pt: 'Portuguese',
+            zh: 'Chinese', ar: 'Arabic', vi: 'Vietnamese', ko: 'Korean',
+            ja: 'Japanese', hi: 'Hindi', tl: 'Filipino', sw: 'Swahili' };
+        const existing = textEl.parentNode.querySelector('.translated-notice');
+        if (existing) existing.remove();
+        const notice = document.createElement('div');
+        notice.className = 'translated-notice';
+        notice.textContent = `🌐 Translated to ${langNames[lang] || lang}. Select "Original (English)" and click Translate to revert.`;
+        textEl.parentNode.insertBefore(notice, textEl.nextSibling);
+
     } catch (err) {
-        showToast('Could not connect to translation service.');
+        console.error('Translation error:', err);
+        showToast('Could not connect to translation service. Check your internet connection.');
     }
 
     btn.textContent = origBtnText;
     btn.disabled = false;
 });
+
+async function translateChunk(text, lang) {
+    try {
+        const response = await fetch(
+            `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${lang}`
+        );
+        const data = await response.json();
+        if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
+            let result = data.responseData.translatedText;
+            // MyMemory returns UPPERCASE text when it hits rate limits — detect and fallback
+            if (result === result.toUpperCase() && text !== text.toUpperCase() && text.length > 20) {
+                return text; // Return original if translation looks bad
+            }
+            return result;
+        }
+        return text; // Return original on failure
+    } catch (e) {
+        return text; // Return original on network error
+    }
+}
 
 
 // ===== Hope Walk Sound Effects (Web Audio API) =====
