@@ -373,6 +373,25 @@ h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
     font-weight: 500;
 }
 
+/* Category sections */
+.welcome-category {
+    margin-bottom: 1.25rem;
+}
+.welcome-category-label {
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-light);
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
 /* Activity cards grid */
 .welcome-activities {
     display: grid;

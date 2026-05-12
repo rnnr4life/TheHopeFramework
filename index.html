@@ -167,55 +167,74 @@
                 <span class="welcome-primary-hint" id="welcome-primary-hint">Learn the markers → Practice matching → Analyze a story</span>
             </div>
 
-            <!-- Activity cards -->
-            <div class="welcome-activities">
-                <div class="welcome-activity-card" id="card-guided">
-                    <div class="welcome-card-icon">🎬</div>
-                    <div class="welcome-card-body">
-                        <div class="welcome-card-title" id="btn-guided-text">Guided Example</div>
-                        <div class="welcome-card-desc">Watch a story get analyzed step-by-step with think-aloud explanations.</div>
+            <!-- Activity cards grouped by category -->
+
+            <!-- Learn -->
+            <div class="welcome-category">
+                <div class="welcome-category-label">📖 Learn</div>
+                <div class="welcome-activities">
+                    <div class="welcome-activity-card" id="card-guided">
+                        <div class="welcome-card-icon">🎬</div>
+                        <div class="welcome-card-body">
+                            <div class="welcome-card-title" id="btn-guided-text">Guided Example</div>
+                            <div class="welcome-card-desc">Watch a story get analyzed step-by-step with think-aloud explanations.</div>
+                        </div>
+                        <button class="btn btn-small" id="btn-guided" aria-label="Watch a guided example">Open</button>
                     </div>
-                    <button class="btn btn-small" id="btn-guided" aria-label="Watch a guided example">Open</button>
                 </div>
-                <div class="welcome-activity-card" id="card-quest">
-                    <div class="welcome-card-icon">🎮</div>
-                    <div class="welcome-card-body">
-                        <div class="welcome-card-title" id="btn-quest-text">Hope Quest</div>
-                        <div class="welcome-card-desc">Adventure through four environments and collect Hope Fragments.</div>
+            </div>
+
+            <!-- Games -->
+            <div class="welcome-category">
+                <div class="welcome-category-label">🎮 Games</div>
+                <div class="welcome-activities">
+                    <div class="welcome-activity-card" id="card-quest">
+                        <div class="welcome-card-icon">🎮</div>
+                        <div class="welcome-card-body">
+                            <div class="welcome-card-title" id="btn-quest-text">Hope Quest</div>
+                            <div class="welcome-card-desc">Adventure through four environments and collect Hope Fragments.</div>
+                        </div>
+                        <button class="btn btn-small btn-game" id="btn-quest" aria-label="Play Hope Quest">Play</button>
                     </div>
-                    <button class="btn btn-small btn-game" id="btn-quest" aria-label="Play Hope Quest">Play</button>
+                    <div class="welcome-activity-card" id="card-walk">
+                        <div class="welcome-card-icon">🚶</div>
+                        <div class="welcome-card-body">
+                            <div class="welcome-card-title" id="btn-walk-text">Hope Walk</div>
+                            <div class="welcome-card-desc">Walk through scenes and find hidden hope in distressing environments.</div>
+                        </div>
+                        <button class="btn btn-small btn-game-2" id="btn-walk" aria-label="Play Hope Walk">Play</button>
+                    </div>
+                    <div class="welcome-activity-card" id="card-detective">
+                        <div class="welcome-card-icon">🔍</div>
+                        <div class="welcome-card-body">
+                            <div class="welcome-card-title" id="btn-detective-text">Hope Detective</div>
+                            <div class="welcome-card-desc">Investigate clues from a story and pin them to the right HOPE marker on the case board.</div>
+                        </div>
+                        <button class="btn btn-small btn-game" id="btn-detective" aria-label="Play Hope Detective">Investigate</button>
+                    </div>
                 </div>
-                <div class="welcome-activity-card" id="card-walk">
-                    <div class="welcome-card-icon">🚶</div>
-                    <div class="welcome-card-body">
-                        <div class="welcome-card-title" id="btn-walk-text">Hope Walk</div>
-                        <div class="welcome-card-desc">Walk through scenes and find hidden hope in distressing environments.</div>
+            </div>
+
+            <!-- Tools -->
+            <div class="welcome-category">
+                <div class="welcome-category-label">🛠️ Tools</div>
+                <div class="welcome-activities">
+                    <div class="welcome-activity-card" id="card-worksheet">
+                        <div class="welcome-card-icon">📝</div>
+                        <div class="welcome-card-body">
+                            <div class="welcome-card-title" id="btn-worksheet-text">Worksheet</div>
+                            <div class="welcome-card-desc">A fillable worksheet for finding HOPE markers in any story.</div>
+                        </div>
+                        <button class="btn btn-small" id="btn-worksheet" aria-label="Open worksheet">Open</button>
                     </div>
-                    <button class="btn btn-small btn-game-2" id="btn-walk" aria-label="Play Hope Walk">Play</button>
-                </div>
-                <div class="welcome-activity-card" id="card-detective">
-                    <div class="welcome-card-icon">🔍</div>
-                    <div class="welcome-card-body">
-                        <div class="welcome-card-title" id="btn-detective-text">Hope Detective</div>
-                        <div class="welcome-card-desc">Investigate clues from a story and pin them to the right HOPE marker on the case board.</div>
+                    <div class="welcome-activity-card" id="card-resources">
+                        <div class="welcome-card-icon">📚</div>
+                        <div class="welcome-card-body">
+                            <div class="welcome-card-title" id="btn-resources-text">Resources</div>
+                            <div class="welcome-card-desc">Books, shows, websites, and more to keep exploring.</div>
+                        </div>
+                        <button class="btn btn-small" id="btn-resources" aria-label="View resources">Browse</button>
                     </div>
-                    <button class="btn btn-small btn-game" id="btn-detective" aria-label="Play Hope Detective">Investigate</button>
-                </div>
-                <div class="welcome-activity-card" id="card-resources">
-                    <div class="welcome-card-icon">📚</div>
-                    <div class="welcome-card-body">
-                        <div class="welcome-card-title" id="btn-resources-text">Resources</div>
-                        <div class="welcome-card-desc">Books, shows, websites, and more to keep exploring.</div>
-                    </div>
-                    <button class="btn btn-small" id="btn-resources" aria-label="View resources">Browse</button>
-                </div>
-                <div class="welcome-activity-card" id="card-worksheet">
-                    <div class="welcome-card-icon">📝</div>
-                    <div class="welcome-card-body">
-                        <div class="welcome-card-title" id="btn-worksheet-text">Worksheet</div>
-                        <div class="welcome-card-desc">A fillable worksheet for finding HOPE markers in any story.</div>
-                    </div>
-                    <button class="btn btn-small" id="btn-worksheet" aria-label="Open worksheet">Open</button>
                 </div>
             </div>
         </div>
