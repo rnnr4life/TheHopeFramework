@@ -2062,6 +2062,112 @@ document.getElementById('btn-translate').addEventListener('click', async () => {
 });
 
 
+// ===== Hope Walk Sound Effects (Web Audio API) =====
+const walkSFX = (function() {
+    let ctx = null;
+    function getCtx() {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+        return ctx;
+    }
+
+    function playTone(freq, duration, type, vol, delay) {
+        const c = getCtx();
+        const o = c.createOscillator();
+        const g = c.createGain();
+        o.type = type || 'sine';
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(vol || 0.15, c.currentTime + (delay || 0));
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + (delay || 0) + duration);
+        o.connect(g); g.connect(c.destination);
+        o.start(c.currentTime + (delay || 0));
+        o.stop(c.currentTime + (delay || 0) + duration);
+    }
+
+    function noise(duration, vol) {
+        const c = getCtx();
+        const bufSize = c.sampleRate * duration;
+        const buf = c.createBuffer(1, bufSize, c.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * 0.5;
+        const src = c.createBufferSource();
+        src.buffer = buf;
+        const g = c.createGain();
+        const filt = c.createBiquadFilter();
+        filt.type = 'lowpass';
+        filt.frequency.value = 400;
+        g.gain.setValueAtTime(vol || 0.06, c.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + duration);
+        src.connect(filt); filt.connect(g); g.connect(c.destination);
+        src.start(); src.stop(c.currentTime + duration);
+    }
+
+    return {
+        // Gentle wind ambiance
+        wind() { noise(3, 0.04); },
+
+        // Soft footsteps (4 quick taps)
+        footsteps() {
+            for (let i = 0; i < 6; i++) {
+                noise(0.08, 0.08);
+                playTone(80 + Math.random() * 40, 0.08, 'triangle', 0.06, i * 0.28);
+            }
+        },
+
+        // Magical spark chime — ascending sparkle
+        sparkFound() {
+            [880, 1108, 1318, 1760].forEach((f, i) => {
+                playTone(f, 0.5, 'sine', 0.12, i * 0.1);
+                playTone(f * 1.5, 0.3, 'sine', 0.05, i * 0.1 + 0.05);
+            });
+        },
+
+        // Scene transforms — uplifting warm swell
+        transform() {
+            [330, 415, 494, 660].forEach((f, i) => {
+                playTone(f, 1.5, 'sine', 0.08, i * 0.3);
+                playTone(f * 2, 0.8, 'triangle', 0.04, i * 0.3 + 0.15);
+            });
+            // Gentle high shimmer
+            playTone(1318, 2.0, 'sine', 0.03, 0.8);
+            playTone(1568, 1.8, 'sine', 0.02, 1.0);
+        },
+
+        // Correct answer — happy ding
+        correct() {
+            playTone(523, 0.15, 'sine', 0.15, 0);
+            playTone(659, 0.15, 'sine', 0.15, 0.12);
+            playTone(784, 0.3, 'sine', 0.15, 0.24);
+        },
+
+        // Wrong answer — gentle low buzz
+        wrong() {
+            playTone(220, 0.25, 'triangle', 0.1, 0);
+            playTone(196, 0.3, 'triangle', 0.08, 0.15);
+        },
+
+        // Birds chirping
+        birds() {
+            [1800, 2200, 1900, 2400, 2000].forEach((f, i) => {
+                playTone(f, 0.08, 'sine', 0.06, i * 0.2);
+                playTone(f * 1.2, 0.06, 'sine', 0.04, i * 0.2 + 0.06);
+            });
+        },
+
+        // Victory fanfare
+        victory() {
+            const notes = [523, 523, 523, 659, 784, 784, 659, 784, 1047];
+            const durs =  [0.15, 0.15, 0.15, 0.2, 0.15, 0.15, 0.2, 0.2, 0.6];
+            let t = 0;
+            notes.forEach((f, i) => {
+                playTone(f, durs[i] + 0.1, 'sine', 0.13, t);
+                playTone(f * 0.5, durs[i] + 0.1, 'triangle', 0.06, t);
+                t += durs[i] + 0.05;
+            });
+        }
+    };
+})();
+
 // ===== Hope Walk Game =====
 
 const walkScenes = {
@@ -2660,6 +2766,8 @@ function renderWalkScene() {
 
     // Animate character walking in from off-screen left
     character.classList.add('walking');
+    walkSFX.wind();
+    walkSFX.footsteps();
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             character.style.left = '';  // clear inline style so CSS class takes over
@@ -2683,6 +2791,7 @@ function handleSparkClick(spark, scene) {
     walkSparkFound = true;
 
     spark.classList.add('found');
+    walkSFX.sparkFound();
 
     // Transform the scene visually
     const sky = document.getElementById('walk-sky');
@@ -2726,6 +2835,7 @@ function handleSparkClick(spark, scene) {
         if (sun) sun.classList.add('visible');
     }
     if (t.showBirds) {
+        walkSFX.birds();
         const b1 = document.getElementById('walk-bird-1');
         const b2 = document.getElementById('walk-bird-2');
         const b3 = document.getElementById('walk-bird-3');
@@ -2767,6 +2877,7 @@ function handleSparkClick(spark, scene) {
     // Update narrative
     const narrative = document.getElementById('walk-narrative');
     narrative.innerHTML = scene.hopeText;
+    walkSFX.transform();
 
     // Reveal hidden-hope custom elements with staggered animation
     document.querySelectorAll('.hidden-hope').forEach((el, i) => {
@@ -2801,6 +2912,7 @@ function handleWalkMarker(chosen, scene) {
     const character = document.getElementById('walk-character');
 
     if (chosen === scene.marker) {
+        walkSFX.correct();
         feedback.className = 'walk-feedback correct';
         feedback.innerHTML = `<strong>That's right!</strong> ${scene.explain}`;
         feedback.classList.remove('hidden');
@@ -2810,6 +2922,7 @@ function handleWalkMarker(chosen, scene) {
         character.classList.add('walking');
         character.classList.remove('entered');
         character.classList.add('walk-off');
+        walkSFX.footsteps();
 
         // Show next button after walk-off animation
         setTimeout(() => {
@@ -2817,6 +2930,7 @@ function handleWalkMarker(chosen, scene) {
             nextBtn.classList.remove('hidden');
         }, 2000);
     } else {
+        walkSFX.wrong();
         feedback.className = 'walk-feedback wrong';
         feedback.textContent = 'Not quite — look at what you found and think about what kind of hope it shows.';
         feedback.classList.remove('hidden');
@@ -2845,6 +2959,7 @@ function showWalkVictory() {
 
     document.getElementById('walk-victory-msg').textContent = msgs[currentAge];
     document.getElementById('walk-victory').classList.remove('hidden');
+    walkSFX.victory();
     triggerCelebration();
 }
 
