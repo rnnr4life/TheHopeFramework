@@ -909,6 +909,15 @@ const resources = {
                 { title: 'Recycle City', desc: 'Explore a virtual city and learn how to reduce, reuse, and recycle.', meta: 'EPA', url: 'https://www.epa.gov/recyclecity' },
                 { title: 'Climate Kids: Big Questions', desc: 'Interactive activities and experiments you can do at home about climate.', url: 'https://climatekids.nasa.gov/menu/make/' },
             ]
+        },
+        {
+            icon: '📝',
+            title: 'Worksheets',
+            items: [
+                { title: 'Searching for HOPE', desc: 'A fun worksheet for finding the four HOPE markers in any story you read.', meta: 'Fillable', action: 'worksheet-search-screen' },
+                { title: 'Teacher Planning Page', desc: 'A planning tool for teachers to record HOPE markers while reading climate literature.', meta: 'For Teachers', action: 'worksheet-teacher-screen' },
+                { title: 'Climate Conversations', desc: 'Discussion starter questions for each HOPE marker to use with students.', meta: 'For Teachers', action: 'worksheet-conversations-screen' },
+            ]
         }
     ],
     middle: [
@@ -947,6 +956,15 @@ const resources = {
             items: [
                 { title: 'Brains On!', desc: 'A science podcast for curious kids — episodes on climate, oceans, and ecosystems.', url: 'https://brainson.org/' },
                 { title: 'The Gist (Yale)', desc: 'Short, clear articles explaining climate science for non-experts.', url: 'https://yaleclimateconnections.org/' },
+            ]
+        },
+        {
+            icon: '📝',
+            title: 'Worksheets',
+            items: [
+                { title: 'Finding Hope in Literature', desc: 'A worksheet for identifying HOPE markers in any story, article, or film.', meta: 'Fillable', action: 'worksheet-literature-screen' },
+                { title: 'Teacher Planning Page', desc: 'Record HOPE markers while reading climate literature — a teacher planning tool.', meta: 'For Teachers', action: 'worksheet-teacher-screen' },
+                { title: 'Climate Conversations', desc: 'Discussion prompts for each HOPE marker to spark dialogue with students.', meta: 'For Teachers', action: 'worksheet-conversations-screen' },
             ]
         }
     ],
@@ -988,6 +1006,15 @@ const resources = {
                 { title: 'How to Save a Planet', desc: 'Explores the science and human stories behind climate change solutions.', meta: 'Gimlet / Spotify', url: 'https://open.spotify.com/show/1KzrasExlM5dgMYwgFHns6' },
                 { title: 'The Ezra Klein Show', desc: 'In-depth interviews on climate policy, systems thinking, and agency.', meta: 'NY Times', url: 'https://www.nytimes.com/column/ezra-klein-podcast' },
                 { title: 'TED Climate', desc: 'Talks from scientists, activists, and thinkers on climate action and hope.', url: 'https://www.ted.com/topics/climate+change' },
+            ]
+        },
+        {
+            icon: '📝',
+            title: 'Worksheets',
+            items: [
+                { title: 'Finding Hope in Literature', desc: 'Identify and analyze HOPE markers across any text, film, or media.', meta: 'Fillable', action: 'worksheet-literature-screen' },
+                { title: 'Teacher Planning Page', desc: 'Structured tool for recording HOPE markers while reading climate literature with students.', meta: 'For Teachers', action: 'worksheet-teacher-screen' },
+                { title: 'Climate Conversations', desc: 'Conversation starters for each HOPE marker — includes equity and power distribution prompts.', meta: 'For Teachers', action: 'worksheet-conversations-screen' },
             ]
         }
     ]
@@ -1053,6 +1080,7 @@ function renderResources() {
         gridEl.innerHTML = items.map(item => {
             const emoji = typeEmojis[item.meta] || item.catIcon;
             const isLink = !!item.url;
+            const isAction = !!item.action;
 
             const cardContent = `
                     <div class="resource-card-header">
@@ -1064,9 +1092,13 @@ function renderResources() {
                         ${item.meta ? `<span class="resource-tag">${escapeHtml(item.meta)}</span>` : ''}
                         <span class="resource-tag">${escapeHtml(item.catTitle)}</span>
                         ${isLink ? '<span class="resource-link-indicator">↗ Visit</span>' : ''}
+                        ${isAction ? '<span class="resource-link-indicator">→ Open</span>' : ''}
                     </div>
             `;
 
+            if (isAction) {
+                return `<button class="resource-card resource-card-action" data-action="${escapeHtml(item.action)}">${cardContent}</button>`;
+            }
             if (isLink) {
                 return `<a class="resource-card resource-card-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">${cardContent}</a>`;
             }
@@ -1093,6 +1125,43 @@ document.getElementById('btn-resources').addEventListener('click', () => {
 });
 document.getElementById('btn-back-resources').addEventListener('click', () => {
     showScreen('welcome-screen');
+});
+
+// ===== Worksheet Navigation =====
+// Back buttons
+document.getElementById('btn-back-ws-search').addEventListener('click', () => showScreen('welcome-screen'));
+document.getElementById('btn-back-ws-lit').addEventListener('click', () => showScreen('welcome-screen'));
+document.getElementById('btn-back-ws-teacher').addEventListener('click', () => showScreen('welcome-screen'));
+document.getElementById('btn-back-ws-convo').addEventListener('click', () => showScreen('welcome-screen'));
+
+// Print buttons
+document.getElementById('btn-print-ws-search').addEventListener('click', () => window.print());
+document.getElementById('btn-print-ws-lit').addEventListener('click', () => window.print());
+document.getElementById('btn-print-ws-teacher').addEventListener('click', () => window.print());
+document.getElementById('btn-print-ws-convo').addEventListener('click', () => window.print());
+
+// Cross-link: Teacher Planning → Conversations
+document.getElementById('btn-goto-conversations').addEventListener('click', () => {
+    showScreen('worksheet-conversations-screen');
+});
+
+// Worksheet button — routes to age-appropriate version
+document.getElementById('btn-worksheet').addEventListener('click', () => {
+    if (currentAge === 'elementary') {
+        showScreen('worksheet-search-screen');
+    } else {
+        showScreen('worksheet-literature-screen');
+    }
+});
+
+// Teacher modal worksheet buttons
+document.getElementById('btn-teacher-planning').addEventListener('click', () => {
+    document.getElementById('teacher-modal').classList.add('hidden');
+    showScreen('worksheet-teacher-screen');
+});
+document.getElementById('btn-teacher-convo').addEventListener('click', () => {
+    document.getElementById('teacher-modal').classList.add('hidden');
+    showScreen('worksheet-conversations-screen');
 });
 
 // ===== In-App Resource Preview =====
@@ -1134,6 +1203,14 @@ document.getElementById('btn-back-resources').addEventListener('click', () => {
 
     // Intercept resource card link clicks
     document.addEventListener('click', (e) => {
+        // Handle in-app action cards (worksheets)
+        const actionCard = e.target.closest('button.resource-card-action');
+        if (actionCard) {
+            const screen = actionCard.dataset.action;
+            if (screen) showScreen(screen);
+            return;
+        }
+
         const card = e.target.closest('a.resource-card-link, a.resources-spotlight-link');
         if (card) {
             e.preventDefault();

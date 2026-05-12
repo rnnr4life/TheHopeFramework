@@ -140,6 +140,14 @@
                     </div>
                     <button class="btn btn-small" id="btn-resources" aria-label="View resources">Browse</button>
                 </div>
+                <div class="welcome-activity-card" id="card-worksheet">
+                    <div class="welcome-card-icon">📝</div>
+                    <div class="welcome-card-body">
+                        <div class="welcome-card-title" id="btn-worksheet-text">Worksheet</div>
+                        <div class="welcome-card-desc">A fillable worksheet for finding HOPE markers in any story.</div>
+                    </div>
+                    <button class="btn btn-small" id="btn-worksheet" aria-label="Open worksheet">Open</button>
+                </div>
             </div>
         </div>
     </section>
@@ -664,6 +672,208 @@
         </div>
     </section>
 
+    <!-- ===== Worksheet: Searching for HOPE (Elementary) ===== -->
+    <section id="worksheet-search-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-ws-search">&larr; Back</button>
+                <div class="step-indicator">🔍 Searching for HOPE</div>
+            </div>
+            <div class="worksheet-page">
+                <div class="worksheet-header">
+                    <div class="worksheet-field"><label>Name:</label><input type="text" class="ws-input" placeholder="Your name"></div>
+                    <div class="worksheet-field"><label>Story Title:</label><input type="text" class="ws-input" placeholder="What story are you reading?"></div>
+                </div>
+                <h2 class="worksheet-title">🔍 Searching for HOPE</h2>
+                <p class="worksheet-intro">Where can you find HOPE in this story?<br>Today we are searching for <strong>4</strong> different clues about HOPE. HOPE-fully we will find them all!</p>
+                <ul class="worksheet-instructions">
+                    <li>What are the characters doing and saying that show they have HOPE?</li>
+                    <li>Look for examples of each HOPE marker below and add your ideas to the frames</li>
+                </ul>
+                <div class="worksheet-grid">
+                    <div class="worksheet-frame frame-motivation">
+                        <div class="frame-label">🔥 Motivation</div>
+                        <textarea class="ws-textarea" placeholder="What makes the characters want to change things?"></textarea>
+                    </div>
+                    <div class="worksheet-frame frame-belief">
+                        <div class="frame-label">✨ Belief</div>
+                        <textarea class="ws-textarea" placeholder="Where do characters believe change is possible?"></textarea>
+                    </div>
+                    <div class="worksheet-frame frame-plans">
+                        <div class="frame-label">🗺️ Plans</div>
+                        <textarea class="ws-textarea" placeholder="What plans do the characters make?"></textarea>
+                    </div>
+                    <div class="worksheet-frame frame-agency">
+                        <div class="frame-label">💪 Agency</div>
+                        <textarea class="ws-textarea" placeholder="What actions do the characters take?"></textarea>
+                    </div>
+                </div>
+                <div class="worksheet-footer">
+                    <button class="btn btn-small" id="btn-print-ws-search" aria-label="Print worksheet">🖨️ Print</button>
+                    <span class="worksheet-credit">© Dr. Colleen Redmond, 2024 — HOPE Framework</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Worksheet: Finding Hope in Literature (Middle/High) ===== -->
+    <section id="worksheet-literature-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-ws-lit">&larr; Back</button>
+                <div class="step-indicator">📖 Finding Hope in Literature</div>
+            </div>
+            <div class="worksheet-page">
+                <div class="worksheet-header">
+                    <div class="worksheet-field"><label>Name:</label><input type="text" class="ws-input" placeholder="Your name"></div>
+                    <div class="worksheet-field"><label>Date:</label><input type="text" class="ws-input ws-input-short" placeholder="Date"></div>
+                    <div class="worksheet-field"><label>Class:</label><input type="text" class="ws-input ws-input-short" placeholder="Class"></div>
+                </div>
+                <h2 class="worksheet-title">📖 Finding Hope in Literature</h2>
+                <div class="worksheet-field" style="max-width:400px;margin:0 auto 1rem"><label>Story Title:</label><input type="text" class="ws-input" placeholder="What story are you reading?"></div>
+                <ul class="worksheet-instructions">
+                    <li>What are the characters doing and saying that show they have hope?</li>
+                    <li>Look for evidence of the hope markers below and add examples to each frame</li>
+                </ul>
+                <div class="worksheet-grid">
+                    <div class="worksheet-frame frame-motivation frame-clean">
+                        <div class="frame-label">Motivation</div>
+                        <textarea class="ws-textarea" placeholder="What motivates the characters to want change?"></textarea>
+                    </div>
+                    <div class="worksheet-frame frame-belief frame-clean">
+                        <div class="frame-label">Belief</div>
+                        <textarea class="ws-textarea" placeholder="Where does the story show characters believe they can make a difference?"></textarea>
+                    </div>
+                    <div class="worksheet-frame frame-plans frame-clean">
+                        <div class="frame-label">Plans</div>
+                        <textarea class="ws-textarea" placeholder="What plans do characters create to solve their problems?"></textarea>
+                    </div>
+                    <div class="worksheet-frame frame-agency frame-clean">
+                        <div class="frame-label">Agency</div>
+                        <textarea class="ws-textarea" placeholder="What actions do the characters take to create change?"></textarea>
+                    </div>
+                </div>
+                <div class="worksheet-footer">
+                    <button class="btn btn-small" id="btn-print-ws-lit" aria-label="Print worksheet">🖨️ Print</button>
+                    <span class="worksheet-credit">© Dr. Colleen Redmond, 2024 — HOPE Framework</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Worksheet: Teacher Planning Page ===== -->
+    <section id="worksheet-teacher-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-ws-teacher">&larr; Back</button>
+                <div class="step-indicator">🍎 Teacher Planning Page</div>
+            </div>
+            <div class="worksheet-page">
+                <h2 class="worksheet-title">🍎 Finding HOPE in Stories: A Teacher Planning Page</h2>
+                <p class="worksheet-intro">Recognizing hope in climate literature is a powerful way to spark dialogue with students about their own hope and grief related to the climate crisis. Record examples of HOPE markers as you find them — these will serve as discussion points with students.</p>
+                <div class="worksheet-header">
+                    <div class="worksheet-field"><label>Title/Source:</label><input type="text" class="ws-input" placeholder="Book, article, film, etc."></div>
+                    <div class="worksheet-field"><label>Author/Creator:</label><input type="text" class="ws-input" placeholder="Who made it?"></div>
+                </div>
+                <div class="worksheet-grid worksheet-grid-4col">
+                    <div class="worksheet-frame frame-motivation frame-clean">
+                        <div class="frame-label-sm">HOPE Marker #1</div>
+                        <div class="frame-label">Motivation for Change</div>
+                        <textarea class="ws-textarea ws-textarea-tall" placeholder="Record examples of motivation for change you find in the story..."></textarea>
+                    </div>
+                    <div class="worksheet-frame frame-belief frame-clean">
+                        <div class="frame-label-sm">HOPE Marker #2</div>
+                        <div class="frame-label">Belief That Change is Possible</div>
+                        <textarea class="ws-textarea ws-textarea-tall" placeholder="Record examples of belief that change is possible..."></textarea>
+                    </div>
+                    <div class="worksheet-frame frame-plans frame-clean">
+                        <div class="frame-label-sm">HOPE Marker #3</div>
+                        <div class="frame-label">Plans for a Path Forward</div>
+                        <textarea class="ws-textarea ws-textarea-tall" placeholder="Record examples of plans for a path forward..."></textarea>
+                    </div>
+                    <div class="worksheet-frame frame-agency frame-clean">
+                        <div class="frame-label-sm">HOPE Marker #4</div>
+                        <div class="frame-label">Agency to Take Action</div>
+                        <textarea class="ws-textarea ws-textarea-tall" placeholder="Record examples of agency to take action..."></textarea>
+                    </div>
+                </div>
+                <p class="worksheet-hint">💡 Flip to the <button class="btn-link" id="btn-goto-conversations">Climate Conversations</button> page for student discussion starters based on each marker.</p>
+                <div class="worksheet-footer">
+                    <button class="btn btn-small" id="btn-print-ws-teacher" aria-label="Print worksheet">🖨️ Print</button>
+                    <span class="worksheet-credit">© Dr. Colleen Redmond, 2024 — HOPE Framework</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Worksheet: Climate Conversations ===== -->
+    <section id="worksheet-conversations-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-ws-convo">&larr; Back</button>
+                <div class="step-indicator">💬 Climate Conversations</div>
+            </div>
+            <div class="worksheet-page">
+                <h2 class="worksheet-title">💬 Finding HOPE in Stories: Starting Climate Conversations</h2>
+                <p class="worksheet-intro">Use the questions below to spark dialogue with students based on each of the HOPE markers. Feel free to add additional questions that are important for <em>your</em> students to discuss.<br><strong>Note:</strong> Markers often overlap each other and are not necessarily meant to be discussed in isolation.</p>
+                <div class="worksheet-grid worksheet-grid-4col">
+                    <div class="worksheet-convo-card frame-motivation">
+                        <div class="frame-label-sm">HOPE Marker #1</div>
+                        <div class="frame-label">Motivation for Change</div>
+                        <ul class="convo-questions">
+                            <li>What are the motivating events for the characters?</li>
+                            <li>When do they first realize something needs to change? How do they react?</li>
+                            <li>Does grief play a part in this story? If so, do the characters grieve alone or collectively?</li>
+                            <li>Have students ever felt alone in their grief and anger about climate change?</li>
+                            <li>How might talking about it with others help?</li>
+                            <li>What role can understanding more about hope play?</li>
+                        </ul>
+                        <textarea class="ws-textarea" placeholder="Add your own questions..."></textarea>
+                    </div>
+                    <div class="worksheet-convo-card frame-belief">
+                        <div class="frame-label-sm">HOPE Marker #2</div>
+                        <div class="frame-label">Belief That Change is Possible</div>
+                        <ul class="convo-questions">
+                            <li>Where does the story show the characters believe they can make a difference?</li>
+                            <li>What are times students have felt this way, too?</li>
+                            <li>How do they feel they can make a difference now for the Earth?</li>
+                            <li>What are resources available for creating collective climate action?</li>
+                        </ul>
+                        <textarea class="ws-textarea" placeholder="Add your own questions..."></textarea>
+                    </div>
+                    <div class="worksheet-convo-card frame-plans">
+                        <div class="frame-label-sm">HOPE Marker #3</div>
+                        <div class="frame-label">Plans for a Path Forward</div>
+                        <ul class="convo-questions">
+                            <li>What plans do characters create to solve their problems?</li>
+                            <li>How does this show hope in the story?</li>
+                            <li>Do the plans always go smoothly? If not, how do the characters react?</li>
+                            <li><em>Resiliency in the face of challenge is a crucial element of hope.</em></li>
+                            <li>Where have students felt resilient in their own lives?</li>
+                        </ul>
+                        <textarea class="ws-textarea" placeholder="Add your own questions..."></textarea>
+                    </div>
+                    <div class="worksheet-convo-card frame-agency">
+                        <div class="frame-label-sm">HOPE Marker #4</div>
+                        <div class="frame-label">Agency to Take Action</div>
+                        <ul class="convo-questions">
+                            <li>What actions do the characters take to create change? What are their sources of power?</li>
+                            <li>What sources of power do students see in themselves?</li>
+                            <li>How is power distributed across populations in regard to race, gender, socio-economic, or age groups?</li>
+                            <li>How has this influenced climate change in the past and what are the current impacts?</li>
+                            <li>What resources are available to help youth gain more agency and engage their hope through action?</li>
+                        </ul>
+                        <textarea class="ws-textarea" placeholder="Add your own questions..."></textarea>
+                    </div>
+                </div>
+                <div class="worksheet-footer">
+                    <button class="btn btn-small" id="btn-print-ws-convo" aria-label="Print worksheet">🖨️ Print</button>
+                    <span class="worksheet-credit">© Dr. Colleen Redmond, 2024 — HOPE Framework</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- ===== Resources Screen ===== -->
     <section id="resources-screen" class="screen">
         <div class="container-wide">
@@ -884,6 +1094,14 @@
             <label class="teacher-label">
                 <input type="checkbox" id="teacher-skip-learn" /> Skip the Learn & Match steps
             </label>
+
+            <div class="teacher-tools" style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--color-border);">
+                <label class="teacher-label" style="margin-bottom:0.4rem">📝 Teacher Worksheets</label>
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    <button class="btn btn-small" id="btn-teacher-planning">🍎 Planning Page</button>
+                    <button class="btn btn-small" id="btn-teacher-convo">💬 Conversation Starters</button>
+                </div>
+            </div>
 
             <div class="modal-actions">
                 <button class="btn btn-small" id="btn-cancel-teacher">Cancel</button>
