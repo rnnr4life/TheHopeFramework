@@ -2669,6 +2669,7 @@ button.resource-card-action {
     background: var(--color-surface); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
     border: 1px solid var(--color-border); border-radius: var(--radius-lg);
     padding: 2rem; animation: fadeIn 0.3s ease;
+    overflow-x: hidden;
 }
 .worksheet-title {
     font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800;
@@ -2696,9 +2697,20 @@ button.resource-card-action {
 .worksheet-grid {
     display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;
 }
-.worksheet-grid-4col { grid-template-columns: repeat(4, 1fr); }
-@media (max-width: 800px) { .worksheet-grid-4col { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 500px) { .worksheet-grid, .worksheet-grid-4col { grid-template-columns: 1fr; } }
+.worksheet-grid-4col { grid-template-columns: 1fr 1fr; }
+
+/* Worksheet responsive */
+@media (max-width: 768px) {
+    .worksheet-grid, .worksheet-grid-4col { grid-template-columns: 1fr; }
+    .worksheet-page { padding: 1.25rem; }
+    .worksheet-title { font-size: 1.2rem; }
+    .worksheet-header { flex-direction: column; }
+    .worksheet-field { min-width: 100%; }
+    .ws-input-short { max-width: 100%; }
+    .worksheet-footer { flex-direction: column; gap: 0.75rem; text-align: center; }
+    .worksheet-intro { font-size: 0.85rem; }
+    .convo-questions li { font-size: 0.78rem; }
+}
 
 .worksheet-frame {
     border: 2px solid var(--color-border); border-radius: var(--card-radius);
