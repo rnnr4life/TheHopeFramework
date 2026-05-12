@@ -619,7 +619,7 @@ h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
 .match-workspace { display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.25rem; align-items: start; }
 
 .match-progress-bar { height: 6px; background: var(--color-border); border-radius: 3px; overflow: hidden; margin-bottom: 1.25rem; }
-.match-progress-fill { height: 100%; background: linear-gradient(90deg, var(--color-primary), #38bdf8); border-radius: 3px; transition: width 0.4s ease; width: 0%; }
+.match-progress-fill { height: 100%; background: linear-gradient(90deg, var(--color-primary), var(--color-plans)); border-radius: 3px; transition: width 0.4s ease; width: 0%; }
 
 .match-phrase {
     background: var(--color-surface); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
@@ -2120,8 +2120,8 @@ button.resource-card-action {
     color: #fca5a5;
 }
 .scene-data-panel.success {
-    border-color: rgba(52,211,153,0.4);
-    color: #6ee7b7;
+    border-color: var(--color-agency-border);
+    color: var(--color-primary-hover);
 }
 
 /* --- Lone tree with carved text --- */
@@ -2347,10 +2347,10 @@ button.resource-card-action {
     animation: spark-pulse 1.5s infinite ease-in-out;
 }
 
-.walk-spark[data-marker="motivation"]::before { background: rgba(255,107,107,0.3); }
-.walk-spark[data-marker="belief"]::before { background: rgba(168,85,247,0.3); }
-.walk-spark[data-marker="plans"]::before { background: rgba(56,189,248,0.3); }
-.walk-spark[data-marker="agency"]::before { background: rgba(52,211,153,0.3); }
+.walk-spark[data-marker="motivation"]::before { background: var(--color-motivation-glow); }
+.walk-spark[data-marker="belief"]::before { background: var(--color-belief-glow); }
+.walk-spark[data-marker="plans"]::before { background: var(--color-plans-glow); }
+.walk-spark[data-marker="agency"]::before { background: var(--color-agency-glow); }
 
 @keyframes spark-pulse {
     0%, 100% { transform: scale(1); opacity: 0.5; }
@@ -2748,6 +2748,25 @@ button.resource-card-action {
 }
 .btn-link:hover { color: var(--color-primary-hover); }
 
+/* Age-specific worksheet styles */
+.age-elementary .worksheet-page { border-radius: 32px; }
+.age-elementary .worksheet-title { font-size: 1.8rem; }
+.age-elementary .worksheet-intro { font-size: 1rem; }
+.age-elementary .worksheet-frame { border-radius: 24px; border-width: 3px; min-height: 200px; }
+.age-elementary .ws-textarea { font-size: 1rem; min-height: 120px; border-radius: 16px; }
+.age-elementary .ws-input { font-size: 1rem; padding: 0.5rem 0.75rem; border-radius: 12px; }
+.age-elementary .frame-label { font-size: 1.1rem; }
+.age-elementary .worksheet-instructions { font-size: 0.95rem; }
+
+.age-high .worksheet-page { border-radius: 14px; }
+.age-high .worksheet-title { font-size: 1.25rem; letter-spacing: -0.02em; }
+.age-high .worksheet-intro { font-size: 0.85rem; }
+.age-high .worksheet-frame { border-radius: 10px; border-width: 1px; }
+.age-high .ws-textarea { font-size: 0.85rem; }
+.age-high .frame-label { font-size: 0.9rem; }
+.age-high .worksheet-convo-card { border-radius: 10px; }
+.age-high .convo-questions li { font-size: 0.78rem; }
+
 /* Conversation cards */
 .worksheet-convo-card {
     border: 2px solid var(--color-border); border-radius: var(--card-radius);
@@ -2769,12 +2788,42 @@ button.resource-card-action {
 
 /* Print styles for worksheets */
 @media print {
-    .worksheet-page { background: white; border: none; box-shadow: none; padding: 1rem; }
-    .screen-nav, .worksheet-footer button, .nature-deco { display: none !important; }
-    .ws-textarea, .ws-input { border: 1px solid #ccc; background: white; color: black; }
-    .worksheet-frame, .worksheet-convo-card { border-width: 1px; break-inside: avoid; }
-    .frame-label, .frame-label-sm { color: black !important; }
-    .worksheet-title, .worksheet-intro, .worksheet-instructions, .convo-questions li { color: black; }
+    /* Hide everything except the active worksheet */
+    body { background: white !important; }
+    body::before, body::after { display: none !important; }
+    .nature-deco, .skip-nav, .browser-modal, .modal, .celebration { display: none !important; }
+    .screen:not(.active) { display: none !important; }
+    .screen.active { display: block !important; animation: none !important; }
+    .screen-nav { display: none !important; }
+    .worksheet-footer button { display: none !important; }
+    .worksheet-page {
+        background: white !important; border: none !important;
+        box-shadow: none !important; padding: 1rem !important;
+        backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+    }
+    .ws-textarea, .ws-input {
+        border: 1px solid #ccc !important; background: white !important;
+        color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    .worksheet-frame, .worksheet-convo-card {
+        border-width: 2px !important; break-inside: avoid;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    .frame-motivation { border-color: #ff6b6b !important; }
+    .frame-belief { border-color: #a855f7 !important; }
+    .frame-plans { border-color: #38bdf8 !important; }
+    .frame-agency { border-color: #34d399 !important; }
+    .frame-label, .frame-label-sm { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .frame-motivation .frame-label { color: #ff6b6b !important; }
+    .frame-belief .frame-label { color: #a855f7 !important; }
+    .frame-plans .frame-label { color: #38bdf8 !important; }
+    .frame-agency .frame-label { color: #34d399 !important; }
+    .worksheet-title, .worksheet-intro, .worksheet-instructions { color: black !important; }
+    .convo-questions li { color: #333 !important; }
+    .convo-questions li::before { color: #34d399 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .worksheet-credit { color: #666 !important; }
+    .worksheet-hint { display: none !important; }
+    .container-wide { max-width: 100% !important; padding: 0 !important; }
 }
 
 /* ===== Text Picker ===== */
@@ -3327,15 +3376,16 @@ button.resource-card-action {
 
 /* ===== Print ===== */
 @media print {
-    body, body::before, body::after { background: white !important; color: black !important; }
-    .screen-nav, .btn, .marker-toolbar-sticky, .text-controls,
+    body, body::before, body::after { background: white !important; }
+    .screen-nav, .marker-toolbar-sticky, .text-controls,
     .collection-tracker, .nature-deco, .celebration, .skip-nav,
-    .feedback-actions, .welcome-buttons, .modal, .tutorial-overlay { display: none !important; }
-    .screen { display: block !important; animation: none !important; }
+    .feedback-actions, .welcome-buttons, .modal, .tutorial-overlay,
+    .browser-modal { display: none !important; }
+    .screen:not(.active) { display: none !important; }
+    .screen.active { display: block !important; animation: none !important; }
     .activity-workspace { display: block !important; }
     .activity-sidebar { position: static !important; }
     .container, .container-wide { max-width: 100%; padding: 0.5rem; }
-    * { color: black !important; border-color: #ccc !important; }
     .glass, .results-panel, .text-panel, .marker-card, .reflect-prompt-card,
     .resource-category { background: white !important; backdrop-filter: none !important; }
 }
