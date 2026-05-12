@@ -1227,6 +1227,193 @@ document.getElementById('btn-teacher-convo').addEventListener('click', () => {
 
 // ===== Hope Quest Game =====
 
+// Zork-style ASCII art for each location
+const questAsciiArt = {
+    'Ember Cave': `
+      _______________
+     /               \\
+    /   .  *  .   *   \\
+   |  *  EMBER   .  *  |
+   |    .  CAVE  *     |
+   |  ____       ____  |
+   | /    \\     /    \\ |
+   ||  ()  | ~ |  ()  ||
+   | \\____/     \\____/ |
+   |    \\|||/ \\|||/    |
+   |_____|  🦊  |_____|
+  /______\\_________/____\\`,
+    'Crystal Falls': `
+        |       |
+       |||     |||
+      |||||   |||||
+       \\  \\_/  /
+        \\ ~~~ /
+    ~~~~~|   |~~~~~
+   ~~~~~~|   |~~~~~~
+    ~~~~~|   |~~~~~
+        /     \\
+       / FALLS \\
+      /  .  🌿  \\
+     /___________\\
+    ~~~~~~~~~~~~~~~~`,
+    'Blueprint Summit': `
+            /\\
+           /  \\
+          / 🦉 \\
+         /______\\
+        /|  ||  |\\
+       / | PLAN | \\
+      /  |______|  \\
+     /   /      \\   \\
+    /   / SUMMIT \\   \\
+   /___/____||____\\___\\
+       |  ____  |
+  ~~~~~|_|    |_|~~~~~`,
+    'Action Valley': `
+     🌳    🌳    🌳
+    /|\\   /|\\   /|\\
+     |     |     |
+  ~~~~~~~~~~~~~~~~~~~
+  ~ ACTION  VALLEY ~
+  ~~~~~~~~~~~~~~~~~~~
+   🌱  🌱  🌱  🌱  🌱
+  ___________________
+ |  \\o/  \\o/  \\o/  |
+ |   |    |    |    |
+ |  / \\  / \\  / \\  |
+ |___________________|`,
+    // Middle / High alternative names
+    'Ember Cave (alt)': `
+    _____________________
+   /   ⚠  DANGER  ⚠     \\
+  / ░░░░░░░░░░░░░░░░░░░░ \\
+ |  ░░ AIR QUALITY  ░░░░  |
+ |  ░░  ▼ -30%     ░░░░  |
+ |  ░░░░░░░░░░░░░░░░░░░░  |
+ |  📊 ████████░░░░░░░░  |
+ |  📊 █████░░░░░░░░░░░  |
+ |  📊 ███░░░░░░░░░░░░░  |
+ |________________________|
+     \\  EMBER CAVE  /`,
+    'Crystal Falls (alt)': `
+    ┌─────────────────────┐
+    │  RESEARCH  STATION  │
+    ├─────────────────────┤
+    │ ✅ Korea River  +92% │
+    │ ✅ India Forest +340% │
+    │ ✅ Reef Recovery +18% │
+    ├─────────────────────┤
+    │    CHANGE IS        │
+    │     POSSIBLE        │
+    │  ~~~Crystal Falls~~~│
+    └─────────────────────┘`,
+    'Blueprint Summit (alt)': `
+    ╔═════════════════════╗
+    ║  COMMAND  CENTER    ║
+    ╠═════════════════════╣
+    ║ Phase 1: ████░░ 60% ║
+    ║ Phase 2: ██░░░░ 30% ║
+    ║ Phase 3: ░░░░░░  0% ║
+    ╠═════════════════════╣
+    ║  🗺️  BUILD YOUR     ║
+    ║      ROADMAP        ║
+    ╚═════════════════════╝
+         /SUMMIT\\`,
+    'Action Valley (alt)': `
+    ╔═════════════════════╗
+    ║  >>> ACTION  <<<    ║
+    ╠═════════════════════╣
+    ║ 🌳🌳🌳🌳🌳🌳🌳🌳🌳 ║
+    ║ Volunteers: ████ 47 ║
+    ║ Trees:   ████░░ 499 ║
+    ║ TARGET:        ⟶ 500║
+    ╠═════════════════════╣
+    ║  🌱 1 seedling left ║
+    ╚═════════════════════╝`
+};
+
+// Retro 8-bit sound effects for quest
+const questSFX = (function() {
+    let ctx = null;
+    function getCtx() {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+        return ctx;
+    }
+
+    function beep(freq, dur, type, vol, delay) {
+        const c = getCtx();
+        const o = c.createOscillator();
+        const g = c.createGain();
+        o.type = type || 'square';
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(vol || 0.08, c.currentTime + (delay || 0));
+        g.gain.linearRampToValueAtTime(0, c.currentTime + (delay || 0) + dur);
+        o.connect(g); g.connect(c.destination);
+        o.start(c.currentTime + (delay || 0));
+        o.stop(c.currentTime + (delay || 0) + dur);
+    }
+
+    return {
+        // Scene enter — retro door/portal sound
+        enter() {
+            beep(180, 0.1, 'square', 0.1, 0);
+            beep(220, 0.1, 'square', 0.1, 0.08);
+            beep(330, 0.15, 'square', 0.1, 0.16);
+            beep(440, 0.2, 'triangle', 0.08, 0.28);
+        },
+        // Typewriter text — rapid clicks
+        type(count) {
+            for (let i = 0; i < Math.min(count, 30); i++) {
+                beep(800 + Math.random() * 400, 0.02, 'square', 0.03, i * 0.03);
+            }
+        },
+        // Correct choice — triumphant 8-bit fanfare
+        correct() {
+            beep(262, 0.1, 'square', 0.1, 0);
+            beep(330, 0.1, 'square', 0.1, 0.1);
+            beep(392, 0.1, 'square', 0.1, 0.2);
+            beep(523, 0.25, 'square', 0.12, 0.3);
+            beep(523, 0.08, 'square', 0.08, 0.55);
+            beep(523, 0.3, 'square', 0.12, 0.65);
+        },
+        // Wrong choice — 8-bit error buzz
+        wrong() {
+            beep(200, 0.15, 'square', 0.1, 0);
+            beep(160, 0.2, 'square', 0.08, 0.12);
+        },
+        // Fragment collected — coin/item pickup
+        fragment() {
+            beep(988, 0.08, 'square', 0.1, 0);
+            beep(1319, 0.15, 'square', 0.1, 0.08);
+        },
+        // Victory — full 8-bit victory theme
+        victory() {
+            const notes = [523, 523, 523, 392, 523, 659, 659, 523, 392, 330, 440, 494, 440, 392, 523, 659, 784, 659, 523, 784, 1047];
+            const durs  = [0.1, 0.1, 0.15, 0.1, 0.15, 0.15, 0.3, 0.1, 0.1, 0.1, 0.1, 0.1, 0.15, 0.1, 0.15, 0.15, 0.15, 0.15, 0.1, 0.15, 0.5];
+            let t = 0;
+            notes.forEach((f, i) => {
+                beep(f, durs[i] + 0.05, 'square', 0.09, t);
+                t += durs[i] + 0.02;
+            });
+        },
+        // Choice hover — tiny blip
+        hover() {
+            beep(600, 0.03, 'square', 0.04, 0);
+        }
+    };
+})();
+
+// Get ASCII art for current quest stage
+function getQuestArt(location) {
+    const cleanName = location.replace(/^[^\s]+\s/, ''); // Remove emoji prefix
+    const isAdvanced = currentAge === 'middle' || currentAge === 'high';
+    if (isAdvanced && questAsciiArt[cleanName + ' (alt)']) {
+        return questAsciiArt[cleanName + ' (alt)'];
+    }
+    return questAsciiArt[cleanName] || '';
+}
+
 const questScenarios = {
     elementary: [
         {
@@ -1444,11 +1631,19 @@ function renderQuestStage() {
     // Location
     document.getElementById('quest-location').innerHTML = scenario.location;
 
-    // Narrative
+    // ASCII Art
+    const art = getQuestArt(scenario.location);
+
+    // Narrative with ASCII art
     document.getElementById('quest-narrative').innerHTML = `
-        <div class="scene-text">${scenario.scene}</div>
-        <div class="scene-prompt">${scenario.prompt}</div>
+        <pre class="quest-ascii-art">${art}</pre>
+        <div class="scene-text quest-typewriter" id="quest-scene-text">${scenario.scene}</div>
+        <div class="scene-prompt quest-typewriter" id="quest-scene-prompt">${scenario.prompt}</div>
     `;
+
+    // Play enter sound and typewriter
+    questSFX.enter();
+    setTimeout(() => questSFX.type(scenario.scene.length), 400);
 
     // Shuffle choices
     const letters = ['A', 'B', 'C', 'D'];
@@ -1471,6 +1666,7 @@ function renderQuestStage() {
     // Wire choices
     document.querySelectorAll('.quest-choice').forEach(btn => {
         btn.addEventListener('click', () => handleQuestChoice(btn, scenario));
+        btn.addEventListener('mouseenter', () => questSFX.hover());
     });
 }
 
@@ -1481,6 +1677,7 @@ function handleQuestChoice(btn, scenario) {
 
     if (chosen === scenario.marker) {
         questChoiceMade = true;
+        questSFX.correct();
 
         // Mark correct
         btn.classList.add('correct');
@@ -1492,6 +1689,7 @@ function handleQuestChoice(btn, scenario) {
         const frag = document.getElementById(`frag-${questStage}`);
         frag.classList.remove('dimmed');
         frag.classList.add('collected');
+        questSFX.fragment();
 
         // Result
         resultEl.className = 'quest-result success';
@@ -1516,6 +1714,7 @@ function handleQuestChoice(btn, scenario) {
         });
     } else {
         // Wrong
+        questSFX.wrong();
         btn.classList.add('wrong');
         resultEl.className = 'quest-result fail';
         resultEl.innerHTML = `<div class="quest-result-title">Not quite...</div><p>${scenario.wrong}</p>`;
@@ -1545,6 +1744,7 @@ function showQuestVictory() {
 
     document.getElementById('quest-victory-msg').textContent = msgs[currentAge];
     document.getElementById('quest-victory').classList.remove('hidden');
+    questSFX.victory();
     triggerCelebration();
 }
 

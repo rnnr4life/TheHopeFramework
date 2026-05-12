@@ -1096,15 +1096,36 @@ button.resource-card-action {
 
 /* Scene */
 .quest-scene {
-    background: var(--color-surface);
-    backdrop-filter: var(--glass);
-    -webkit-backdrop-filter: var(--glass);
-    border: 1px solid var(--color-border);
-    border-radius: var(--card-radius);
+    background: #0a0e14;
+    border: 2px solid #33ff33;
+    border-radius: 8px;
     padding: 1.5rem;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 0 20px rgba(51,255,51,0.08), inset 0 0 60px rgba(0,0,0,0.5);
     max-width: 700px;
     margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+/* CRT scanline overlay */
+.quest-scene::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.08) 0px,
+        rgba(0,0,0,0.08) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    pointer-events: none; z-index: 1;
+}
+/* CRT glow on border */
+.quest-scene::after {
+    content: '';
+    position: absolute; inset: -2px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(51,255,51,0.15), 0 0 40px rgba(51,255,51,0.05);
+    pointer-events: none;
 }
 
 .quest-scene-header {
@@ -1113,16 +1134,19 @@ button.resource-card-action {
     align-items: center;
     margin-bottom: 1rem;
     padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid rgba(51,255,51,0.25);
+    position: relative; z-index: 2;
 }
 
 .quest-location {
-    font-family: var(--font-heading);
+    font-family: 'Courier New', Courier, monospace;
     font-size: 1.1rem;
     font-weight: 700;
     display: flex;
     align-items: center;
     gap: 0.4rem;
+    color: #33ff33;
+    text-shadow: 0 0 6px rgba(51,255,51,0.4);
 }
 
 .quest-fragments {
@@ -1157,8 +1181,43 @@ button.resource-card-action {
     font-size: 1rem;
     line-height: 1.8;
     margin-bottom: 1.25rem;
-    color: var(--color-text);
+    color: #33ff33;
+    font-family: 'Courier New', Courier, monospace;
     animation: narrative-in 0.6s ease;
+    position: relative;
+    z-index: 2;
+}
+
+/* ASCII Art */
+.quest-ascii-art {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    color: #33ff33;
+    text-align: center;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: rgba(51,255,51,0.03);
+    border: 1px solid rgba(51,255,51,0.15);
+    border-radius: 4px;
+    white-space: pre;
+    overflow-x: auto;
+    text-shadow: 0 0 8px rgba(51,255,51,0.4);
+    animation: ascii-glow 2s ease-in-out infinite alternate;
+}
+@keyframes ascii-glow {
+    from { text-shadow: 0 0 8px rgba(51,255,51,0.3); }
+    to { text-shadow: 0 0 14px rgba(51,255,51,0.6); }
+}
+
+/* Typewriter effect on text */
+.quest-typewriter {
+    animation: typewriter-fade 0.8s ease;
+}
+@keyframes typewriter-fade {
+    from { opacity: 0; }
+    20% { opacity: 0; }
+    to { opacity: 1; }
 }
 
 @keyframes narrative-in {
@@ -1167,18 +1226,20 @@ button.resource-card-action {
 }
 
 .quest-narrative .scene-text {
-    font-style: italic;
-    color: var(--color-text-light);
+    font-style: normal;
+    color: #88ff88;
     margin-bottom: 0.75rem;
     padding: 0.75rem 1rem;
-    border-left: 3px solid var(--color-border);
-    background: rgba(255,255,255,0.03);
-    border-radius: 0 var(--radius) var(--radius) 0;
+    border-left: 3px solid rgba(51,255,51,0.3);
+    background: rgba(51,255,51,0.03);
+    border-radius: 0 4px 4px 0;
 }
 
 .quest-narrative .scene-prompt {
-    font-weight: 600;
+    font-weight: 700;
     margin-top: 0.75rem;
+    color: #ffff33;
+    text-shadow: 0 0 6px rgba(255,255,51,0.3);
 }
 
 /* Choices */
@@ -1189,16 +1250,16 @@ button.resource-card-action {
 }
 
 .quest-choice {
-    background: var(--color-surface-solid);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
+    background: rgba(51,255,51,0.05);
+    border: 1px solid rgba(51,255,51,0.2);
+    border-radius: 4px;
     padding: 0.9rem 1rem;
     text-align: left;
-    font-family: var(--font-body);
+    font-family: 'Courier New', Courier, monospace;
     font-size: 0.85rem;
     font-weight: 500;
     line-height: 1.5;
-    color: var(--color-text);
+    color: #88ff88;
     cursor: pointer;
     transition: all var(--transition);
     display: flex;
@@ -1208,18 +1269,20 @@ button.resource-card-action {
 
 .quest-choice:hover {
     transform: translateY(-2px);
-    border-color: rgba(255,255,255,0.2);
-    box-shadow: var(--shadow);
-    background: rgba(255,255,255,0.1);
+    border-color: #33ff33;
+    box-shadow: 0 0 12px rgba(51,255,51,0.15);
+    background: rgba(51,255,51,0.12);
+    color: #33ff33;
 }
 
 .quest-choice:active { transform: translateY(0); }
 
 .quest-choice-letter {
     font-weight: 800;
-    font-family: var(--font-heading);
+    font-family: 'Courier New', Courier, monospace;
     font-size: 0.9rem;
-    opacity: 0.4;
+    color: #33ff33;
+    opacity: 0.6;
     flex-shrink: 0;
     width: 1.5rem;
 }
@@ -1239,20 +1302,24 @@ button.resource-card-action {
 .quest-result {
     margin-top: 1rem;
     padding: 0.9rem 1.1rem;
-    border-radius: var(--radius);
+    border-radius: 4px;
     font-size: 0.9rem;
     line-height: 1.6;
     animation: screen-in 0.3s ease;
+    font-family: 'Courier New', Courier, monospace;
+    position: relative; z-index: 2;
 }
 
 .quest-result.success {
-    background: var(--color-agency-bg);
-    border: 1px solid var(--color-agency-border);
+    background: rgba(51,255,51,0.08);
+    border: 1px solid rgba(51,255,51,0.3);
+    color: #88ff88;
 }
 
 .quest-result.fail {
-    background: var(--color-motivation-bg);
-    border: 1px solid var(--color-motivation-border);
+    background: rgba(255,50,50,0.08);
+    border: 1px solid rgba(255,50,50,0.3);
+    color: #ff8888;
 }
 
 .quest-result-title {
