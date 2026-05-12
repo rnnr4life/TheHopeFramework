@@ -189,6 +189,71 @@ h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
    AGE SELECTOR
    ================================================ */
 .welcome-hero { margin-bottom: 1rem; }
+
+/* HOPE Wheel Logo */
+.hope-wheel-logo {
+    width: 240px; height: 240px;
+    margin: 0 auto 0.75rem;
+    animation: wheel-fade-in 1s ease;
+}
+@keyframes wheel-fade-in {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+.hope-wheel-svg { width: 100%; height: 100%; }
+
+.wheel-ring { transition: stroke 0.5s ease; }
+.hope-wheel-logo:hover .wheel-ring { stroke: rgba(255,255,255,0.2); }
+
+.wheel-arc {
+    stroke-dasharray: 245;
+    stroke-dashoffset: 245;
+    animation: wheel-arc-draw 1.5s ease forwards;
+}
+.arc-motivation { animation-delay: 0.2s; }
+.arc-agency { animation-delay: 0.5s; }
+.arc-plans { animation-delay: 0.8s; }
+.arc-belief { animation-delay: 1.1s; }
+@keyframes wheel-arc-draw {
+    to { stroke-dashoffset: 0; }
+}
+
+.wheel-center {
+    animation: wheel-center-pulse 4s ease-in-out infinite;
+}
+@keyframes wheel-center-pulse {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(52,211,153,0.1)); }
+    50% { filter: drop-shadow(0 0 16px rgba(52,211,153,0.25)); }
+}
+
+.wheel-center-title {
+    font-family: var(--font-heading); font-size: 18px; font-weight: 800;
+    fill: var(--color-text); letter-spacing: 0.05em;
+}
+.wheel-center-line {
+    font-family: var(--font-body); font-size: 10.5px; fill: var(--color-text-light);
+}
+.wheel-center-line tspan { fill: var(--color-primary); }
+
+.wheel-label {
+    font-family: var(--font-heading); font-size: 15px; font-weight: 800;
+}
+.wheel-sublabel {
+    font-family: var(--font-body); font-size: 9.5px; fill: var(--color-text-light);
+}
+.wheel-label-motivation { fill: #ff6b6b; }
+.wheel-label-agency { fill: #34d399; }
+.wheel-label-plans { fill: #38bdf8; }
+.wheel-label-belief { fill: #a855f7; }
+
+/* Hover glow on labels */
+.hope-wheel-logo:hover .wheel-label-motivation { filter: drop-shadow(0 0 6px rgba(255,107,107,0.5)); }
+.hope-wheel-logo:hover .wheel-label-agency { filter: drop-shadow(0 0 6px rgba(52,211,153,0.5)); }
+.hope-wheel-logo:hover .wheel-label-plans { filter: drop-shadow(0 0 6px rgba(56,189,248,0.5)); }
+.hope-wheel-logo:hover .wheel-label-belief { filter: drop-shadow(0 0 6px rgba(168,85,247,0.5)); }
+
+/* Responsive sizing */
+@media (max-width: 500px) { .hope-wheel-logo { width: 200px; height: 200px; } }
 .framework-about {
     max-width: 560px; margin: 1.5rem auto 0; text-align: left;
     background: var(--color-surface); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
