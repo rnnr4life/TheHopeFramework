@@ -721,7 +721,113 @@ h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
     .teacher-extend-grid { grid-template-columns: 1fr; }
     .teacher-heroes-group { padding: 1rem; }
     .teacher-grade-guide { padding: 1rem; }
+    .hope-rubric { font-size: 0.72rem; }
+    .hope-rubric th, .hope-rubric td { padding: 0.4rem; }
+    .teacher-grade-nav { flex-wrap: wrap; }
 }
+
+/* Collapsible Sections */
+[data-toggle] {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+[data-toggle]:hover { opacity: 0.85; }
+.collapse-icon {
+    font-size: 0.8em;
+    transition: transform 0.25s ease;
+    margin-left: 0.5rem;
+    opacity: 0.5;
+}
+[data-collapsible].collapsed .collapse-icon {
+    transform: rotate(-90deg);
+}
+[data-collapsible].collapsed > .collapsible-body {
+    display: none;
+}
+
+/* Grade-Level Quick Nav */
+.teacher-grade-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(0,0,0,0.15);
+    border-radius: var(--card-radius);
+    border: 1px solid var(--color-border);
+    margin-bottom: 1.5rem;
+    position: sticky;
+    top: 76px;
+    z-index: 90;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+.teacher-grade-nav-label {
+    font-size: 0.82rem;
+    color: var(--color-text-light);
+    font-weight: 600;
+    white-space: nowrap;
+}
+.teacher-grade-nav-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.teacher-grade-nav-btn:hover {
+    background: rgba(255,255,255,0.12);
+    border-color: var(--color-text-light);
+}
+.teacher-grade-nav-btn.active {
+    background: var(--color-plans);
+    color: #1a1a2e;
+    border-color: var(--color-plans);
+}
+
+/* HOPE Rubric Table */
+.hope-rubric {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    margin-top: 0.5rem;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.hope-rubric thead {
+    background: rgba(0,0,0,0.2);
+}
+.hope-rubric th {
+    text-align: left;
+    padding: 0.6rem 0.75rem;
+    font-weight: 700;
+    font-size: 0.78rem;
+    color: var(--color-text-light);
+    border-bottom: 2px solid var(--color-border);
+}
+.hope-rubric td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+}
+.hope-rubric tbody tr:last-child td { border-bottom: none; }
+.hope-rubric tbody tr:hover { background: rgba(255,255,255,0.03); }
+.rubric-marker {
+    font-weight: 700;
+    white-space: nowrap;
+}
+tr[data-marker="motivation"] .rubric-marker { color: var(--color-motivation); }
+tr[data-marker="belief"] .rubric-marker { color: var(--color-belief); }
+tr[data-marker="plans"] .rubric-marker { color: var(--color-plans); }
+tr[data-marker="agency"] .rubric-marker { color: var(--color-agency); }
 
 /* Grade-Level Guides */
 .teacher-grade-guide {

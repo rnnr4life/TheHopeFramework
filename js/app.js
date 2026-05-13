@@ -545,6 +545,41 @@ document.getElementById('classroom-submissions-list').addEventListener('click', 
 // Init classroom dashboard when teacher page shows
 setTimeout(renderClassroomDashboard, 100);
 
+// ===== Collapsible Teacher Sections =====
+document.querySelectorAll('[data-toggle]').forEach(toggle => {
+    toggle.addEventListener('click', () => {
+        const section = toggle.closest('[data-collapsible]');
+        if (section) section.classList.toggle('collapsed');
+    });
+});
+
+// ===== Grade-Level Quick Nav =====
+document.querySelectorAll('.teacher-grade-nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const target = btn.dataset.target;
+        const el = document.getElementById('grade-' + target);
+        if (!el) return;
+
+        // Expand the parent Grade-Level Guides section if collapsed
+        const parentSection = el.closest('.teacher-hub-section[data-collapsible]');
+        if (parentSection && parentSection.classList.contains('collapsed')) {
+            parentSection.classList.remove('collapsed');
+        }
+
+        // Expand the target grade guide if collapsed
+        if (el.classList.contains('collapsed')) {
+            el.classList.remove('collapsed');
+        }
+
+        // Scroll to it
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Highlight active nav button
+        document.querySelectorAll('.teacher-grade-nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    });
+});
+
 // Student: join classroom modal
 document.getElementById('btn-close-classroom-modal').addEventListener('click', () => {
     document.getElementById('classroom-modal').classList.add('hidden');

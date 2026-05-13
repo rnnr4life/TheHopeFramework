@@ -359,8 +359,9 @@
             </div>
 
             <!-- ① Your Classroom — First action step -->
-            <div class="teacher-hub-section">
-                <h4 class="teacher-hub-section-label">🏫 Step 1: Set Up Your Classroom</h4>
+            <div class="teacher-hub-section collapsed" data-collapsible>
+                <h4 class="teacher-hub-section-label" data-toggle>🏫 Step 1: Set Up Your Classroom <span class="collapse-icon">▾</span></h4>
+                <div class="collapsible-body">
                 <p class="teacher-section-desc">Create a private classroom space. Students join with your code, publish their work, and review classmates' submissions. You control everything — only you can manage and remove content.</p>
 
                 <div id="classroom-setup" class="classroom-setup">
@@ -406,16 +407,27 @@
                         </div>
                     </div>
                 </div>
+                </div>
             </div>
 
+            <!-- Grade-Level Quick Nav -->
+            <nav class="teacher-grade-nav" id="teacher-grade-nav">
+                <span class="teacher-grade-nav-label">Jump to:</span>
+                <button class="teacher-grade-nav-btn" data-target="elementary">🌻 Elementary</button>
+                <button class="teacher-grade-nav-btn" data-target="middle">🧭 Middle</button>
+                <button class="teacher-grade-nav-btn" data-target="high">🔬 High School</button>
+            </nav>
+
             <!-- ② Grade-Level Guides — Activities, Heroes & Literature per grade -->
-            <div class="teacher-hub-section">
-                <h4 class="teacher-hub-section-label">📚 Step 2: Grade-Level Guides</h4>
+            <div class="teacher-hub-section collapsed" data-collapsible>
+                <h4 class="teacher-hub-section-label" data-toggle>📚 Step 2: Grade-Level Guides <span class="collapse-icon">▾</span></h4>
+                <div class="collapsible-body">
                 <p class="teacher-section-desc">Everything organized by grade level: student activities to assign, real youth climate heroes as examples, and literature that pairs with the HOPE Framework.</p>
 
                 <!-- Elementary (K–5) -->
-                <div class="teacher-grade-guide" data-age="elementary">
-                    <h5 class="teacher-grade-guide-label">🌻 Elementary (Grades K–5)</h5>
+                <div class="teacher-grade-guide collapsed" data-age="elementary" id="grade-elementary" data-collapsible>
+                    <h5 class="teacher-grade-guide-label" data-toggle>🌻 Elementary (Grades K–5) <span class="collapse-icon">▾</span></h5>
+                    <div class="collapsible-body">
 
                     <div class="teacher-grade-subsection">
                         <h6 class="teacher-grade-sub-label">🎨 Assign These Activities</h6>
@@ -471,11 +483,54 @@
                             <li><strong>The Watcher</strong> by Jeanette Winter <span class="teacher-heroes-book-desc">— Jane Goodall's story is a perfect HOPE journey: motivation, belief, plans, and agency.</span></li>
                         </ul>
                     </div>
+
+                    <div class="teacher-grade-subsection">
+                        <h6 class="teacher-grade-sub-label">📊 HOPE Rubric — Elementary</h6>
+                        <p class="teacher-grade-sub-desc">Use this rubric to assess student work. Each HOPE marker is scored on a 3-point scale.</p>
+                        <table class="hope-rubric">
+                            <thead>
+                                <tr>
+                                    <th>Marker</th>
+                                    <th>⭐ Emerging (1)</th>
+                                    <th>⭐⭐ Developing (2)</th>
+                                    <th>⭐⭐⭐ Strong (3)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-marker="motivation">
+                                    <td class="rubric-marker">🔥 Motivation</td>
+                                    <td>Names something in nature they care about</td>
+                                    <td>Explains why they care and how it makes them feel</td>
+                                    <td>Connects their feelings to wanting to help or change something</td>
+                                </tr>
+                                <tr data-marker="belief">
+                                    <td class="rubric-marker">✨ Belief</td>
+                                    <td>Says things "can" get better</td>
+                                    <td>Gives an example of something that got better</td>
+                                    <td>Explains why they believe people can make a difference</td>
+                                </tr>
+                                <tr data-marker="plans">
+                                    <td class="rubric-marker">🗺️ Plans</td>
+                                    <td>Names one thing they could do</td>
+                                    <td>Describes steps they would take</td>
+                                    <td>Creates a simple plan with who, what, and when</td>
+                                </tr>
+                                <tr data-marker="agency">
+                                    <td class="rubric-marker">💪 Agency</td>
+                                    <td>Says "I can help"</td>
+                                    <td>Describes something they already did or will do</td>
+                                    <td>Shows ownership — explains their role and why it matters</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
                 </div>
 
                 <!-- Middle School (6–8) -->
-                <div class="teacher-grade-guide" data-age="middle">
-                    <h5 class="teacher-grade-guide-label">🧭 Middle School (Grades 6–8)</h5>
+                <div class="teacher-grade-guide collapsed" data-age="middle" id="grade-middle" data-collapsible>
+                    <h5 class="teacher-grade-guide-label" data-toggle>🧭 Middle School (Grades 6–8) <span class="collapse-icon">▾</span></h5>
+                    <div class="collapsible-body">
 
                     <div class="teacher-grade-subsection">
                         <h6 class="teacher-grade-sub-label">🎨 Assign These Activities</h6>
@@ -548,11 +603,54 @@
                             <li><strong>No One Is Too Small to Make a Difference</strong> by Greta Thunberg <span class="teacher-heroes-book-desc">— Greta's speeches collected. Great for close reading and HOPE marker analysis.</span></li>
                         </ul>
                     </div>
+
+                    <div class="teacher-grade-subsection">
+                        <h6 class="teacher-grade-sub-label">📊 HOPE Rubric — Middle School</h6>
+                        <p class="teacher-grade-sub-desc">Use this rubric to assess student work. Each HOPE marker is scored on a 3-point scale.</p>
+                        <table class="hope-rubric">
+                            <thead>
+                                <tr>
+                                    <th>Marker</th>
+                                    <th>⭐ Emerging (1)</th>
+                                    <th>⭐⭐ Developing (2)</th>
+                                    <th>⭐⭐⭐ Strong (3)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-marker="motivation">
+                                    <td class="rubric-marker">🔥 Motivation</td>
+                                    <td>Identifies an environmental issue that concerns them</td>
+                                    <td>Explains how the issue personally affects them or their community</td>
+                                    <td>Connects personal eco-grief to a broader desire for systemic change</td>
+                                </tr>
+                                <tr data-marker="belief">
+                                    <td class="rubric-marker">✨ Belief</td>
+                                    <td>States that change is possible</td>
+                                    <td>References a real example of environmental progress</td>
+                                    <td>Analyzes why specific actions succeeded and applies that reasoning</td>
+                                </tr>
+                                <tr data-marker="plans">
+                                    <td class="rubric-marker">🗺️ Plans</td>
+                                    <td>Lists actions that could help</td>
+                                    <td>Outlines a multi-step plan with specific actions</td>
+                                    <td>Creates a realistic plan that considers obstacles and resources</td>
+                                </tr>
+                                <tr data-marker="agency">
+                                    <td class="rubric-marker">💪 Agency</td>
+                                    <td>Expresses willingness to act</td>
+                                    <td>Describes concrete actions they have taken or will take</td>
+                                    <td>Demonstrates leadership — organizes others, measures impact, adapts approach</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
                 </div>
 
                 <!-- High School (9–12) -->
-                <div class="teacher-grade-guide" data-age="high">
-                    <h5 class="teacher-grade-guide-label">🔬 High School (Grades 9–12)</h5>
+                <div class="teacher-grade-guide collapsed" data-age="high" id="grade-high" data-collapsible>
+                    <h5 class="teacher-grade-guide-label" data-toggle>🔬 High School (Grades 9–12) <span class="collapse-icon">▾</span></h5>
+                    <div class="collapsible-body">
 
                     <div class="teacher-grade-subsection">
                         <h6 class="teacher-grade-sub-label">🎨 Assign These Activities</h6>
@@ -633,12 +731,56 @@
                             <li><strong>Silent Spring</strong> by Rachel Carson <span class="teacher-heroes-book-desc">— The book that launched the environmental movement. A historical anchor for motivation and belief.</span></li>
                         </ul>
                     </div>
+
+                    <div class="teacher-grade-subsection">
+                        <h6 class="teacher-grade-sub-label">📊 HOPE Rubric — High School</h6>
+                        <p class="teacher-grade-sub-desc">Use this rubric to assess student work. Each HOPE marker is scored on a 3-point scale.</p>
+                        <table class="hope-rubric">
+                            <thead>
+                                <tr>
+                                    <th>Marker</th>
+                                    <th>⭐ Emerging (1)</th>
+                                    <th>⭐⭐ Developing (2)</th>
+                                    <th>⭐⭐⭐ Strong (3)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-marker="motivation">
+                                    <td class="rubric-marker">🔥 Motivation</td>
+                                    <td>Acknowledges eco-grief or environmental concern</td>
+                                    <td>Analyzes the relationship between personal experience, systemic injustice, and the desire for change</td>
+                                    <td>Articulates a nuanced understanding of eco-grief as both individual and collective, connecting it to intersectional justice</td>
+                                </tr>
+                                <tr data-marker="belief">
+                                    <td class="rubric-marker">✨ Belief</td>
+                                    <td>Identifies reasons for optimism</td>
+                                    <td>Evaluates evidence for and against the possibility of meaningful change</td>
+                                    <td>Synthesizes multiple perspectives to build a complex, evidence-based argument for belief in change</td>
+                                </tr>
+                                <tr data-marker="plans">
+                                    <td class="rubric-marker">🗺️ Plans</td>
+                                    <td>Proposes actions or strategies</td>
+                                    <td>Develops a detailed plan addressing root causes, stakeholders, and potential barriers</td>
+                                    <td>Designs a strategic, multi-phase plan that accounts for power dynamics, coalition building, and measurable outcomes</td>
+                                </tr>
+                                <tr data-marker="agency">
+                                    <td class="rubric-marker">💪 Agency</td>
+                                    <td>Expresses personal commitment to action</td>
+                                    <td>Demonstrates agency through leadership, organizing, or sustained engagement</td>
+                                    <td>Models transformative agency — challenges systems, amplifies marginalized voices, and reflects critically on their own positionality</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+                </div>
                 </div>
             </div>
 
             <!-- ③ Lesson Planning -->
-            <div class="teacher-hub-section">
-                <h4 class="teacher-hub-section-label">📖 Step 3: Lesson Planning</h4>
+            <div class="teacher-hub-section collapsed" data-collapsible>
+                <h4 class="teacher-hub-section-label" data-toggle>📖 Step 3: Lesson Planning <span class="collapse-icon">▾</span></h4>
+                <div class="collapsible-body">
                 <div class="teacher-hub-grid teacher-hub-grid--3">
                     <div class="teacher-hub-card">
                         <div class="teacher-hub-card-icon">📋</div>
@@ -659,11 +801,13 @@
                         <button class="btn btn-small" id="btn-teacher-hub-guided">Open</button>
                     </div>
                 </div>
+                </div>
             </div>
 
             <!-- ④ Resources -->
-            <div class="teacher-hub-section">
-                <h4 class="teacher-hub-section-label">📄 Resources</h4>
+            <div class="teacher-hub-section collapsed" data-collapsible>
+                <h4 class="teacher-hub-section-label" data-toggle>📄 Resources <span class="collapse-icon">▾</span></h4>
+                <div class="collapsible-body">
                 <div class="teacher-hub-grid teacher-hub-grid--2">
                     <div class="teacher-hub-card">
                         <div class="teacher-hub-card-icon">📝</div>
@@ -677,6 +821,7 @@
                         <p>Read Dr. Colleen Redmond's published article in <em>Climate Literacy in Education</em>.</p>
                         <a href="https://doi.org/10.24926/cle.v2i1.6231" target="_blank" rel="noopener noreferrer" class="btn btn-small">Read Paper</a>
                     </div>
+                </div>
                 </div>
             </div>
         </div>
