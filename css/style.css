@@ -651,8 +651,75 @@ h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
 .teacher-extend-app-link {
     margin-top: 0.25rem;
 }
+
+/* Heroes Age Groups */
+.teacher-heroes-group {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border-radius: var(--card-radius);
+    background: rgba(0,0,0,0.1);
+    border: 1px solid var(--color-border);
+}
+.teacher-heroes-group:last-child { margin-bottom: 0; }
+.teacher-heroes-group-label {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+}
+.teacher-heroes-group[data-age="elementary"] .teacher-heroes-group-label { color: #f59e0b; }
+.teacher-heroes-group[data-age="middle"] .teacher-heroes-group-label { color: var(--color-plans); }
+.teacher-heroes-group[data-age="high"] .teacher-heroes-group-label { color: var(--color-belief); }
+.teacher-heroes-group-desc {
+    font-size: 0.85rem;
+    color: var(--color-text-light);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+/* Book Lists */
+.teacher-heroes-books {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+.teacher-heroes-books-label {
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+.teacher-heroes-book-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+.teacher-heroes-book-list li {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    padding-left: 1.4rem;
+    position: relative;
+}
+.teacher-heroes-book-list li::before {
+    content: "📖";
+    position: absolute;
+    left: 0;
+    font-size: 0.8rem;
+}
+.teacher-heroes-book-list li strong {
+    color: var(--color-text);
+}
+.teacher-heroes-book-desc {
+    color: var(--color-text-light);
+    font-size: 0.82rem;
+}
+
 @media (max-width: 650px) {
     .teacher-extend-grid { grid-template-columns: 1fr; }
+    .teacher-heroes-group { padding: 1rem; }
 }
 
 
