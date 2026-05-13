@@ -215,6 +215,11 @@
                 </div>
             </div>
 
+            <div class="hope-quote-rotator" id="hope-quote-rotator">
+                <p class="hope-quote-text" id="hope-quote-text"></p>
+                <p class="hope-quote-cite" id="hope-quote-cite"></p>
+            </div>
+
             <div class="age-picker">
                 <p class="age-picker-label">I'm in...</p>
                 <div class="age-options">
@@ -410,24 +415,28 @@
                 </div>
             </div>
 
-            <!-- Grade-Level Quick Nav -->
-            <nav class="teacher-grade-nav" id="teacher-grade-nav">
-                <span class="teacher-grade-nav-label">Jump to:</span>
-                <button class="teacher-grade-nav-btn" data-target="elementary">🌻 Elementary</button>
-                <button class="teacher-grade-nav-btn" data-target="middle">🧭 Middle</button>
-                <button class="teacher-grade-nav-btn" data-target="high">🔬 High School</button>
-            </nav>
-
             <!-- ② Grade-Level Guides — Activities, Heroes & Literature per grade -->
             <div class="teacher-hub-section collapsed" data-collapsible>
                 <h4 class="teacher-hub-section-label" data-toggle>📚 Step 2: Grade-Level Guides <span class="collapse-icon">▾</span></h4>
                 <div class="collapsible-body">
                 <p class="teacher-section-desc">Everything organized by grade level: student activities to assign, real youth climate heroes as examples, and literature that pairs with the HOPE Framework.</p>
 
+                <!-- Grade-Level Quick Nav -->
+                <nav class="teacher-grade-nav" id="teacher-grade-nav">
+                    <span class="teacher-grade-nav-label">Jump to:</span>
+                    <button class="teacher-grade-nav-btn" data-target="elementary">🌻 Elementary</button>
+                    <button class="teacher-grade-nav-btn" data-target="middle">🧭 Middle</button>
+                    <button class="teacher-grade-nav-btn" data-target="high">🔬 High School</button>
+                </nav>
+
                 <!-- Elementary (K–5) -->
                 <div class="teacher-grade-guide collapsed" data-age="elementary" id="grade-elementary" data-collapsible>
                     <h5 class="teacher-grade-guide-label" data-toggle>🌻 Elementary (Grades K–5) <span class="collapse-icon">▾</span></h5>
                     <div class="collapsible-body">
+
+                    <div class="teacher-grade-intro">
+                        <p>Young children already notice changes in their world — a dead tree, trash in a creek, a hot day that doesn’t feel right. They feel it, even if they can’t name it. This section gives you simple, creative activities that turn those feelings into something productive. Students will reflect on nature through writing and art, meet real kids who took action at their age, and explore picture books that model all four HOPE markers. The goal: help them see that caring about the planet is the first step, not the last.</p>
+                    </div>
 
                     <div class="teacher-grade-subsection">
                         <h6 class="teacher-grade-sub-label">🎨 Assign These Activities</h6>
@@ -531,6 +540,10 @@
                 <div class="teacher-grade-guide collapsed" data-age="middle" id="grade-middle" data-collapsible>
                     <h5 class="teacher-grade-guide-label" data-toggle>🧭 Middle School (Grades 6–8) <span class="collapse-icon">▾</span></h5>
                     <div class="collapsible-body">
+
+                    <div class="teacher-grade-intro">
+                        <p>Middle schoolers are starting to understand systems — why things are unfair, who has power, and what happens when nobody acts. They’re also old enough to feel real eco-grief but not always sure what to do with it. This section gives you activities that channel that energy: personal reflection, creative writing, and poetry that connects emotions to action. They’ll study teen activists who turned frustration into movements, and read books where young characters do the same. The goal: show them that their anger and sadness are valid — and that those feelings can fuel real change.</p>
+                    </div>
 
                     <div class="teacher-grade-subsection">
                         <h6 class="teacher-grade-sub-label">🎨 Assign These Activities</h6>
@@ -651,6 +664,10 @@
                 <div class="teacher-grade-guide collapsed" data-age="high" id="grade-high" data-collapsible>
                     <h5 class="teacher-grade-guide-label" data-toggle>🔬 High School (Grades 9–12) <span class="collapse-icon">▾</span></h5>
                     <div class="collapsible-body">
+
+                    <div class="teacher-grade-intro">
+                        <p>High school students are ready for complexity. They can analyze power structures, evaluate evidence, and grapple with the tension between systemic problems and individual agency. This section gives you activities that push beyond personal reflection into critical analysis — essays, art concepts, and narratives that examine who benefits, who suffers, and what real action looks like. They’ll study activists who challenged governments and institutions, and read texts that don’t shy away from hard truths. The goal: move them from “the world is broken” to “here’s how I can be part of fixing it” — with the critical thinking to back it up.</p>
+                    </div>
 
                     <div class="teacher-grade-subsection">
                         <h6 class="teacher-grade-sub-label">🎨 Assign These Activities</h6>
@@ -840,6 +857,7 @@
                         Discover hope in the stories we read. Use four markers to find
                         how authors show us that change is possible and that we can make a difference.
                     </p>
+                    <div class="welcome-message hidden" id="welcome-message"></div>
                 </div>
                 <div class="welcome-markers">
                     <div class="welcome-marker-pill" data-marker="motivation"><span>🔥</span> Motivation</div>

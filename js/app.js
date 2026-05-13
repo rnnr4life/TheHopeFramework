@@ -31,6 +31,7 @@ const ageContent = {
         reflectBtn: 'Think About It',
         exportBtn: 'Print My Work',
         welcomeHint: 'Learn the Hope Powers → Practice matching → Read a story!',
+        welcomeMessage: 'Hey there! 🌟 Have you ever felt sad about something happening to the Earth — like animals losing their homes, or too much trash in the ocean? That\'s actually a superpower. It means you care! Today you\'re going to learn four special Hope Powers that help you find hope in the stories you read. You\'ll watch an example, practice spotting the powers, and then try it yourself. Ready?',
     },
     middle: {
         welcomeTitle: 'The HOPE Framework',
@@ -61,6 +62,7 @@ const ageContent = {
         reflectBtn: 'Reflect',
         exportBtn: 'Print My Work',
         welcomeHint: 'Learn the markers → Practice matching → Analyze a story',
+        welcomeMessage: 'You\'ve probably noticed things about the environment that bother you — wildfires, pollution, species disappearing. That feeling? It\'s called eco-grief, and it\'s completely normal. The problem is when it makes you feel like nothing can be done. That\'s where the HOPE Framework comes in. You\'re going to learn four markers that show how stories move from grief to action. You\'ll watch a guided example, practice identifying the markers, and then analyze a real story on your own. By the end, you\'ll have a new way to read — and a new way to think about what\'s possible.',
     },
     high: {
         welcomeTitle: 'The HOPE Framework',
@@ -91,8 +93,52 @@ const ageContent = {
         reflectBtn: 'Reflect',
         exportBtn: 'Export',
         welcomeHint: 'Learn the markers → Practice identification → Analyze a text',
+        welcomeMessage: 'Climate change isn\'t just a scientific issue — it\'s an emotional one. Eco-grief, climate anxiety, solastalgia — these are real psychological responses to environmental destruction, and research shows they\'re rising fast among young people. The HOPE Framework, developed by Dr. Colleen Redmond, gives you a structured lens for analyzing how narratives move readers from despair to agency. You\'ll study four textual markers, practice identifying them, and apply the framework to a full text. This isn\'t about blind optimism. It\'s about understanding how hope functions as a catalyst for action — and learning to find it in the stories that matter.',
     }
 };
+
+// ===== Rotating Hope Quotes =====
+const hopeQuotes = [
+    { text: "A woman in Gambia started recycling plastic bags into purses — and changed her entire community.", cite: "One Plastic Bag by Miranda Paul" },
+    { text: "A couple transformed 200 acres of dead, barren farmland into a thriving ecosystem teeming with life.", cite: "The Biggest Little Farm (2018 documentary)" },
+    { text: "Jane Goodall began her life's work with nothing but curiosity and a notebook — and changed how we understand our closest relatives.", cite: "The Watcher by Jeanette Winter" },
+    { text: "Project Drawdown identified over 80 existing solutions that can reverse global warming — and most of them are already working.", cite: "Project Drawdown (drawdown.org)" },
+    { text: "A 9-year-old girl in India sued her own government for failing to protect the environment — and the world listened.", cite: "Ridhima Pandey, UN Climate Complaint (2019)" },
+    { text: "Regenerative farming can pull carbon out of the atmosphere and put it back in the soil — turning farmland into a climate solution.", cite: "Kiss the Ground (Netflix, 2020)" },
+    { text: "Jane Goodall's Roots & Shoots program has young people in over 50 countries taking action in their own communities right now.", cite: "Roots & Shoots (rootsandshoots.org)" },
+    { text: "When kids in Florida discovered endangered owls were in danger, they organized and stopped a construction project.", cite: "Hoot by Carl Hiaasen" },
+    { text: "Indigenous communities have been practicing sustainable land management for thousands of years — science is finally catching up.", cite: "Braiding Sweetgrass by Robin Wall Kimmerer" },
+    { text: "A filmmaker asked one question — 'What could 2040 look like if we used the best solutions we already have?' The answer was hopeful.", cite: "2040 (2019 documentary)" },
+    { text: "NASA satellites track environmental recovery in real time — and in many places, forests are growing back.", cite: "NASA Climate Change (climate.nasa.gov)" },
+    { text: "One photographer's images of retreating glaciers moved millions of people to care about ice they'd never seen.", cite: "Chasing Ice (2012 documentary)" },
+];
+
+let hopeQuoteIndex = 0;
+function rotateHopeQuote() {
+    const textEl = document.getElementById('hope-quote-text');
+    const citeEl = document.getElementById('hope-quote-cite');
+    const wrapper = document.getElementById('hope-quote-rotator');
+    if (!textEl || !citeEl || !wrapper) return;
+
+    wrapper.classList.add('fading');
+    setTimeout(() => {
+        const q = hopeQuotes[hopeQuoteIndex];
+        textEl.textContent = '"' + q.text + '"';
+        citeEl.textContent = '— ' + q.cite;
+        hopeQuoteIndex = (hopeQuoteIndex + 1) % hopeQuotes.length;
+        wrapper.classList.remove('fading');
+    }, 500);
+}
+
+// Shuffle on load, show first, rotate every 8 seconds
+(function initHopeQuotes() {
+    for (let i = hopeQuotes.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [hopeQuotes[i], hopeQuotes[j]] = [hopeQuotes[j], hopeQuotes[i]];
+    }
+    rotateHopeQuote();
+    setInterval(rotateHopeQuote, 8000);
+})();
 
 function setAge(age) {
     currentAge = age;
@@ -109,6 +155,11 @@ function setAge(age) {
     document.getElementById('welcome-title').textContent = c.welcomeTitle;
     document.getElementById('welcome-subtitle').textContent = c.welcomeSubtitle;
     document.getElementById('welcome-desc').textContent = c.welcomeDesc;
+    const msgEl = document.getElementById('welcome-message');
+    if (msgEl && c.welcomeMessage) {
+        msgEl.textContent = c.welcomeMessage;
+        msgEl.classList.remove('hidden');
+    }
     document.getElementById('btn-start-text').textContent = c.btnStart;
     document.getElementById('learn-title').textContent = c.learnTitle;
     document.getElementById('learn-intro').textContent = c.learnIntro;
