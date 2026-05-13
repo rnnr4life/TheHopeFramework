@@ -190,70 +190,138 @@ h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
    ================================================ */
 .welcome-hero { margin-bottom: 1rem; }
 
-/* HOPE Wheel Logo */
+/* HOPE Wheel Logo — Premium */
 .hope-wheel-logo {
-    width: 240px; height: 240px;
-    margin: 0 auto 0.75rem;
-    animation: wheel-fade-in 1s ease;
+    width: 280px; height: 280px;
+    margin: 0 auto 0.5rem;
+    animation: wheel-fade-in 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
+.hope-wheel-logo:hover { transform: scale(1.04); }
 @keyframes wheel-fade-in {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
+    from { opacity: 0; transform: scale(0.85) rotate(-8deg); }
+    to { opacity: 1; transform: scale(1) rotate(0deg); }
 }
-.hope-wheel-svg { width: 100%; height: 100%; }
+.hope-wheel-svg { width: 100%; height: 100%; overflow: visible; }
 
-.wheel-ring { transition: stroke 0.5s ease; }
-.hope-wheel-logo:hover .wheel-ring { stroke: rgba(255,255,255,0.2); }
+/* Ambient glow behind wheel */
+.wheel-ambient {
+    animation: ambient-breathe 6s ease-in-out infinite;
+}
+@keyframes ambient-breathe {
+    0%, 100% { stroke-opacity: 0.04; stroke-width: 40; }
+    50% { stroke-opacity: 0.08; stroke-width: 50; }
+}
 
+/* Wedge fills — fade in staggered */
+.wheel-wedge {
+    opacity: 0;
+    animation: wedge-in 0.8s ease forwards;
+    transition: opacity 0.3s ease;
+}
+.wedge-mot { animation-delay: 0.3s; }
+.wedge-age { animation-delay: 0.5s; }
+.wedge-pln { animation-delay: 0.7s; }
+.wedge-bel { animation-delay: 0.9s; }
+@keyframes wedge-in { to { opacity: 1; } }
+.hope-wheel-logo:hover .wedge-mot { fill-opacity: 0.35; }
+.hope-wheel-logo:hover .wedge-age { fill-opacity: 0.35; }
+.hope-wheel-logo:hover .wedge-pln { fill-opacity: 0.35; }
+.hope-wheel-logo:hover .wedge-bel { fill-opacity: 0.35; }
+
+/* Outer ring */
+.wheel-ring-outer { transition: stroke 0.5s ease; }
+.hope-wheel-logo:hover .wheel-ring-outer { stroke: rgba(255,255,255,0.25); }
+
+/* Arc strokes — draw in */
 .wheel-arc {
-    stroke-dasharray: 245;
-    stroke-dashoffset: 245;
-    animation: wheel-arc-draw 1.5s ease forwards;
+    stroke-dasharray: 272;
+    stroke-dashoffset: 272;
+    animation: arc-draw 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
-.arc-motivation { animation-delay: 0.2s; }
-.arc-agency { animation-delay: 0.5s; }
-.arc-plans { animation-delay: 0.8s; }
-.arc-belief { animation-delay: 1.1s; }
-@keyframes wheel-arc-draw {
-    to { stroke-dashoffset: 0; }
+.arc-motivation { animation-delay: 0.4s; }
+.arc-agency { animation-delay: 0.7s; }
+.arc-plans { animation-delay: 1.0s; }
+.arc-belief { animation-delay: 1.3s; }
+@keyframes arc-draw { to { stroke-dashoffset: 0; } }
+
+/* Orbiting dots */
+.wheel-dot {
+    animation: orbit 12s linear infinite;
+    transform-origin: 200px 200px;
+}
+.dot-1 { animation-delay: 0s; }
+.dot-2 { animation-delay: -3s; }
+.dot-3 { animation-delay: -6s; }
+.dot-4 { animation-delay: -9s; }
+@keyframes orbit {
+    from { transform: rotate(0deg) translateX(172px) rotate(0deg); }
+    to { transform: rotate(360deg) translateX(172px) rotate(-360deg); }
 }
 
+/* Inner ring pulse */
+.wheel-inner-ring {
+    animation: inner-ring-pulse 4s ease-in-out infinite;
+}
+@keyframes inner-ring-pulse {
+    0%, 100% { stroke-opacity: 0.08; r: 84; }
+    50% { stroke-opacity: 0.18; r: 86; }
+}
+
+/* Center frosted glass */
 .wheel-center {
-    animation: wheel-center-pulse 4s ease-in-out infinite;
+    animation: center-glow 5s ease-in-out infinite;
 }
-@keyframes wheel-center-pulse {
-    0%, 100% { filter: drop-shadow(0 0 6px rgba(52,211,153,0.1)); }
-    50% { filter: drop-shadow(0 0 16px rgba(52,211,153,0.25)); }
+@keyframes center-glow {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(52,211,153,0.08)); }
+    50% { filter: drop-shadow(0 0 20px rgba(52,211,153,0.2)); }
 }
 
+/* Center text */
 .wheel-center-title {
-    font-family: var(--font-heading); font-size: 18px; font-weight: 800;
-    fill: var(--color-text); letter-spacing: 0.05em;
+    font-family: var(--font-heading); font-size: 22px; font-weight: 800;
+    fill: var(--color-text); letter-spacing: 0.12em;
+    opacity: 0; animation: text-reveal 0.6s ease forwards 1.4s;
 }
-.wheel-center-line {
-    font-family: var(--font-body); font-size: 10.5px; fill: var(--color-text-light);
+.wheel-center-sub {
+    font-family: var(--font-body); font-size: 10px; fill: rgba(148,163,184,0.9);
+    letter-spacing: 0.02em;
+    opacity: 0; animation: text-reveal 0.6s ease forwards 1.6s;
 }
-.wheel-center-line tspan { fill: var(--color-primary); }
+@keyframes text-reveal {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
+/* Marker labels */
 .wheel-label {
-    font-family: var(--font-heading); font-size: 15px; font-weight: 800;
+    font-family: var(--font-heading); font-size: 16px; font-weight: 800;
+    letter-spacing: 0.02em;
+    opacity: 0; animation: text-reveal 0.5s ease forwards;
+    transition: filter 0.3s ease, font-size 0.3s ease;
 }
-.wheel-sublabel {
-    font-family: var(--font-body); font-size: 9.5px; fill: var(--color-text-light);
+.wheel-sub {
+    font-family: var(--font-body); font-size: 9.5px; fill: rgba(148,163,184,0.7);
+    opacity: 0; animation: text-reveal 0.5s ease forwards;
 }
-.wheel-label-motivation { fill: #ff6b6b; }
-.wheel-label-agency { fill: #34d399; }
-.wheel-label-plans { fill: #38bdf8; }
-.wheel-label-belief { fill: #a855f7; }
 
-/* Hover glow on labels */
-.hope-wheel-logo:hover .wheel-label-motivation { filter: drop-shadow(0 0 6px rgba(255,107,107,0.5)); }
-.hope-wheel-logo:hover .wheel-label-agency { filter: drop-shadow(0 0 6px rgba(52,211,153,0.5)); }
-.hope-wheel-logo:hover .wheel-label-plans { filter: drop-shadow(0 0 6px rgba(56,189,248,0.5)); }
-.hope-wheel-logo:hover .wheel-label-belief { filter: drop-shadow(0 0 6px rgba(168,85,247,0.5)); }
+.wl-mot { fill: #ff6b6b; animation-delay: 0.5s; }
+.wl-mot + .wheel-sub { animation-delay: 0.6s; }
+.wl-age { fill: #34d399; animation-delay: 0.8s; }
+.wl-age + .wheel-sub { animation-delay: 0.9s; }
+.wl-pln { fill: #38bdf8; animation-delay: 1.1s; }
+.wl-pln + .wheel-sub { animation-delay: 1.2s; }
+.wl-bel { fill: #a855f7; animation-delay: 1.4s; }
+.wl-bel + .wheel-sub { animation-delay: 1.5s; }
 
-/* Responsive sizing */
-@media (max-width: 500px) { .hope-wheel-logo { width: 200px; height: 200px; } }
+/* Hover label glow */
+.hope-wheel-logo:hover .wl-mot { filter: drop-shadow(0 0 8px rgba(255,107,107,0.6)); }
+.hope-wheel-logo:hover .wl-age { filter: drop-shadow(0 0 8px rgba(52,211,153,0.6)); }
+.hope-wheel-logo:hover .wl-pln { filter: drop-shadow(0 0 8px rgba(56,189,248,0.6)); }
+.hope-wheel-logo:hover .wl-bel { filter: drop-shadow(0 0 8px rgba(168,85,247,0.6)); }
+
+/* Responsive */
+@media (max-width: 500px) { .hope-wheel-logo { width: 220px; height: 220px; } }
 .framework-about {
     max-width: 560px; margin: 1.5rem auto 0; text-align: left;
     background: var(--color-surface); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
