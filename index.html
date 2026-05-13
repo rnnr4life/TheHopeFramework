@@ -27,6 +27,31 @@
     <!-- ===== Age Selector Screen ===== -->
     <section id="age-screen" class="screen active" role="main">
         <div class="container center-content">
+            <!-- H-Logo at top -->
+            <div class="hope-logo-mark hope-logo-top" aria-label="HOPE Framework logo">
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="hope-logo-svg">
+                    <defs>
+                        <linearGradient id="ring1" x1="0.5" y1="0" x2="1" y2="0.5"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="100%" stop-color="#e84575"/></linearGradient>
+                        <linearGradient id="ring2" x1="1" y1="0.5" x2="0.5" y2="1"><stop offset="0%" stop-color="#d63a3a"/><stop offset="100%" stop-color="#34d399"/></linearGradient>
+                        <linearGradient id="ring3" x1="0.5" y1="1" x2="0" y2="0.5"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
+                        <linearGradient id="ring4" x1="0" y1="0.5" x2="0.5" y2="0"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#a855f7"/></linearGradient>
+                    </defs>
+                    <path d="M100 16 A84 84 0 0 1 184 100" fill="none" stroke="url(#ring1)" stroke-width="8" stroke-linecap="round" class="logo-arc la1"/>
+                    <path d="M184 100 A84 84 0 0 1 100 184" fill="none" stroke="url(#ring2)" stroke-width="8" stroke-linecap="round" class="logo-arc la2"/>
+                    <path d="M100 184 A84 84 0 0 1 16 100" fill="none" stroke="url(#ring3)" stroke-width="8" stroke-linecap="round" class="logo-arc la3"/>
+                    <path d="M16 100 A84 84 0 0 1 100 16" fill="none" stroke="url(#ring4)" stroke-width="8" stroke-linecap="round" class="logo-arc la4"/>
+                    <circle cx="100" cy="16" r="8" fill="#ff6b6b" class="logo-dot ld1"/>
+                    <circle cx="184" cy="100" r="8" fill="#34d399" class="logo-dot ld2"/>
+                    <circle cx="100" cy="184" r="8" fill="#38bdf8" class="logo-dot ld3"/>
+                    <circle cx="16" cy="100" r="8" fill="#a855f7" class="logo-dot ld4"/>
+                    <path d="M68 60 L68 140 M68 100 L132 100 M132 60 L132 140" fill="none" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" class="logo-h"/>
+                    <path d="M100 132 C100 118 108 112 118 110" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M100 132 C100 120 92 114 84 112" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round"/>
+                    <ellipse cx="113" cy="108" rx="8" ry="5" transform="rotate(-25 113 108)" fill="#34d399" opacity="0.85"/>
+                    <ellipse cx="89" cy="110" rx="8" ry="5" transform="rotate(25 89 110)" fill="#34d399" opacity="0.85"/>
+                </svg>
+            </div>
+
             <div class="welcome-hero">
                 <h1>The HOPE Framework</h1>
                 <p class="subtitle">Healing Opportunities for Processing Eco-grief</p>
@@ -35,34 +60,70 @@
                 <p>The HOPE Framework is a literacy strategy for identifying hope in narratives as a response to eco-grief. It helps readers find four markers of hope in stories about the environment: <strong>Motivation for Change</strong>, <strong>Belief that Change is Possible</strong>, <strong>Plans for a Path Forward</strong>, and <strong>Agency to Take Action</strong>.</p>
                 <p class="framework-credit">Developed by <strong>Dr. Colleen Redmond</strong>, University of Minnesota. Published in <em>Climate Literacy in Education</em>, Vol. 2, No. 1, 2024.</p>
             </div>
-            <div class="hope-logo-mark" aria-label="HOPE Framework logo">
-                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="hope-logo-svg">
+
+            <!-- Full HOPE wheel diagram -->
+            <div class="hope-wheel-diagram" aria-label="HOPE Framework wheel diagram">
+                <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" class="hope-wheel-svg">
                     <defs>
-                        <linearGradient id="ring1" x1="0.5" y1="0" x2="1" y2="0.5"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="100%" stop-color="#e84575"/></linearGradient>
-                        <linearGradient id="ring2" x1="1" y1="0.5" x2="0.5" y2="1"><stop offset="0%" stop-color="#d63a3a"/><stop offset="100%" stop-color="#34d399"/></linearGradient>
-                        <linearGradient id="ring3" x1="0.5" y1="1" x2="0" y2="0.5"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
-                        <linearGradient id="ring4" x1="0" y1="0.5" x2="0.5" y2="0"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#a855f7"/></linearGradient>
-                        <linearGradient id="ring5" x1="0.3" y1="0" x2="0.7" y2="0"><stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#ff6b6b"/></linearGradient>
+                        <linearGradient id="rg1" x1="0.5" y1="0" x2="1" y2="0.5"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="100%" stop-color="#e84575"/></linearGradient>
+                        <linearGradient id="rg2" x1="1" y1="0.5" x2="0.5" y2="1"><stop offset="0%" stop-color="#d63a3a"/><stop offset="100%" stop-color="#34d399"/></linearGradient>
+                        <linearGradient id="rg3" x1="0.5" y1="1" x2="0" y2="0.5"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
+                        <linearGradient id="rg4" x1="0" y1="0.5" x2="0.5" y2="0"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#a855f7"/></linearGradient>
+                        <radialGradient id="wcg" cx="50%" cy="45%" r="55%"><stop offset="0%" stop-color="#1a3a4a"/><stop offset="100%" stop-color="#0f1f2e"/></radialGradient>
+                        <filter id="wsg"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
                     </defs>
-                    <!-- Gradient ring arcs -->
-                    <path d="M100 16 A84 84 0 0 1 184 100" fill="none" stroke="url(#ring1)" stroke-width="8" stroke-linecap="round" class="logo-arc la1"/>
-                    <path d="M184 100 A84 84 0 0 1 100 184" fill="none" stroke="url(#ring2)" stroke-width="8" stroke-linecap="round" class="logo-arc la2"/>
-                    <path d="M100 184 A84 84 0 0 1 16 100" fill="none" stroke="url(#ring3)" stroke-width="8" stroke-linecap="round" class="logo-arc la3"/>
-                    <path d="M16 100 A84 84 0 0 1 100 16" fill="none" stroke="url(#ring4)" stroke-width="8" stroke-linecap="round" class="logo-arc la4"/>
-                    <!-- Cardinal dots -->
-                    <circle cx="100" cy="16" r="8" fill="#ff6b6b" class="logo-dot ld1"/>
-                    <circle cx="184" cy="100" r="8" fill="#34d399" class="logo-dot ld2"/>
-                    <circle cx="100" cy="184" r="8" fill="#38bdf8" class="logo-dot ld3"/>
-                    <circle cx="16" cy="100" r="8" fill="#a855f7" class="logo-dot ld4"/>
-                    <!-- H letter -->
-                    <path d="M68 60 L68 140 M68 100 L132 100 M132 60 L132 140" fill="none" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" class="logo-h"/>
-                    <!-- Leaf/sprout -->
-                    <path d="M100 132 C100 118 108 112 118 110" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round"/>
-                    <path d="M100 132 C100 120 92 114 84 112" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round"/>
-                    <ellipse cx="113" cy="108" rx="8" ry="5" transform="rotate(-25 113 108)" fill="#34d399" opacity="0.85"/>
-                    <ellipse cx="89" cy="110" rx="8" ry="5" transform="rotate(25 89 110)" fill="#34d399" opacity="0.85"/>
+                    <!-- Gradient ring -->
+                    <path d="M250 72 A178 178 0 0 1 428 250" fill="none" stroke="url(#rg1)" stroke-width="10" stroke-linecap="round"/>
+                    <path d="M428 250 A178 178 0 0 1 250 428" fill="none" stroke="url(#rg2)" stroke-width="10" stroke-linecap="round"/>
+                    <path d="M250 428 A178 178 0 0 1 72 250" fill="none" stroke="url(#rg3)" stroke-width="10" stroke-linecap="round"/>
+                    <path d="M72 250 A178 178 0 0 1 250 72" fill="none" stroke="url(#rg4)" stroke-width="10" stroke-linecap="round"/>
+                    <!-- Center circle -->
+                    <circle cx="250" cy="250" r="120" fill="url(#wcg)" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+                    <ellipse cx="250" cy="220" rx="70" ry="25" fill="rgba(255,255,255,0.03)"/>
+                    <!-- Center text -->
+                    <text x="250" y="200" text-anchor="middle" font-family="var(--font-body)" font-size="14" fill="rgba(200,215,230,0.7)" letter-spacing="0.1em">The</text>
+                    <text x="250" y="245" text-anchor="middle" font-family="var(--font-heading)" font-size="42" font-weight="800" fill="white" letter-spacing="0.1em">H.O.P.E</text>
+                    <text x="250" y="275" text-anchor="middle" font-family="var(--font-heading)" font-size="18" font-weight="600" fill="rgba(200,215,230,0.8)">Framework</text>
+                    <text x="250" y="298" text-anchor="middle" font-size="14" fill="#34d399" opacity="0.7">🌿</text>
+                    <text x="250" y="320" text-anchor="middle" font-family="var(--font-body)" font-size="12" fill="rgba(200,215,230,0.6)">Healing Opportunities</text>
+                    <text x="250" y="338" text-anchor="middle" font-family="var(--font-body)" font-size="12" fill="rgba(200,215,230,0.6)">for Processing Eco-Grief</text>
+                    <!-- Motivation (top) -->
+                    <circle cx="250" cy="50" r="32" fill="#ff6b6b" opacity="0.9" filter="url(#wsg)"/>
+                    <circle cx="250" cy="50" r="32" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <path d="M238 64 L250 40 L262 64 Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+                    <line x1="250" y1="40" x2="258" y2="44" stroke="white" stroke-width="1.5"/>
+                    <circle cx="255" cy="42" r="3" fill="white" opacity="0.8"/>
+                    <text x="300" y="44" text-anchor="start" font-family="var(--font-heading)" font-size="17" font-weight="800" fill="#ff6b6b">Motivation</text>
+                    <text x="300" y="62" text-anchor="start" font-family="var(--font-body)" font-size="11" fill="rgba(148,163,184,0.7)">for Change</text>
+                    <!-- Agency (right) -->
+                    <circle cx="450" cy="250" r="32" fill="#34d399" opacity="0.9" filter="url(#wsg)"/>
+                    <circle cx="450" cy="250" r="32" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <circle cx="450" cy="238" r="4" fill="white"/>
+                    <line x1="450" y1="242" x2="450" y2="256" stroke="white" stroke-width="2"/>
+                    <line x1="440" y1="236" x2="450" y2="246" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="460" y1="236" x2="450" y2="246" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="450" y1="256" x2="443" y2="266" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="450" y1="256" x2="457" y2="266" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    <text x="440" y="296" text-anchor="middle" font-family="var(--font-heading)" font-size="17" font-weight="800" fill="#34d399">Agency</text>
+                    <text x="440" y="314" text-anchor="middle" font-family="var(--font-body)" font-size="11" fill="rgba(148,163,184,0.7)">to take action</text>
+                    <!-- Plans (bottom) -->
+                    <circle cx="250" cy="450" r="32" fill="#38bdf8" opacity="0.9" filter="url(#wsg)"/>
+                    <circle cx="250" cy="450" r="32" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <path d="M242 463 Q250 453 258 458 Q266 463 258 443 Q254 436 250 438" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="250" cy="436" r="4" fill="white" opacity="0.8"/>
+                    <text x="193" y="456" text-anchor="end" font-family="var(--font-heading)" font-size="17" font-weight="800" fill="#38bdf8">Plans</text>
+                    <text x="193" y="474" text-anchor="end" font-family="var(--font-body)" font-size="11" fill="rgba(148,163,184,0.7)">for a path forward</text>
+                    <!-- Belief (left) -->
+                    <circle cx="50" cy="250" r="32" fill="#a855f7" opacity="0.9" filter="url(#wsg)"/>
+                    <circle cx="50" cy="250" r="32" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <path d="M50 260 C40 248 40 238 47 235 C50 234 53 236 50 240" fill="none" stroke="white" stroke-width="2"/>
+                    <path d="M50 260 C60 248 60 238 53 235 C50 234 47 236 50 240" fill="none" stroke="white" stroke-width="2"/>
+                    <path d="M46 248 Q50 244 54 248" fill="none" stroke="white" stroke-width="1.5" opacity="0.7"/>
+                    <text x="40" y="296" text-anchor="middle" font-family="var(--font-heading)" font-size="17" font-weight="800" fill="#a855f7">Belief</text>
+                    <text x="40" y="314" text-anchor="middle" font-family="var(--font-body)" font-size="11" fill="rgba(148,163,184,0.7)">change is possible</text>
                 </svg>
             </div>
+
             <div class="age-picker">
                 <p class="age-picker-label">I'm in...</p>
                 <div class="age-options">
