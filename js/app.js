@@ -190,7 +190,7 @@ const screenToGroup = {
     'welcome-screen': 'home',
     'learn-screen': 'learn', 'match-screen': 'learn', 'activity-screen': 'learn', 'reflect-screen': 'learn', 'marker-detail-screen': 'learn',
     'detective-screen': 'games', 'quest-screen': 'games', 'walk-screen': 'games',
-    'guided-screen': 'tools', 'resources-screen': 'tools', 'my-hope-screen': 'tools',
+    'guided-screen': 'tools', 'resources-screen': 'tools', 'my-hope-screen': 'tools', 'creative-write-screen': 'tools', 'gallery-screen': 'tools',
     'teacher-hub-screen': 'teacher',
     'worksheet-teacher-screen': 'teacher', 'worksheet-conversations-screen': 'teacher',
     'worksheet-search-screen': 'tools', 'worksheet-literature-screen': 'tools',
@@ -401,6 +401,320 @@ document.getElementById('marker-deep-dots').addEventListener('click', (e) => {
     currentMarkerIdx = parseInt(dot.dataset.idx);
     renderMarkerDetail(markerOrder[currentMarkerIdx]);
     window.scrollTo(0, 0);
+});
+
+
+// ===== Classroom System =====
+function generateCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+}
+
+function getClassroom() {
+    try { return JSON.parse(localStorage.getItem('hope-classroom')); } catch { return null; }
+}
+function saveClassroom(classroom) {
+    localStorage.setItem('hope-classroom', JSON.stringify(classroom));
+}
+function getStudentClassroom() {
+    return localStorage.getItem('hope-student-classroom') || null;
+}
+function setStudentClassroom(code) {
+    localStorage.setItem('hope-student-classroom', code);
+}
+
+function getSubmissions(code) {
+    try { return JSON.parse(localStorage.getItem('hope-submissions-' + code)) || []; } catch { return []; }
+}
+function saveSubmissions(code, subs) {
+    localStorage.setItem('hope-submissions-' + code, JSON.stringify(subs));
+}
+
+function publishWork(type, data) {
+    let code = getStudentClassroom();
+    const classroom = getClassroom();
+    if (classroom) code = classroom.code;
+
+    if (!code) {
+        pendingPublish = { type, data };
+        document.getElementById('classroom-modal').classList.remove('hidden');
+        return false;
+    }
+
+    const subs = getSubmissions(code);
+    subs.push({
+        id: Date.now(),
+        type: type,
+        title: data.title || 'Untitled',
+        author: data.author || 'Anonymous',
+        content: data.content,
+        markers: data.markers || null,
+        mode: data.mode || null,
+        date: new Date().toLocaleDateString()
+    });
+    saveSubmissions(code, subs);
+    return true;
+}
+
+let pendingPublish = null;
+
+// Teacher: create classroom
+document.getElementById('btn-create-classroom').addEventListener('click', () => {
+    const name = document.getElementById('classroom-name-input').value.trim();
+    if (!name) { document.getElementById('classroom-name-input').focus(); return; }
+    const code = generateCode();
+    saveClassroom({ name, code, created: new Date().toISOString() });
+    setStudentClassroom(code);
+    renderClassroomDashboard();
+});
+
+// Teacher: delete classroom
+document.getElementById('btn-delete-classroom').addEventListener('click', () => {
+    if (!confirm('Delete this classroom and all submissions? This cannot be undone.')) return;
+    const classroom = getClassroom();
+    if (classroom) localStorage.removeItem('hope-submissions-' + classroom.code);
+    localStorage.removeItem('hope-classroom');
+    localStorage.removeItem('hope-student-classroom');
+    renderClassroomDashboard();
+});
+
+// Teacher: view gallery
+document.getElementById('btn-view-gallery').addEventListener('click', () => {
+    showScreen('gallery-screen');
+    renderGallery();
+});
+
+function renderClassroomDashboard() {
+    const classroom = getClassroom();
+    if (!classroom) {
+        document.getElementById('classroom-create-panel').classList.remove('hidden');
+        document.getElementById('classroom-dashboard').classList.add('hidden');
+        return;
+    }
+    document.getElementById('classroom-create-panel').classList.add('hidden');
+    document.getElementById('classroom-dashboard').classList.remove('hidden');
+    document.getElementById('classroom-display-name').textContent = classroom.name;
+    document.getElementById('classroom-display-code').textContent = classroom.code;
+
+    const subs = getSubmissions(classroom.code);
+    const uniqueAuthors = new Set(subs.map(s => s.author));
+    document.getElementById('classroom-stat-submissions').textContent = subs.length;
+    document.getElementById('classroom-stat-students').textContent = uniqueAuthors.size;
+
+    const listEl = document.getElementById('classroom-submissions-list');
+    if (subs.length === 0) {
+        listEl.innerHTML = '<p class="classroom-empty">No submissions yet. Share your classroom code with students to get started.</p>';
+        return;
+    }
+    const typeIcons = { myhope: '🌱', poetry: '📝', story: '✍️', art: '🎨' };
+    listEl.innerHTML = subs.map(s => `
+        <div class="classroom-submission-item" data-id="${s.id}">
+            <span class="classroom-submission-type">${typeIcons[s.type] || '📄'}</span>
+            <div class="classroom-submission-info">
+                <div class="classroom-submission-title">${(s.title || 'Untitled').replace(/</g,'&lt;')}</div>
+                <div class="classroom-submission-meta">by ${(s.author || 'Anonymous').replace(/</g,'&lt;')} · ${s.date}</div>
+            </div>
+            <button class="classroom-submission-remove" data-id="${s.id}">Remove</button>
+        </div>
+    `).join('');
+}
+
+// Teacher: remove submission
+document.getElementById('classroom-submissions-list').addEventListener('click', (e) => {
+    const btn = e.target.closest('.classroom-submission-remove');
+    if (!btn) return;
+    const id = parseInt(btn.dataset.id);
+    const classroom = getClassroom();
+    if (!classroom) return;
+    let subs = getSubmissions(classroom.code);
+    subs = subs.filter(s => s.id !== id);
+    saveSubmissions(classroom.code, subs);
+    renderClassroomDashboard();
+});
+
+// Init classroom dashboard when teacher page shows
+setTimeout(renderClassroomDashboard, 100);
+
+// Student: join classroom modal
+document.getElementById('btn-close-classroom-modal').addEventListener('click', () => {
+    document.getElementById('classroom-modal').classList.add('hidden');
+    pendingPublish = null;
+});
+document.getElementById('btn-cancel-join').addEventListener('click', () => {
+    document.getElementById('classroom-modal').classList.add('hidden');
+    pendingPublish = null;
+});
+document.getElementById('btn-confirm-join').addEventListener('click', () => {
+    const code = document.getElementById('classroom-join-code').value.trim().toUpperCase();
+    if (!code || code.length < 6) {
+        document.getElementById('classroom-modal-error').classList.remove('hidden');
+        return;
+    }
+
+    setStudentClassroom(code);
+    document.getElementById('classroom-modal-error').classList.add('hidden');
+
+    if (pendingPublish) {
+        publishWork(pendingPublish.type, pendingPublish.data);
+        const classroom = getClassroom();
+        const joinedEl = document.getElementById('classroom-modal-joined');
+        joinedEl.classList.remove('hidden');
+        document.getElementById('classroom-modal-joined-name').textContent = classroom && classroom.code === code ? classroom.name : 'Classroom ' + code;
+        pendingPublish = null;
+        setTimeout(() => {
+            document.getElementById('classroom-modal').classList.add('hidden');
+            joinedEl.classList.add('hidden');
+        }, 1500);
+    } else {
+        document.getElementById('classroom-modal').classList.add('hidden');
+    }
+});
+
+
+// ===== Creative Writing Activities =====
+const creativeActivities = {
+    poetry: {
+        icon: '📝',
+        title: 'Climate Poetry',
+        desc: 'Write a poem that expresses eco-grief and hope. Use any form — haiku, free verse, or your own invention.',
+        prompts: {
+            elementary: 'Write a poem about something in nature you love. Include how it makes you feel and what you would do to protect it. Try a simple pattern like: I see... / I feel... / I wish... / I will...',
+            middle: 'Write a poem that starts with eco-grief (what worries you about the environment) and ends with hope (what gives you strength). Try to include at least one HOPE marker.',
+            high: 'Compose a poem that explores the tension between eco-grief and agency. Consider how form and structure can mirror the emotional journey from despair to action.'
+        }
+    },
+    story: {
+        icon: '✍️',
+        title: 'Write a HOPE Story',
+        desc: 'Write a short story or personal narrative that includes all four HOPE markers.',
+        prompts: {
+            elementary: 'Write a short story about a kid who notices something wrong in nature near their home. What do they feel? What do they learn? What plan do they make? What do they do about it?',
+            middle: 'Write a story where a group of students discovers an environmental problem. Show how they move through all four HOPE markers: motivation, belief, plans, and agency.',
+            high: 'Craft a narrative — fiction or personal essay — that traces the full arc of the HOPE Framework. Your protagonist should experience genuine eco-grief before finding their path to agency.'
+        }
+    },
+    art: {
+        icon: '🎨',
+        title: 'Art Description',
+        desc: 'Plan and describe a piece of visual art that represents the HOPE markers.',
+        prompts: {
+            elementary: 'Imagine you\'re making a poster about hope for the Earth. Describe what you would draw. What colors would you use? What would the title be? Describe every part!',
+            middle: 'Design an artwork — a mural, collage, or digital piece — that shows the journey from eco-grief to hope. Describe it in detail: images, colors, and symbols for each HOPE marker.',
+            high: 'Conceptualize a gallery-ready artwork that embodies the HOPE Framework. Describe the medium, composition, symbolism, and how your piece guides someone from eco-grief to empowerment.'
+        }
+    }
+};
+
+let currentCreativeType = 'poetry';
+
+function openCreativeActivity(type) {
+    currentCreativeType = type;
+    const activity = creativeActivities[type];
+    const age = currentAge || 'middle';
+    document.getElementById('creative-header-icon').textContent = activity.icon;
+    document.getElementById('creative-header-title').textContent = activity.title;
+    document.getElementById('creative-header-desc').textContent = activity.desc;
+    document.getElementById('creative-prompt').textContent = activity.prompts[age];
+    document.getElementById('creative-indicator').textContent = activity.icon + ' ' + activity.title;
+    document.getElementById('creative-textarea').value = '';
+    document.getElementById('creative-title-input').value = '';
+    document.getElementById('creative-author').value = '';
+    showScreen('creative-write-screen');
+}
+
+// Teacher buttons for creative activities
+document.getElementById('btn-teacher-myhope').addEventListener('click', () => { if (!currentAge) setAge('middle'); showScreen('my-hope-screen'); });
+document.getElementById('btn-teacher-poetry').addEventListener('click', () => { if (!currentAge) setAge('middle'); openCreativeActivity('poetry'); });
+document.getElementById('btn-teacher-story').addEventListener('click', () => { if (!currentAge) setAge('middle'); openCreativeActivity('story'); });
+document.getElementById('btn-teacher-art').addEventListener('click', () => { if (!currentAge) setAge('middle'); openCreativeActivity('art'); });
+
+// Creative screen: back, clear, publish
+document.getElementById('btn-back-creative').addEventListener('click', () => showScreen('welcome-screen'));
+document.getElementById('btn-creative-clear').addEventListener('click', () => {
+    if (document.getElementById('creative-textarea').value.trim() && !confirm('Clear your writing?')) return;
+    document.getElementById('creative-textarea').value = '';
+});
+document.getElementById('btn-creative-publish').addEventListener('click', () => {
+    const text = document.getElementById('creative-textarea').value.trim();
+    if (!text) { alert('Write something before publishing.'); return; }
+    const title = document.getElementById('creative-title-input').value.trim() || 'Untitled';
+    const author = document.getElementById('creative-author').value.trim() || 'Anonymous';
+    const success = publishWork(currentCreativeType, { title, author, content: text });
+    if (success) alert('Published! Your work is now in the classroom gallery.');
+});
+
+// My HOPE Story: publish button
+document.getElementById('btn-myhope-publish').addEventListener('click', () => {
+    const hasContent = myhopeResponses.some(r => r.trim().length > 0);
+    if (!hasContent) { alert('Write something in at least one marker before publishing.'); return; }
+    const markers = {};
+    myhopeMarkers.forEach((m, i) => { markers[m] = myhopeResponses[i]; });
+    const author = prompt('Enter your name or initials:') || 'Anonymous';
+    const success = publishWork('myhope', {
+        title: 'My HOPE Story (' + myhopeMode + ')',
+        author: author,
+        content: myhopeResponses.filter(r => r.trim()).join('\n\n---\n\n'),
+        markers: markers,
+        mode: myhopeMode
+    });
+    if (success) alert('Published! Your work is now in the classroom gallery.');
+});
+
+
+// ===== Gallery =====
+function renderGallery(filter) {
+    filter = filter || 'all';
+    let code = getStudentClassroom();
+    const classroom = getClassroom();
+    if (classroom) code = classroom.code;
+    document.getElementById('gallery-classroom-name').textContent = classroom ? classroom.name : code ? 'Classroom ' + code : 'No classroom joined';
+
+    const subs = code ? getSubmissions(code) : [];
+    const filtered = filter === 'all' ? subs : subs.filter(s => s.type === filter);
+    const cardsEl = document.getElementById('gallery-cards');
+    const emptyEl = document.getElementById('gallery-empty');
+
+    if (filtered.length === 0) {
+        emptyEl.classList.remove('hidden');
+        emptyEl.textContent = subs.length === 0 ? 'No published work yet. Complete an activity and publish it to see it here!' : 'No submissions match this filter.';
+        cardsEl.innerHTML = '';
+        cardsEl.appendChild(emptyEl);
+        return;
+    }
+    emptyEl.classList.add('hidden');
+    const typeIcons = { myhope: '🌱', poetry: '📝', story: '✍️', art: '🎨' };
+    const typeLabels = { myhope: 'My HOPE Story', poetry: 'Poetry', story: 'Story', art: 'Art' };
+    cardsEl.innerHTML = filtered.map(s => {
+        let markerHtml = '';
+        if (s.markers) {
+            const names = { motivation: '🔥 Motivation', belief: '✨ Belief', plans: '🗺️ Plans', agency: '💪 Agency' };
+            markerHtml = Object.entries(s.markers).filter(([,v]) => v && v.trim())
+                .map(([k, v]) => `<div class="gallery-card-marker"><div class="gallery-card-marker-label">${names[k]}</div><div class="gallery-card-marker-text">${v.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>`)
+                .join('');
+        }
+        const preview = s.content ? s.content.replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+        return `<div class="gallery-card" data-type="${s.type}">
+            <div class="gallery-card-header"><span class="gallery-card-type">${typeIcons[s.type] || '📄'}</span><span class="gallery-card-title">${(s.title || 'Untitled').replace(/</g,'&lt;')}</span></div>
+            <div class="gallery-card-author">by ${(s.author || 'Anonymous').replace(/</g,'&lt;')} · ${s.date} · ${typeLabels[s.type] || s.type}</div>
+            ${s.markers ? markerHtml : `<div class="gallery-card-text">${preview}</div>`}
+        </div>`;
+    }).join('');
+}
+
+// Gallery: back
+document.getElementById('btn-back-gallery').addEventListener('click', () => {
+    showScreen(getClassroom() ? 'teacher-hub-screen' : 'welcome-screen');
+});
+
+// Gallery: filter
+document.querySelector('.gallery-filters').addEventListener('click', (e) => {
+    const btn = e.target.closest('.gallery-filter');
+    if (!btn) return;
+    document.querySelectorAll('.gallery-filter').forEach(f => f.classList.remove('active'));
+    btn.classList.add('active');
+    renderGallery(btn.dataset.filter);
 });
 
 

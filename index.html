@@ -12,6 +12,9 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="age-middle" role="application" aria-label="The HOPE Framework - Interactive Learning Tool">
+    <!-- Prototype banner -->
+    <div class="prototype-banner" aria-label="This is a prototype">⚠️ PROTOTYPE — Not production ready</div>
+
     <!-- Skip navigation -->
     <a href="#age-screen" class="skip-nav">Skip to main content</a>
 
@@ -89,6 +92,26 @@
             </div>
         </div>
     </nav>
+
+    <!-- Join Classroom Modal -->
+    <div id="classroom-modal" class="classroom-modal hidden">
+        <div class="classroom-modal-content">
+            <button class="classroom-modal-close" id="btn-close-classroom-modal">&times;</button>
+            <span class="classroom-modal-icon">🏫</span>
+            <h3 id="classroom-modal-title">Join a Classroom</h3>
+            <p id="classroom-modal-desc">Enter the code your teacher gave you to publish your work to the classroom gallery.</p>
+            <input type="text" id="classroom-join-code" class="classroom-input classroom-code-input" placeholder="Enter code" maxlength="6" />
+            <div class="classroom-modal-actions">
+                <button class="btn btn-small btn-muted" id="btn-cancel-join">Cancel</button>
+                <button class="btn btn-small btn-primary" id="btn-confirm-join">Join</button>
+            </div>
+            <p class="classroom-modal-error hidden" id="classroom-modal-error">Classroom not found. Check the code and try again.</p>
+            <div class="classroom-modal-joined hidden" id="classroom-modal-joined">
+                <p>✅ You're in! Your work has been published to:</p>
+                <strong id="classroom-modal-joined-name"></strong>
+            </div>
+        </div>
+    </div>
 
     <!-- ===== Age Selector Screen ===== -->
     <section id="age-screen" class="screen active" role="main">
@@ -240,34 +263,78 @@
                 <p class="section-intro">Everything you need to bring the HOPE Framework into your classroom.</p>
             </div>
 
-            <!-- Understanding Eco-Grief -->
-            <div class="teacher-hub-section">
-                <h4 class="teacher-hub-section-label">🌍 Understanding Eco-Grief</h4>
-                <div class="teacher-ecogrief">
-                    <div class="teacher-ecogrief-card">
-                        <h3>What is Eco-Grief?</h3>
-                        <p>Eco-grief is the sadness, anxiety, or sense of loss people feel in response to environmental destruction and climate change. It can show up as worry about the future, guilt about consumption, or mourning the loss of natural places, species, and ecosystems.</p>
-                        <p>For students, eco-grief often appears as:</p>
-                        <ul class="teacher-ecogrief-list">
-                            <li>Feeling helpless or overwhelmed by news about climate change</li>
-                            <li>Anxiety about the future of the planet</li>
-                            <li>Sadness when seeing pollution, deforestation, or habitat loss</li>
-                            <li>Frustration that adults aren't doing enough</li>
-                            <li>A desire to help but not knowing where to start</li>
-                        </ul>
+            <!-- Impact of Eco-Grief on Youth -->
+            <div class="teacher-impact-banner">
+                <div class="teacher-impact-stat-row">
+                    <div class="teacher-impact-stat">
+                        <span class="teacher-impact-stat-number">75%</span>
+                        <span class="teacher-impact-stat-label">of young people say the future is frightening</span>
                     </div>
-                    <div class="teacher-ecogrief-card">
-                        <h3>Why This Matters</h3>
-                        <p>Research shows that young people are deeply affected by the climate crisis. A 2021 global study of 10,000 young people (ages 16–25) found that <strong>75% described the future as frightening</strong>, and nearly half said climate anxiety affected their daily lives.</p>
-                        <p>Without tools to process these emotions, eco-grief can lead to disengagement, hopelessness, and avoidance. The HOPE Framework gives students a way to:</p>
-                        <ul class="teacher-ecogrief-list">
-                            <li><strong>Name what they feel</strong> — validating eco-grief as a real and healthy response</li>
-                            <li><strong>Find hope in stories</strong> — literature shows that change is possible and that people take action</li>
-                            <li><strong>Move from grief to agency</strong> — the four markers (Motivation, Belief, Plans, Agency) mirror the psychological journey from emotional distress to empowered action</li>
-                            <li><strong>Build resilience</strong> — students who can identify hope are better equipped to face environmental challenges constructively</li>
-                        </ul>
-                        <p class="teacher-ecogrief-cite">Hickman, C., et al. (2021). "Climate anxiety in children and young people and their beliefs about government responses to climate change." <em>The Lancet Planetary Health</em>, 5(12), e863–e873.</p>
+                    <div class="teacher-impact-stat">
+                        <span class="teacher-impact-stat-number">45%</span>
+                        <span class="teacher-impact-stat-label">say climate anxiety affects their daily functioning</span>
                     </div>
+                    <div class="teacher-impact-stat">
+                        <span class="teacher-impact-stat-number">56%</span>
+                        <span class="teacher-impact-stat-label">feel that humanity is doomed</span>
+                    </div>
+                </div>
+                <p class="teacher-impact-source">Hickman, C., et al. (2021). Global survey of 10,000 young people ages 16–25. <em>The Lancet Planetary Health</em>, 5(12).</p>
+
+                <div class="teacher-impact-message">
+                    <h3>Your Students Are Already Feeling This</h3>
+                    <p>Eco-grief — the sadness, anxiety, and sense of loss people feel about environmental destruction — is not a future problem. It's happening right now in your classroom. Students see the news, feel the heat, watch the wildfires, and wonder if anyone is doing anything. Without tools to process these emotions, eco-grief leads to disengagement, hopelessness, and avoidance.</p>
+                    <p><strong>But grief doesn't have to be the end of the story.</strong> When students learn to find hope in the narratives they read, they move from helplessness to agency. That's exactly what the HOPE Framework is designed to do.</p>
+                </div>
+            </div>
+
+            <!-- The HOPE Framework for Teachers -->
+            <div class="teacher-framework-section">
+                <h3 class="teacher-framework-title">🌿 The HOPE Framework</h3>
+                <p class="teacher-framework-subtitle">A literacy strategy for identifying hope in narratives as a response to eco-grief</p>
+
+                <p class="teacher-framework-desc">Developed by <strong>Dr. Colleen Redmond</strong> at the University of Minnesota and published in <em>Climate Literacy in Education</em> (Vol. 2, No. 1, 2024), the HOPE Framework gives students a structured way to find hope when reading stories about the environment. Instead of stopping at the grief, students learn to look for four markers that show how people move from concern to action.</p>
+
+                <div class="teacher-framework-markers">
+                    <div class="teacher-framework-marker" data-marker="motivation">
+                        <div class="teacher-framework-marker-letter">H</div>
+                        <div>
+                            <strong>Healing — Motivation for Change</strong>
+                            <p>The emotional spark. Something in the story makes people want things to be different. This is where eco-grief transforms into purpose.</p>
+                        </div>
+                    </div>
+                    <div class="teacher-framework-marker" data-marker="belief">
+                        <div class="teacher-framework-marker-letter">O</div>
+                        <div>
+                            <strong>Opportunities — Belief that Change is Possible</strong>
+                            <p>Evidence that things can get better. Not blind optimism — real examples of success that build confidence change is achievable.</p>
+                        </div>
+                    </div>
+                    <div class="teacher-framework-marker" data-marker="plans">
+                        <div class="teacher-framework-marker-letter">P</div>
+                        <div>
+                            <strong>Processing — Plans for a Path Forward</strong>
+                            <p>Concrete steps and strategies. When students see characters making plans, they learn that problems have actionable solutions.</p>
+                        </div>
+                    </div>
+                    <div class="teacher-framework-marker" data-marker="agency">
+                        <div class="teacher-framework-marker-letter">E</div>
+                        <div>
+                            <strong>Eco-grief → Agency to Take Action</strong>
+                            <p>The shift from feeling to doing. Characters take real action — and students see that they can too.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="teacher-framework-why">
+                    <h4>Why This Works in the Classroom</h4>
+                    <ul class="teacher-ecogrief-list">
+                        <li><strong>Validates emotions</strong> — tells students it's okay to feel grief about the environment</li>
+                        <li><strong>Uses stories they're already reading</strong> — works with any climate-related text or literature</li>
+                        <li><strong>Builds critical thinking</strong> — students analyze text through a structured lens</li>
+                        <li><strong>Moves past helplessness</strong> — the four markers model the journey from grief to empowered action</li>
+                        <li><strong>Meets students where they are</strong> — age-appropriate prompts for elementary, middle, and high school</li>
+                    </ul>
                 </div>
             </div>
 
@@ -323,6 +390,154 @@
                         <h3>Original Research Paper</h3>
                         <p>Read Dr. Colleen Redmond's published article in <em>Climate Literacy in Education</em>.</p>
                         <a href="https://doi.org/10.24926/cle.v2i1.6231" target="_blank" rel="noopener noreferrer" class="btn btn-small">Read Paper</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extend the Learning — Creative Expression -->
+            <div class="teacher-hub-section">
+                <h4 class="teacher-hub-section-label">🎨 Extend the Learning — Creative Expression</h4>
+                <p class="teacher-section-desc">Move students from analysis to creation. All activities happen right here in the app. Students create work, publish it to your private classroom, and review each other's submissions.</p>
+                <div class="teacher-extend-grid">
+                    <div class="teacher-extend-card">
+                        <div class="teacher-extend-icon">🌱</div>
+                        <div class="teacher-extend-body">
+                            <h3>My HOPE Story</h3>
+                            <p>Students choose writing or art mode and reflect on each HOPE marker in their own lives. When finished, they can publish their story to the classroom gallery for classmates to read.</p>
+                            <button class="btn btn-small teacher-extend-app-link" id="btn-teacher-myhope">Open Activity</button>
+                        </div>
+                    </div>
+                    <div class="teacher-extend-card">
+                        <div class="teacher-extend-icon">📝</div>
+                        <div class="teacher-extend-body">
+                            <h3>Climate Poetry</h3>
+                            <p>Students write poems that express eco-grief <em>and</em> hope — haiku, free verse, or "Where I'm From" poems adapted for the environment. Published poems appear in the classroom gallery.</p>
+                            <button class="btn btn-small teacher-extend-app-link" id="btn-teacher-poetry">Open Activity</button>
+                        </div>
+                    </div>
+                    <div class="teacher-extend-card">
+                        <div class="teacher-extend-icon">✍️</div>
+                        <div class="teacher-extend-body">
+                            <h3>Write a HOPE Story</h3>
+                            <p>Students write short fiction or personal narratives that include all four HOPE markers. They become the authors — creating stories where characters move from grief to action.</p>
+                            <button class="btn btn-small teacher-extend-app-link" id="btn-teacher-story">Open Activity</button>
+                        </div>
+                    </div>
+                    <div class="teacher-extend-card">
+                        <div class="teacher-extend-icon">🎨</div>
+                        <div class="teacher-extend-body">
+                            <h3>Art Description</h3>
+                            <p>Students plan and describe visual artwork — posters, murals, collages, or digital art — that represents the HOPE markers. They write about what they'd create, why, and what each element means.</p>
+                            <button class="btn btn-small teacher-extend-app-link" id="btn-teacher-art">Open Activity</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classroom Management -->
+            <div class="teacher-hub-section">
+                <h4 class="teacher-hub-section-label">🏫 Your Classroom</h4>
+                <p class="teacher-section-desc">Create a private classroom space. Students join with your code and publish their work for classmates to review. You control everything — only you can create, manage, and remove content.</p>
+
+                <div id="classroom-setup" class="classroom-setup">
+                    <!-- No classroom yet -->
+                    <div id="classroom-create-panel" class="classroom-create-panel">
+                        <div class="classroom-create-content">
+                            <span class="classroom-create-icon">🏫</span>
+                            <h3>Create Your Classroom</h3>
+                            <p>Give your classroom a name and you'll get a unique code to share with your students.</p>
+                            <div class="classroom-create-form">
+                                <input type="text" id="classroom-name-input" class="classroom-input" placeholder="e.g. Mrs. Garcia's 6th Period" maxlength="40" />
+                                <button class="btn btn-primary" id="btn-create-classroom">Create Classroom</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Classroom exists -->
+                    <div id="classroom-dashboard" class="classroom-dashboard hidden">
+                        <div class="classroom-info">
+                            <div class="classroom-info-main">
+                                <h3 id="classroom-display-name"></h3>
+                                <div class="classroom-code-display">
+                                    <span class="classroom-code-label">Share this code with students:</span>
+                                    <span class="classroom-code" id="classroom-display-code"></span>
+                                </div>
+                            </div>
+                            <button class="btn btn-small btn-muted" id="btn-delete-classroom">Delete Classroom</button>
+                        </div>
+                        <div class="classroom-stats">
+                            <div class="classroom-stat">
+                                <span class="classroom-stat-number" id="classroom-stat-submissions">0</span>
+                                <span class="classroom-stat-label">Submissions</span>
+                            </div>
+                            <div class="classroom-stat">
+                                <span class="classroom-stat-number" id="classroom-stat-students">0</span>
+                                <span class="classroom-stat-label">Students</span>
+                            </div>
+                        </div>
+                        <div class="classroom-submissions-header">
+                            <h4>Student Submissions</h4>
+                            <button class="btn btn-small" id="btn-view-gallery">View Gallery</button>
+                        </div>
+                        <div id="classroom-submissions-list" class="classroom-submissions-list">
+                            <p class="classroom-empty">No submissions yet. Share your classroom code with students to get started.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Youth Climate Heroes -->
+            <div class="teacher-hub-section">
+                <h4 class="teacher-hub-section-label">🌟 Youth Climate Heroes — Real Students Taking Action</h4>
+                <p class="teacher-section-desc">Show students that people their age are already living the HOPE Framework. These young climate leaders went from eco-grief to agency — and their stories are powerful classroom examples.</p>
+                <div class="teacher-extend-grid">
+                    <div class="teacher-extend-card">
+                        <div class="teacher-extend-icon">🇸🇪</div>
+                        <div class="teacher-extend-body">
+                            <h3>Greta Thunberg — Fridays for Future</h3>
+                            <p>Started a global movement at age 15 by sitting outside the Swedish parliament. Her school strike for climate grew into millions of students worldwide demanding action. A clear example of all four HOPE markers in one person's story.</p>
+                            <a href="https://fridaysforfuture.org/" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">Fridays for Future →</a>
+                        </div>
+                    </div>
+                    <div class="teacher-extend-card">
+                        <div class="teacher-extend-icon">🇺🇸</div>
+                        <div class="teacher-extend-body">
+                            <h3>Isra Hirsi — US Youth Climate Strike</h3>
+                            <p>Co-founded the US Youth Climate Strike at age 16, organizing nationwide student walkouts. She focuses on how climate change disproportionately affects communities of color — connecting environmental justice to action.</p>
+                            <a href="https://www.usyouthclimatestrike.org/" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">US Youth Climate Strike →</a>
+                        </div>
+                    </div>
+                    <div class="teacher-extend-card">
+                        <div class="teacher-extend-icon">🇮🇳</div>
+                        <div class="teacher-extend-body">
+                            <h3>Ridhima Pandey — Climate Lawsuit</h3>
+                            <p>Filed a lawsuit against the Indian government at age 9 for failing to act on climate change. Later joined 15 other children in a UN complaint. She shows that even the youngest students can exercise agency.</p>
+                            <a href="https://www.childrensclimatecase.com/" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">Youth Climate Lawsuits →</a>
+                        </div>
+                    </div>
+                    <div class="teacher-extend-card">
+                        <div class="teacher-extend-icon">🇺🇬</div>
+                        <div class="teacher-extend-body">
+                            <h3>Vanessa Nakate — Rise Up Movement</h3>
+                            <p>Started climate activism at age 22 in Uganda, founding the Rise Up Movement. She planted trees and installed solar panels in schools while amplifying African voices in global climate conversations.</p>
+                            <a href="https://www.vanessanakate.com/" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">Vanessa Nakate →</a>
+                        </div>
+                    </div>
+                    <div class="teacher-extend-card">
+                        <div class="teacher-extend-icon">🇺🇸</div>
+                        <div class="teacher-extend-body">
+                            <h3>Jerome Foster II — OneMillionOfUs</h3>
+                            <p>Started climate striking at age 15 outside the White House, then founded OneMillionOfUs to mobilize youth voters on climate. At 18, he became the youngest White House Advisory Council member. Plans plus agency in action.</p>
+                            <a href="https://www.onemillionofus.org/" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">OneMillionOfUs →</a>
+                        </div>
+                    </div>
+                    <div class="teacher-extend-card">
+                        <div class="teacher-extend-icon">🌍</div>
+                        <div class="teacher-extend-body">
+                            <h3>Find More Young Climate Leaders</h3>
+                            <p>Explore directories of youth climate organizations and activists worldwide. Great for research projects where students find and present climate heroes from their own region or background.</p>
+                            <a href="https://www.youthclimateleaders.org/" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">Youth Climate Leaders Network →</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -624,6 +839,72 @@
         </div>
     </section>
 
+    <!-- ===== Creative Writing Activity (Poetry / Story / Art Description) ===== -->
+    <section id="creative-write-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-creative">&larr; Back</button>
+                <div class="step-indicator" id="creative-indicator">Creative Writing</div>
+            </div>
+
+            <div class="creative-header" id="creative-header">
+                <span class="creative-header-icon" id="creative-header-icon">📝</span>
+                <div>
+                    <h2 class="creative-header-title" id="creative-header-title">Climate Poetry</h2>
+                    <p class="creative-header-desc" id="creative-header-desc"></p>
+                </div>
+            </div>
+
+            <div class="creative-prompt" id="creative-prompt"></div>
+
+            <div class="creative-meta">
+                <label class="creative-label">Your Name</label>
+                <input type="text" id="creative-author" class="classroom-input" placeholder="First name or initials" maxlength="30" />
+            </div>
+
+            <div class="creative-meta">
+                <label class="creative-label">Title</label>
+                <input type="text" id="creative-title-input" class="classroom-input" placeholder="Give your work a title" maxlength="60" />
+            </div>
+
+            <textarea class="myhope-textarea creative-textarea" id="creative-textarea" rows="10" placeholder="Start writing here..."></textarea>
+
+            <div class="creative-actions">
+                <button class="btn btn-small btn-muted" id="btn-creative-clear">Clear</button>
+                <div class="creative-actions-right">
+                    <button class="btn btn-small" id="btn-creative-publish">Publish to Classroom 📤</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Classroom Gallery ===== -->
+    <section id="gallery-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-gallery">&larr; Back</button>
+                <div class="step-indicator" id="gallery-indicator">Classroom Gallery</div>
+            </div>
+
+            <div class="gallery-header">
+                <h2>📚 Classroom Gallery</h2>
+                <p class="gallery-classroom-name" id="gallery-classroom-name"></p>
+            </div>
+
+            <div class="gallery-filters">
+                <button class="gallery-filter active" data-filter="all">All</button>
+                <button class="gallery-filter" data-filter="myhope">My HOPE Story</button>
+                <button class="gallery-filter" data-filter="poetry">Poetry</button>
+                <button class="gallery-filter" data-filter="story">Story</button>
+                <button class="gallery-filter" data-filter="art">Art</button>
+            </div>
+
+            <div id="gallery-cards" class="gallery-cards">
+                <p class="classroom-empty" id="gallery-empty">No published work yet. Complete an activity and publish it to see it here!</p>
+            </div>
+        </div>
+    </section>
+
     <!-- ===== My HOPE Story — Personal Reflection Activity ===== -->
     <section id="my-hope-screen" class="screen">
         <div class="container-wide">
@@ -690,7 +971,8 @@
                 </div>
                 <div class="myhope-summary-cards" id="myhope-summary-cards"></div>
                 <div class="myhope-summary-actions">
-                    <button class="btn btn-small" id="btn-myhope-restart">Start Over</button>
+                    <button class="btn btn-small btn-muted" id="btn-myhope-restart">Start Over</button>
+                    <button class="btn btn-small" id="btn-myhope-publish">Publish to Classroom 📤</button>
                 </div>
             </div>
         </div>
