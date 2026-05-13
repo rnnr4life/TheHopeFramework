@@ -136,6 +136,9 @@ function setAge(age) {
     document.getElementById('btn-export-text').textContent = c.exportBtn;
     document.getElementById('btn-print-reflect-text').textContent = c.exportBtn;
     document.getElementById('welcome-primary-hint').textContent = c.welcomeHint;
+
+    // Show classroom step on welcome screen if student has joined
+    updateWelcomeClassroomStep();
 }
 
 // Age selector buttons
@@ -509,16 +512,21 @@ function renderClassroomDashboard() {
         return;
     }
     const typeIcons = { myhope: '🌱', poetry: '📝', story: '✍️', art: '🎨' };
-    listEl.innerHTML = subs.map(s => `
-        <div class="classroom-submission-item" data-id="${s.id}">
+    const allFeedback = getFeedback(classroom.code);
+    listEl.innerHTML = subs.map(s => {
+        const fb = allFeedback[s.id];
+        const fbBadge = fb && (fb.comment || Object.values(fb.scores || {}).some(v => v !== '0'))
+            ? '<span class="classroom-submission-fb-badge">✓ Scored</span>'
+            : '<span class="classroom-submission-fb-badge classroom-submission-fb-badge--pending">Needs Review</span>';
+        return `<div class="classroom-submission-item" data-id="${s.id}">
             <span class="classroom-submission-type">${typeIcons[s.type] || '📄'}</span>
             <div class="classroom-submission-info">
                 <div class="classroom-submission-title">${(s.title || 'Untitled').replace(/</g,'&lt;')}</div>
-                <div class="classroom-submission-meta">by ${(s.author || 'Anonymous').replace(/</g,'&lt;')} · ${s.date}</div>
+                <div class="classroom-submission-meta">by ${(s.author || 'Anonymous').replace(/</g,'&lt;')} · ${s.date} ${fbBadge}</div>
             </div>
             <button class="classroom-submission-remove" data-id="${s.id}">Remove</button>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
 // Teacher: remove submission
@@ -624,11 +632,19 @@ function openCreativeActivity(type) {
     showScreen('creative-write-screen');
 }
 
-// Teacher buttons for creative activities
-document.getElementById('btn-teacher-myhope').addEventListener('click', () => { if (!currentAge) setAge('middle'); showScreen('my-hope-screen'); });
-document.getElementById('btn-teacher-poetry').addEventListener('click', () => { if (!currentAge) setAge('middle'); openCreativeActivity('poetry'); });
-document.getElementById('btn-teacher-story').addEventListener('click', () => { if (!currentAge) setAge('middle'); openCreativeActivity('story'); });
-document.getElementById('btn-teacher-art').addEventListener('click', () => { if (!currentAge) setAge('middle'); openCreativeActivity('art'); });
+// Teacher buttons for creative activities (delegated — grade-level guide cards)
+document.querySelectorAll('.teacher-extend-app-link[data-activity]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const activity = btn.dataset.activity;
+        const grade = btn.dataset.grade || 'middle';
+        if (!currentAge) setAge(grade);
+        if (activity === 'myhope') {
+            showScreen('my-hope-screen');
+        } else {
+            openCreativeActivity(activity);
+        }
+    });
+});
 
 // Creative screen: back, clear, publish
 document.getElementById('btn-back-creative').addEventListener('click', () => showScreen('welcome-screen'));
@@ -664,14 +680,55 @@ document.getElementById('btn-myhope-publish').addEventListener('click', () => {
 
 
 // ===== Gallery =====
+function getFeedback(code, submissionId) {
+    try { return JSON.parse(localStorage.getItem('hope-feedback-' + code)) || {}; } catch { return {}; }
+}
+function saveFeedback(code, allFeedback) {
+    localStorage.setItem('hope-feedback-' + code, JSON.stringify(allFeedback));
+}
+
+function renderFeedbackHtml(feedback) {
+    if (!feedback) return '';
+    const levelLabels = { '1': 'Emerging', '2': 'Developing', '3': 'Strong' };
+    const markerNames = { motivation: '🔥', belief: '✨', plans: '🗺️', agency: '💪' };
+    let chips = '';
+    if (feedback.scores) {
+        chips = Object.entries(feedback.scores)
+            .filter(([,v]) => v && v !== '0')
+            .map(([k,v]) => `<span class="hope-score-chip" data-marker="${k}">${markerNames[k] || k} <span class="hope-score-level">${levelLabels[v] || v}</span></span>`)
+            .join('');
+    }
+    const comment = feedback.comment ? `<div class="submission-feedback-comment">"${feedback.comment.replace(/</g,'&lt;').replace(/>/g,'&gt;')}"</div>` : '';
+    if (!chips && !comment) return '';
+    return `<div class="submission-feedback"><div class="submission-feedback-header">Teacher Feedback</div>${chips ? `<div class="hope-scores">${chips}</div>` : ''}${comment}</div>`;
+}
+
+function renderScoringPanel(submissionId) {
+    return `<div class="scoring-panel" data-sub-id="${submissionId}">
+        <h5>Rate HOPE Markers</h5>
+        <div class="scoring-markers">
+            <div class="scoring-marker" data-marker="motivation"><label>🔥 Motivation</label><select data-marker="motivation"><option value="0">—</option><option value="1">Emerging</option><option value="2">Developing</option><option value="3">Strong</option></select></div>
+            <div class="scoring-marker" data-marker="belief"><label>✨ Belief</label><select data-marker="belief"><option value="0">—</option><option value="1">Emerging</option><option value="2">Developing</option><option value="3">Strong</option></select></div>
+            <div class="scoring-marker" data-marker="plans"><label>🗺️ Plans</label><select data-marker="plans"><option value="0">—</option><option value="1">Emerging</option><option value="2">Developing</option><option value="3">Strong</option></select></div>
+            <div class="scoring-marker" data-marker="agency"><label>💪 Agency</label><select data-marker="agency"><option value="0">—</option><option value="1">Emerging</option><option value="2">Developing</option><option value="3">Strong</option></select></div>
+        </div>
+        <textarea class="scoring-comment" placeholder="Written feedback (optional)"></textarea>
+        <div class="scoring-actions">
+            <button class="btn btn-small btn-primary btn-save-score" data-sub-id="${submissionId}">Save Feedback</button>
+        </div>
+    </div>`;
+}
+
 function renderGallery(filter) {
     filter = filter || 'all';
     let code = getStudentClassroom();
     const classroom = getClassroom();
+    const isTeacher = !!classroom;
     if (classroom) code = classroom.code;
     document.getElementById('gallery-classroom-name').textContent = classroom ? classroom.name : code ? 'Classroom ' + code : 'No classroom joined';
 
     const subs = code ? getSubmissions(code) : [];
+    const allFeedback = code ? getFeedback(code) : {};
     const filtered = filter === 'all' ? subs : subs.filter(s => s.type === filter);
     const cardsEl = document.getElementById('gallery-cards');
     const emptyEl = document.getElementById('gallery-empty');
@@ -695,12 +752,34 @@ function renderGallery(filter) {
                 .join('');
         }
         const preview = s.content ? s.content.replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
-        return `<div class="gallery-card" data-type="${s.type}">
+        const feedbackHtml = renderFeedbackHtml(allFeedback[s.id]);
+        const scoringHtml = isTeacher ? renderScoringPanel(s.id) : '';
+        return `<div class="gallery-card" data-type="${s.type}" data-id="${s.id}">
             <div class="gallery-card-header"><span class="gallery-card-type">${typeIcons[s.type] || '📄'}</span><span class="gallery-card-title">${(s.title || 'Untitled').replace(/</g,'&lt;')}</span></div>
             <div class="gallery-card-author">by ${(s.author || 'Anonymous').replace(/</g,'&lt;')} · ${s.date} · ${typeLabels[s.type] || s.type}</div>
             ${s.markers ? markerHtml : `<div class="gallery-card-text">${preview}</div>`}
+            ${feedbackHtml}
+            ${scoringHtml}
         </div>`;
     }).join('');
+
+    // Pre-fill existing scores for teacher
+    if (isTeacher) {
+        cardsEl.querySelectorAll('.scoring-panel').forEach(panel => {
+            const subId = panel.dataset.subId;
+            const fb = allFeedback[subId];
+            if (fb && fb.scores) {
+                Object.entries(fb.scores).forEach(([marker, val]) => {
+                    const sel = panel.querySelector(`select[data-marker="${marker}"]`);
+                    if (sel) sel.value = val;
+                });
+            }
+            if (fb && fb.comment) {
+                const ta = panel.querySelector('.scoring-comment');
+                if (ta) ta.value = fb.comment;
+            }
+        });
+    }
 }
 
 // Gallery: back
@@ -716,6 +795,129 @@ document.querySelector('.gallery-filters').addEventListener('click', (e) => {
     btn.classList.add('active');
     renderGallery(btn.dataset.filter);
 });
+
+// Gallery: save teacher feedback score
+document.getElementById('gallery-cards').addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-save-score');
+    if (!btn) return;
+    const subId = btn.dataset.subId;
+    const panel = btn.closest('.scoring-panel');
+    if (!panel) return;
+
+    const classroom = getClassroom();
+    if (!classroom) return;
+
+    const scores = {};
+    panel.querySelectorAll('select[data-marker]').forEach(sel => {
+        scores[sel.dataset.marker] = sel.value;
+    });
+    const comment = panel.querySelector('.scoring-comment').value.trim();
+
+    const allFeedback = getFeedback(classroom.code);
+    allFeedback[subId] = { scores, comment, date: new Date().toLocaleDateString() };
+    saveFeedback(classroom.code, allFeedback);
+
+    btn.textContent = '✓ Saved';
+    setTimeout(() => { btn.textContent = 'Save Feedback'; }, 1500);
+});
+
+
+// ===== Join Classroom Strip (Age Selection Screen) =====
+(function initJoinClassroomStrip() {
+    const strip = document.getElementById('join-classroom-strip');
+    if (!strip) return;
+
+    const toggleBtn = document.getElementById('btn-join-classroom-toggle');
+    const joinBtn = document.getElementById('btn-join-code');
+    const leaveBtn = document.getElementById('btn-leave-classroom');
+    const codeInput = document.getElementById('join-code-input');
+    const statusEl = document.getElementById('join-classroom-status');
+    const badgeEl = document.getElementById('join-classroom-name-display');
+
+    const collapsedEl = document.getElementById('join-classroom-collapsed');
+    const expandedEl = document.getElementById('join-classroom-expanded');
+    const activeEl = document.getElementById('join-classroom-active');
+
+    function updateStrip() {
+        const code = getStudentClassroom();
+
+        if (code && !getClassroom()) {
+            // Student is in a classroom
+            collapsedEl.classList.add('hidden');
+            expandedEl.classList.add('hidden');
+            activeEl.classList.remove('hidden');
+            if (badgeEl) badgeEl.textContent = code;
+        } else {
+            // Not in a classroom — show toggle
+            collapsedEl.classList.remove('hidden');
+            expandedEl.classList.add('hidden');
+            activeEl.classList.add('hidden');
+        }
+        updateWelcomeClassroomStep();
+    }
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            collapsedEl.classList.add('hidden');
+            expandedEl.classList.remove('hidden');
+            statusEl.classList.add('hidden');
+            if (codeInput) codeInput.focus();
+        });
+    }
+
+    if (joinBtn) {
+        joinBtn.addEventListener('click', () => {
+            const val = codeInput.value.trim().toUpperCase();
+            if (!val || val.length < 4) {
+                statusEl.textContent = 'Please enter a valid classroom code.';
+                statusEl.classList.remove('hidden');
+                return;
+            }
+            setStudentClassroom(val);
+            statusEl.textContent = 'Joined classroom ' + val + '!';
+            statusEl.classList.remove('hidden');
+            setTimeout(updateStrip, 800);
+        });
+    }
+
+    if (leaveBtn) {
+        leaveBtn.addEventListener('click', () => {
+            localStorage.removeItem('hope-student-classroom');
+            statusEl.textContent = '';
+            statusEl.classList.add('hidden');
+            codeInput.value = '';
+            updateStrip();
+        });
+    }
+
+    // Init on load
+    updateStrip();
+})();
+
+
+// ===== Welcome Screen Classroom Step =====
+function updateWelcomeClassroomStep() {
+    const step = document.getElementById('journey-classroom-step');
+    if (!step) return;
+    const code = getStudentClassroom();
+    const classroom = getClassroom();
+    if (code && !classroom) {
+        step.classList.remove('hidden');
+        const badge = document.getElementById('journey-classroom-badge');
+        if (badge) badge.textContent = '🏫 Classroom: ' + code;
+    } else {
+        step.classList.add('hidden');
+    }
+}
+
+// Student gallery button on welcome screen
+const btnStudentGallery = document.getElementById('btn-student-gallery');
+if (btnStudentGallery) {
+    btnStudentGallery.addEventListener('click', () => {
+        showScreen('gallery-screen');
+        renderGallery();
+    });
+}
 
 
 // ===== My HOPE Story — Personal Reflection Activity =====
@@ -4882,9 +5084,6 @@ document.getElementById('btn-back-teacher-hub').addEventListener('click', () => 
 });
 
 // Teacher Hub card buttons
-document.getElementById('btn-teacher-hub-setup').addEventListener('click', () => {
-    document.getElementById('teacher-modal').classList.remove('hidden');
-});
 document.getElementById('btn-teacher-hub-planning').addEventListener('click', () => {
     showScreen('worksheet-teacher-screen');
 });

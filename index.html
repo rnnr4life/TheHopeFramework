@@ -235,6 +235,26 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Join a Classroom (optional) -->
+            <div class="join-classroom-strip" id="join-classroom-strip">
+                <div class="join-classroom-collapsed" id="join-classroom-collapsed">
+                    <button class="join-classroom-toggle" id="btn-join-classroom-toggle">🏫 Have a classroom code from your teacher?</button>
+                </div>
+                <div class="join-classroom-expanded hidden" id="join-classroom-expanded">
+                    <p class="join-classroom-label">Enter the code your teacher gave you:</p>
+                    <div class="join-classroom-form">
+                        <input type="text" id="join-code-input" class="classroom-input classroom-code-input" placeholder="e.g. ABC123" maxlength="6" />
+                        <button class="btn btn-small btn-primary" id="btn-join-code">Join</button>
+                    </div>
+                    <p class="join-classroom-status hidden" id="join-classroom-status"></p>
+                </div>
+                <div class="join-classroom-active hidden" id="join-classroom-active">
+                    <span class="join-classroom-badge">✅ Joined: <strong id="join-classroom-name-display"></strong></span>
+                    <button class="btn btn-small btn-muted" id="btn-leave-classroom">Leave</button>
+                </div>
+            </div>
+
             <div class="teacher-link">
                 <div class="teacher-divider">
                     <span class="teacher-divider-line"></span>
@@ -338,109 +358,12 @@
                 </div>
             </div>
 
-            <!-- Quick Start — featured -->
-            <div class="teacher-hub-featured">
-                <div class="teacher-hub-card teacher-hub-card--featured">
-                    <div class="teacher-hub-card-icon">⚙️</div>
-                    <div class="teacher-hub-card-body">
-                        <h3>Classroom Setup</h3>
-                        <p>Pre-configure the app for your students — pick a grade level, paste a story, and skip steps. The fastest way to get started.</p>
-                    </div>
-                    <button class="btn btn-primary" id="btn-teacher-hub-setup">Get Started</button>
-                </div>
-            </div>
-
-            <!-- Lesson Planning -->
+            <!-- ① Your Classroom — First action step -->
             <div class="teacher-hub-section">
-                <h4 class="teacher-hub-section-label">📖 Lesson Planning</h4>
-                <div class="teacher-hub-grid teacher-hub-grid--3">
-                    <div class="teacher-hub-card">
-                        <div class="teacher-hub-card-icon">📋</div>
-                        <h3>Planning Page</h3>
-                        <p>Record HOPE markers while reading climate literature — a structured planning tool.</p>
-                        <button class="btn btn-small" id="btn-teacher-hub-planning">Open</button>
-                    </div>
-                    <div class="teacher-hub-card">
-                        <div class="teacher-hub-card-icon">💬</div>
-                        <h3>Climate Conversations</h3>
-                        <p>Discussion prompts for each HOPE marker to spark meaningful student dialogue.</p>
-                        <button class="btn btn-small" id="btn-teacher-hub-convo">Open</button>
-                    </div>
-                    <div class="teacher-hub-card">
-                        <div class="teacher-hub-card-icon">🎬</div>
-                        <h3>Guided Example</h3>
-                        <p>Watch a story get analyzed step-by-step — great for modeling the framework in class.</p>
-                        <button class="btn btn-small" id="btn-teacher-hub-guided">Open</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Student & Research Resources -->
-            <div class="teacher-hub-section">
-                <h4 class="teacher-hub-section-label">📚 Resources</h4>
-                <div class="teacher-hub-grid teacher-hub-grid--2">
-                    <div class="teacher-hub-card">
-                        <div class="teacher-hub-card-icon">📝</div>
-                        <h3>Student Worksheets</h3>
-                        <p>Printable, fillable worksheets for students to find HOPE markers in any story.</p>
-                        <button class="btn btn-small" id="btn-teacher-hub-worksheets">Browse</button>
-                    </div>
-                    <div class="teacher-hub-card">
-                        <div class="teacher-hub-card-icon">📄</div>
-                        <h3>Original Research Paper</h3>
-                        <p>Read Dr. Colleen Redmond's published article in <em>Climate Literacy in Education</em>.</p>
-                        <a href="https://doi.org/10.24926/cle.v2i1.6231" target="_blank" rel="noopener noreferrer" class="btn btn-small">Read Paper</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Extend the Learning — Creative Expression -->
-            <div class="teacher-hub-section">
-                <h4 class="teacher-hub-section-label">🎨 Extend the Learning — Creative Expression</h4>
-                <p class="teacher-section-desc">Move students from analysis to creation. All activities happen right here in the app. Students create work, publish it to your private classroom, and review each other's submissions.</p>
-                <div class="teacher-extend-grid">
-                    <div class="teacher-extend-card">
-                        <div class="teacher-extend-icon">🌱</div>
-                        <div class="teacher-extend-body">
-                            <h3>My HOPE Story</h3>
-                            <p>Students choose writing or art mode and reflect on each HOPE marker in their own lives. When finished, they can publish their story to the classroom gallery for classmates to read.</p>
-                            <button class="btn btn-small teacher-extend-app-link" id="btn-teacher-myhope">Open Activity</button>
-                        </div>
-                    </div>
-                    <div class="teacher-extend-card">
-                        <div class="teacher-extend-icon">📝</div>
-                        <div class="teacher-extend-body">
-                            <h3>Climate Poetry</h3>
-                            <p>Students write poems that express eco-grief <em>and</em> hope — haiku, free verse, or "Where I'm From" poems adapted for the environment. Published poems appear in the classroom gallery.</p>
-                            <button class="btn btn-small teacher-extend-app-link" id="btn-teacher-poetry">Open Activity</button>
-                        </div>
-                    </div>
-                    <div class="teacher-extend-card">
-                        <div class="teacher-extend-icon">✍️</div>
-                        <div class="teacher-extend-body">
-                            <h3>Write a HOPE Story</h3>
-                            <p>Students write short fiction or personal narratives that include all four HOPE markers. They become the authors — creating stories where characters move from grief to action.</p>
-                            <button class="btn btn-small teacher-extend-app-link" id="btn-teacher-story">Open Activity</button>
-                        </div>
-                    </div>
-                    <div class="teacher-extend-card">
-                        <div class="teacher-extend-icon">🎨</div>
-                        <div class="teacher-extend-body">
-                            <h3>Art Description</h3>
-                            <p>Students plan and describe visual artwork — posters, murals, collages, or digital art — that represents the HOPE markers. They write about what they'd create, why, and what each element means.</p>
-                            <button class="btn btn-small teacher-extend-app-link" id="btn-teacher-art">Open Activity</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Classroom Management -->
-            <div class="teacher-hub-section">
-                <h4 class="teacher-hub-section-label">🏫 Your Classroom</h4>
-                <p class="teacher-section-desc">Create a private classroom space. Students join with your code and publish their work for classmates to review. You control everything — only you can create, manage, and remove content.</p>
+                <h4 class="teacher-hub-section-label">🏫 Step 1: Set Up Your Classroom</h4>
+                <p class="teacher-section-desc">Create a private classroom space. Students join with your code, publish their work, and review classmates' submissions. You control everything — only you can manage and remove content.</p>
 
                 <div id="classroom-setup" class="classroom-setup">
-                    <!-- No classroom yet -->
                     <div id="classroom-create-panel" class="classroom-create-panel">
                         <div class="classroom-create-content">
                             <span class="classroom-create-icon">🏫</span>
@@ -453,7 +376,6 @@
                         </div>
                     </div>
 
-                    <!-- Classroom exists -->
                     <div id="classroom-dashboard" class="classroom-dashboard hidden">
                         <div class="classroom-info">
                             <div class="classroom-info-main">
@@ -486,175 +408,274 @@
                 </div>
             </div>
 
-            <!-- Youth Climate Heroes — Grouped by Age Level -->
+            <!-- ② Grade-Level Guides — Activities, Heroes & Literature per grade -->
             <div class="teacher-hub-section">
-                <h4 class="teacher-hub-section-label">🌟 Youth Climate Heroes &amp; Literature</h4>
-                <p class="teacher-section-desc">Real young climate leaders grouped by the age level they best connect with, plus suggested literature that pairs well with the HOPE Framework. Each hero and book links to age-appropriate reading.</p>
+                <h4 class="teacher-hub-section-label">📚 Step 2: Grade-Level Guides</h4>
+                <p class="teacher-section-desc">Everything organized by grade level: student activities to assign, real youth climate heroes as examples, and literature that pairs with the HOPE Framework.</p>
 
                 <!-- Elementary (K–5) -->
-                <div class="teacher-heroes-group" data-age="elementary">
-                    <h5 class="teacher-heroes-group-label">🌻 Elementary (Grades K–5)</h5>
-                    <p class="teacher-heroes-group-desc">Young activists who started early — perfect for showing kids that even small people can make big change.</p>
-                    <div class="teacher-extend-grid">
-                        <div class="teacher-extend-card">
-                            <div class="teacher-extend-icon">🇮🇳</div>
-                            <div class="teacher-extend-body">
-                                <h3>Ridhima Pandey</h3>
-                                <p>Filed a lawsuit against the Indian government at age 9 for not protecting the environment. She later joined 15 other kids in a complaint to the United Nations. Proof that even the youngest voices matter.</p>
-                                <a href="https://www.nationalgeographic.com/family/article/kids-suing-governments-for-climate-change" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">Nat Geo Kids: Kids Suing for Climate →</a>
+                <div class="teacher-grade-guide" data-age="elementary">
+                    <h5 class="teacher-grade-guide-label">🌻 Elementary (Grades K–5)</h5>
+
+                    <div class="teacher-grade-subsection">
+                        <h6 class="teacher-grade-sub-label">🎨 Assign These Activities</h6>
+                        <p class="teacher-grade-sub-desc">Simple, creative activities that let younger students explore the HOPE markers through their own experiences.</p>
+                        <div class="teacher-extend-grid">
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">🌱</div>
+                                <div class="teacher-extend-body">
+                                    <h3>My HOPE Story</h3>
+                                    <p>Students pick writing or art mode and reflect on each marker in their own lives. Simple prompts use "I see / I feel / I wish / I will" patterns.</p>
+                                    <button class="btn btn-small teacher-extend-app-link" data-activity="myhope" data-grade="elementary">Preview</button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="teacher-extend-card">
-                            <div class="teacher-extend-icon">🇨🇴</div>
-                            <div class="teacher-extend-body">
-                                <h3>Francisco Vera</h3>
-                                <p>Started environmental activism in Colombia at age 7, founding the Guardians for Life movement. He speaks at international forums about children's rights and the planet. Shows that caring starts young.</p>
-                                <a href="https://www.bbc.com/news/world-latin-america-55893055" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">BBC: Colombia's 11-year-old Environmentalist →</a>
-                            </div>
-                        </div>
-                        <div class="teacher-extend-card">
-                            <div class="teacher-extend-icon">🇺🇸</div>
-                            <div class="teacher-extend-body">
-                                <h3>Lilly Platt</h3>
-                                <p>Started picking up litter at age 7 on walks with her grandpa in the Netherlands. She's collected thousands of pieces of plastic and become an ambassador for plastic pollution awareness. One small action, repeated, becomes big change.</p>
-                                <a href="https://www.earthday.org/youth-and-the-environment/" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">Earth Day: Youth Environmental Leaders →</a>
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">📝</div>
+                                <div class="teacher-extend-body">
+                                    <h3>Climate Poetry</h3>
+                                    <p>Write poems about nature using simple patterns. Great for building vocabulary around feelings and the environment.</p>
+                                    <button class="btn btn-small teacher-extend-app-link" data-activity="poetry" data-grade="elementary">Preview</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="teacher-heroes-books">
-                        <h6 class="teacher-heroes-books-label">📚 Suggested Literature</h6>
+
+                    <div class="teacher-grade-subsection">
+                        <h6 class="teacher-grade-sub-label">🌟 Youth Climate Heroes</h6>
+                        <div class="teacher-extend-grid">
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">🇮🇳</div>
+                                <div class="teacher-extend-body">
+                                    <h3>Ridhima Pandey</h3>
+                                    <p>Filed a lawsuit against the Indian government at age 9 for not protecting the environment. Proof that even the youngest voices matter.</p>
+                                    <a href="https://www.nationalgeographic.com/family/article/kids-suing-governments-for-climate-change" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">Nat Geo Kids: Kids Suing for Climate →</a>
+                                </div>
+                            </div>
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">🇨🇴</div>
+                                <div class="teacher-extend-body">
+                                    <h3>Francisco Vera</h3>
+                                    <p>Started environmental activism in Colombia at age 7, founding the Guardians for Life movement. Shows that caring starts young.</p>
+                                    <a href="https://www.bbc.com/news/world-latin-america-55893055" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">BBC: Colombia's 11-year-old Environmentalist →</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="teacher-grade-subsection">
+                        <h6 class="teacher-grade-sub-label">📖 Suggested Literature</h6>
                         <ul class="teacher-heroes-book-list">
-                            <li>
-                                <strong>The Lorax</strong> by Dr. Seuss
-                                <span class="teacher-heroes-book-desc">— The classic story of speaking for the trees. All four HOPE markers appear as the boy at the end receives the last seed.</span>
-                            </li>
-                            <li>
-                                <strong>The Water Princess</strong> by Susan Verde
-                                <span class="teacher-heroes-book-desc">— Based on the childhood of model Georgie Badiel, this story shows motivation and plans as a girl dreams of bringing clean water to her village.</span>
-                            </li>
-                            <li>
-                                <strong>We Are Water Protectors</strong> by Carole Lindstrom
-                                <span class="teacher-heroes-book-desc">— An Ojibwe-inspired story about protecting water from a "black snake" (pipeline). Strong themes of agency and belief rooted in Indigenous values.</span>
-                            </li>
-                            <li>
-                                <strong>The Watcher: Jane Goodall's Life with the Chimps</strong> by Jeanette Winter
-                                <span class="teacher-heroes-book-desc">— Jane's story is a perfect HOPE journey: motivation (love of animals), belief (she could study them), plans (going to Africa), agency (decades of conservation).</span>
-                            </li>
+                            <li><strong>The Lorax</strong> by Dr. Seuss <span class="teacher-heroes-book-desc">— The classic story of speaking for the trees. All four HOPE markers appear as the boy receives the last seed.</span></li>
+                            <li><strong>The Water Princess</strong> by Susan Verde <span class="teacher-heroes-book-desc">— A girl dreams of bringing clean water to her village. Strong motivation and plans.</span></li>
+                            <li><strong>We Are Water Protectors</strong> by Carole Lindstrom <span class="teacher-heroes-book-desc">— An Ojibwe-inspired story about protecting water. Themes of agency and belief rooted in Indigenous values.</span></li>
+                            <li><strong>The Watcher</strong> by Jeanette Winter <span class="teacher-heroes-book-desc">— Jane Goodall's story is a perfect HOPE journey: motivation, belief, plans, and agency.</span></li>
                         </ul>
                     </div>
                 </div>
 
                 <!-- Middle School (6–8) -->
-                <div class="teacher-heroes-group" data-age="middle">
-                    <h5 class="teacher-heroes-group-label">🧭 Middle School (Grades 6–8)</h5>
-                    <p class="teacher-heroes-group-desc">Teens who turned frustration into organized action — relatable for students starting to understand systems and injustice.</p>
-                    <div class="teacher-extend-grid">
-                        <div class="teacher-extend-card">
-                            <div class="teacher-extend-icon">🇸🇪</div>
-                            <div class="teacher-extend-body">
-                                <h3>Greta Thunberg</h3>
-                                <p>At 15, Greta sat alone outside the Swedish parliament with a sign. Within a year, millions of students worldwide joined her Fridays for Future strikes. Her story is all four HOPE markers in action: eco-grief became motivation, evidence built belief, weekly strikes were her plan, and she took agency by speaking to world leaders.</p>
-                                <a href="https://www.wonderopolis.org/wonder/who-is-greta-thunberg" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">Wonderopolis: Who Is Greta Thunberg? →</a>
+                <div class="teacher-grade-guide" data-age="middle">
+                    <h5 class="teacher-grade-guide-label">🧭 Middle School (Grades 6–8)</h5>
+
+                    <div class="teacher-grade-subsection">
+                        <h6 class="teacher-grade-sub-label">🎨 Assign These Activities</h6>
+                        <p class="teacher-grade-sub-desc">Activities that push students to think critically about the markers and connect them to real environmental issues.</p>
+                        <div class="teacher-extend-grid">
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">🌱</div>
+                                <div class="teacher-extend-body">
+                                    <h3>My HOPE Story</h3>
+                                    <p>Students reflect on personal experiences with each marker — times they felt motivated, believed change was possible, made plans, or took action.</p>
+                                    <button class="btn btn-small teacher-extend-app-link" data-activity="myhope" data-grade="middle">Preview</button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="teacher-extend-card">
-                            <div class="teacher-extend-icon">🇺🇸</div>
-                            <div class="teacher-extend-body">
-                                <h3>Jerome Foster II</h3>
-                                <p>Began climate striking at 15 outside the White House every Friday. Founded OneMillionOfUs to register young voters for climate action. At 18, became the youngest member of the White House Environmental Justice Advisory Council. Planning plus agency, amplified.</p>
-                                <a href="https://www.teenvogue.com/story/jerome-foster-white-house-environmental-justice-council" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">Teen Vogue: Jerome Foster's Climate Journey →</a>
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">✍️</div>
+                                <div class="teacher-extend-body">
+                                    <h3>Write a HOPE Story</h3>
+                                    <p>Students write fiction or personal narratives that include all four markers. Characters move from eco-grief through motivation, belief, planning, and action.</p>
+                                    <button class="btn btn-small teacher-extend-app-link" data-activity="story" data-grade="middle">Preview</button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="teacher-extend-card">
-                            <div class="teacher-extend-icon">🇲🇽</div>
-                            <div class="teacher-extend-body">
-                                <h3>Xiye Bastida</h3>
-                                <p>An Indigenous Mexican-Chilean climate activist who moved to New York after floods devastated her hometown. She co-organized the NYC climate strike of 300,000 people at age 17. Her story connects eco-grief to Indigenous knowledge and collective action.</p>
-                                <a href="https://www.yaleclimateconnections.org/2021/01/teen-xiye-bastida-is-bringing-indigenous-knowledge-to-climate-activism/" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">Yale Climate: Xiye Bastida's Story →</a>
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">📝</div>
+                                <div class="teacher-extend-body">
+                                    <h3>Climate Poetry</h3>
+                                    <p>Poems that start with eco-grief and end with hope. Students include at least one HOPE marker in their writing.</p>
+                                    <button class="btn btn-small teacher-extend-app-link" data-activity="poetry" data-grade="middle">Preview</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="teacher-heroes-books">
-                        <h6 class="teacher-heroes-books-label">📚 Suggested Literature</h6>
+
+                    <div class="teacher-grade-subsection">
+                        <h6 class="teacher-grade-sub-label">🌟 Youth Climate Heroes</h6>
+                        <div class="teacher-extend-grid">
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">🇸🇪</div>
+                                <div class="teacher-extend-body">
+                                    <h3>Greta Thunberg</h3>
+                                    <p>At 15, sat alone outside the Swedish parliament. Within a year, millions joined Fridays for Future. All four HOPE markers in one story.</p>
+                                    <a href="https://www.wonderopolis.org/wonder/who-is-greta-thunberg" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">Wonderopolis: Who Is Greta Thunberg? →</a>
+                                </div>
+                            </div>
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">🇺🇸</div>
+                                <div class="teacher-extend-body">
+                                    <h3>Jerome Foster II</h3>
+                                    <p>Climate striking at 15 outside the White House, then founded OneMillionOfUs. At 18, youngest White House Advisory Council member.</p>
+                                    <a href="https://www.teenvogue.com/story/jerome-foster-white-house-environmental-justice-council" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">Teen Vogue: Jerome Foster's Climate Journey →</a>
+                                </div>
+                            </div>
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">🇲🇽</div>
+                                <div class="teacher-extend-body">
+                                    <h3>Xiye Bastida</h3>
+                                    <p>Indigenous Mexican-Chilean activist who co-organized the NYC climate strike of 300,000 people at age 17. Connects Indigenous knowledge to climate action.</p>
+                                    <a href="https://www.yaleclimateconnections.org/2021/01/teen-xiye-bastida-is-bringing-indigenous-knowledge-to-climate-activism/" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">Yale Climate: Xiye Bastida's Story →</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="teacher-grade-subsection">
+                        <h6 class="teacher-grade-sub-label">📖 Suggested Literature</h6>
                         <ul class="teacher-heroes-book-list">
-                            <li>
-                                <strong>Hoot</strong> by Carl Hiaasen
-                                <span class="teacher-heroes-book-desc">— Three middle schoolers fight to protect burrowing owls from a construction site. Motivation, plans, and agency drive the plot. A perfect HOPE Framework text.</span>
-                            </li>
-                            <li>
-                                <strong>The Wild Robot</strong> by Peter Brown
-                                <span class="teacher-heroes-book-desc">— A robot learns to survive in the wilderness and becomes part of the ecosystem. Explores belief, adaptation, and the relationship between technology and nature.</span>
-                            </li>
-                            <li>
-                                <strong>A Long Walk to Water</strong> by Linda Sue Park
-                                <span class="teacher-heroes-book-desc">— Based on a true story of a Sudanese boy who walked for water and later built wells. Motivation from suffering, belief from survival, plans from education, agency through giving back.</span>
-                            </li>
-                            <li>
-                                <strong>Flush</strong> by Carl Hiaasen
-                                <span class="teacher-heroes-book-desc">— A boy's father is jailed for sinking a casino boat dumping sewage into the ocean. The kids investigate and take action. Environmental justice through a middle-school lens.</span>
-                            </li>
-                            <li>
-                                <strong>No One Is Too Small to Make a Difference</strong> by Greta Thunberg
-                                <span class="teacher-heroes-book-desc">— Greta's own speeches collected in one short book. Pairs directly with studying her as a climate hero. Great for close reading and HOPE marker analysis.</span>
-                            </li>
+                            <li><strong>Hoot</strong> by Carl Hiaasen <span class="teacher-heroes-book-desc">— Three middle schoolers fight to protect burrowing owls. A perfect HOPE Framework text.</span></li>
+                            <li><strong>The Wild Robot</strong> by Peter Brown <span class="teacher-heroes-book-desc">— A robot learns to survive in the wilderness. Explores belief, adaptation, and nature.</span></li>
+                            <li><strong>A Long Walk to Water</strong> by Linda Sue Park <span class="teacher-heroes-book-desc">— True story of a Sudanese boy. All four markers: motivation from suffering, belief from survival, plans from education, agency through giving back.</span></li>
+                            <li><strong>Flush</strong> by Carl Hiaasen <span class="teacher-heroes-book-desc">— Kids investigate a casino boat dumping sewage. Environmental justice through a middle-school lens.</span></li>
+                            <li><strong>No One Is Too Small to Make a Difference</strong> by Greta Thunberg <span class="teacher-heroes-book-desc">— Greta's speeches collected. Great for close reading and HOPE marker analysis.</span></li>
                         </ul>
                     </div>
                 </div>
 
                 <!-- High School (9–12) -->
-                <div class="teacher-heroes-group" data-age="high">
-                    <h5 class="teacher-heroes-group-label">🔬 High School (Grades 9–12)</h5>
-                    <p class="teacher-heroes-group-desc">Young adults tackling systems, policy, and justice — activists whose stories invite critical analysis of power, strategy, and intersectionality.</p>
-                    <div class="teacher-extend-grid">
-                        <div class="teacher-extend-card">
-                            <div class="teacher-extend-icon">🇺🇸</div>
-                            <div class="teacher-extend-body">
-                                <h3>Isra Hirsi</h3>
-                                <p>Co-founded the US Youth Climate Strike at 16, organizing nationwide school walkouts. She centers her work on environmental racism — how climate change hits communities of color hardest. Her advocacy connects environmental justice to systemic change.</p>
-                                <a href="https://www.theguardian.com/commentisfree/2019/mar/14/climate-change-movement-isra-hirsi" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">The Guardian: Isra Hirsi on Climate Justice →</a>
+                <div class="teacher-grade-guide" data-age="high">
+                    <h5 class="teacher-grade-guide-label">🔬 High School (Grades 9–12)</h5>
+
+                    <div class="teacher-grade-subsection">
+                        <h6 class="teacher-grade-sub-label">🎨 Assign These Activities</h6>
+                        <p class="teacher-grade-sub-desc">Advanced activities that invite critical analysis of systems, power, and personal agency in the environmental crisis.</p>
+                        <div class="teacher-extend-grid">
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">🌱</div>
+                                <div class="teacher-extend-body">
+                                    <h3>My HOPE Story</h3>
+                                    <p>Reflective writing on personal environmental identity — how values, place, and experience shape emotional responses to climate issues.</p>
+                                    <button class="btn btn-small teacher-extend-app-link" data-activity="myhope" data-grade="high">Preview</button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="teacher-extend-card">
-                            <div class="teacher-extend-icon">🇺🇬</div>
-                            <div class="teacher-extend-body">
-                                <h3>Vanessa Nakate</h3>
-                                <p>Ugandan activist who started the Rise Up Movement and Africa-based Fridays for Future. She installed solar panels in schools, planted trees, and challenged global media for cropping African activists out of climate photos. A powerful study in agency and voice.</p>
-                                <a href="https://time.com/collection/next-generation-leaders/5900743/vanessa-nakate/" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">TIME: Vanessa Nakate — Next Gen Leader →</a>
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">✍️</div>
+                                <div class="teacher-extend-body">
+                                    <h3>Write a HOPE Story</h3>
+                                    <p>Craft a narrative — fiction or personal essay — that traces the full arc from eco-grief to agency. Protagonist must experience genuine grief before finding their path.</p>
+                                    <button class="btn btn-small teacher-extend-app-link" data-activity="story" data-grade="high">Preview</button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="teacher-extend-card">
-                            <div class="teacher-extend-icon">🇺🇸</div>
-                            <div class="teacher-extend-body">
-                                <h3>Kelsey Juliana &amp; Juliana v. United States</h3>
-                                <p>Lead plaintiff in a landmark lawsuit where 21 young people sued the US government for failing to protect the climate. Filed at age 19. The case argues that a stable climate is a constitutional right. A case study in legal agency and systemic plans.</p>
-                                <a href="https://www.ourchildrenstrust.org/juliana-v-us" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">Our Children's Trust: Juliana v. US →</a>
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">📝</div>
+                                <div class="teacher-extend-body">
+                                    <h3>Climate Poetry</h3>
+                                    <p>Explore tension between eco-grief and agency. Consider how form and structure can mirror the emotional journey from despair to action.</p>
+                                    <button class="btn btn-small teacher-extend-app-link" data-activity="poetry" data-grade="high">Preview</button>
+                                </div>
+                            </div>
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">🎨</div>
+                                <div class="teacher-extend-body">
+                                    <h3>Art Concept</h3>
+                                    <p>Conceptualize gallery-ready artwork — describe medium, composition, symbolism, and how the piece guides viewers from eco-grief to empowerment.</p>
+                                    <button class="btn btn-small teacher-extend-app-link" data-activity="art" data-grade="high">Preview</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="teacher-heroes-books">
-                        <h6 class="teacher-heroes-books-label">📚 Suggested Literature</h6>
+
+                    <div class="teacher-grade-subsection">
+                        <h6 class="teacher-grade-sub-label">🌟 Youth Climate Heroes</h6>
+                        <div class="teacher-extend-grid">
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">🇺🇸</div>
+                                <div class="teacher-extend-body">
+                                    <h3>Isra Hirsi</h3>
+                                    <p>Co-founded the US Youth Climate Strike at 16. Centers environmental racism — how climate change hits communities of color hardest.</p>
+                                    <a href="https://www.theguardian.com/commentisfree/2019/mar/14/climate-change-movement-isra-hirsi" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">The Guardian: Isra Hirsi on Climate Justice →</a>
+                                </div>
+                            </div>
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">🇺🇬</div>
+                                <div class="teacher-extend-body">
+                                    <h3>Vanessa Nakate</h3>
+                                    <p>Ugandan activist — Rise Up Movement, solar panels in schools, challenged global media for erasing African voices from climate coverage.</p>
+                                    <a href="https://time.com/collection/next-generation-leaders/5900743/vanessa-nakate/" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">TIME: Vanessa Nakate — Next Gen Leader →</a>
+                                </div>
+                            </div>
+                            <div class="teacher-extend-card">
+                                <div class="teacher-extend-icon">🇺🇸</div>
+                                <div class="teacher-extend-body">
+                                    <h3>Kelsey Juliana &amp; Juliana v. US</h3>
+                                    <p>Lead plaintiff where 21 young people sued the US government arguing a stable climate is a constitutional right. A case study in legal agency.</p>
+                                    <a href="https://www.ourchildrenstrust.org/juliana-v-us" target="_blank" rel="noopener noreferrer" class="teacher-extend-link">Our Children's Trust: Juliana v. US →</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="teacher-grade-subsection">
+                        <h6 class="teacher-grade-sub-label">📖 Suggested Literature</h6>
                         <ul class="teacher-heroes-book-list">
-                            <li>
-                                <strong>The Sixth Extinction</strong> by Elizabeth Kolbert
-                                <span class="teacher-heroes-book-desc">— Pulitzer Prize–winning examination of mass extinction driven by human activity. Deep motivation and eco-grief, with belief emerging from scientists fighting to preserve species.</span>
-                            </li>
-                            <li>
-                                <strong>Braiding Sweetgrass for Young Adults</strong> by Robin Wall Kimmerer (adapted by Monique Gray Smith)
-                                <span class="teacher-heroes-book-desc">— Indigenous and scientific knowledge woven together. Every chapter contains HOPE markers as Kimmerer shows reciprocal relationships with the earth as a path forward.</span>
-                            </li>
-                            <li>
-                                <strong>The Uninhabitable Earth</strong> by David Wallace-Wells
-                                <span class="teacher-heroes-book-desc">— Unflinching look at what climate change means. Heavy on motivation and eco-grief. Pairs powerfully with the HOPE Framework as students search for belief and agency in the text.</span>
-                            </li>
-                            <li>
-                                <strong>All We Can Save</strong> edited by Ayana Elizabeth Johnson &amp; Katharine K. Wilkinson
-                                <span class="teacher-heroes-book-desc">— Essays and poetry by women leading on climate. Rich with all four markers. Individual essays work well as standalone close-reading texts.</span>
-                            </li>
-                            <li>
-                                <strong>Silent Spring</strong> by Rachel Carson
-                                <span class="teacher-heroes-book-desc">— The book that launched the modern environmental movement. A historical anchor for understanding how motivation and belief can lead to systemic change (the EPA was founded in response).</span>
-                            </li>
+                            <li><strong>The Sixth Extinction</strong> by Elizabeth Kolbert <span class="teacher-heroes-book-desc">— Pulitzer Prize–winning examination of mass extinction. Deep motivation and eco-grief.</span></li>
+                            <li><strong>Braiding Sweetgrass for Young Adults</strong> by Robin Wall Kimmerer <span class="teacher-heroes-book-desc">— Indigenous and scientific knowledge woven together. Every chapter contains HOPE markers.</span></li>
+                            <li><strong>The Uninhabitable Earth</strong> by David Wallace-Wells <span class="teacher-heroes-book-desc">— Unflinching look at climate change. Pairs powerfully with the HOPE Framework.</span></li>
+                            <li><strong>All We Can Save</strong> edited by Johnson &amp; Wilkinson <span class="teacher-heroes-book-desc">— Essays and poetry by women leading on climate. Individual essays work well as standalone texts.</span></li>
+                            <li><strong>Silent Spring</strong> by Rachel Carson <span class="teacher-heroes-book-desc">— The book that launched the environmental movement. A historical anchor for motivation and belief.</span></li>
                         </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ③ Lesson Planning -->
+            <div class="teacher-hub-section">
+                <h4 class="teacher-hub-section-label">📖 Step 3: Lesson Planning</h4>
+                <div class="teacher-hub-grid teacher-hub-grid--3">
+                    <div class="teacher-hub-card">
+                        <div class="teacher-hub-card-icon">📋</div>
+                        <h3>Planning Page</h3>
+                        <p>Record HOPE markers while reading climate literature — a structured planning tool.</p>
+                        <button class="btn btn-small" id="btn-teacher-hub-planning">Open</button>
+                    </div>
+                    <div class="teacher-hub-card">
+                        <div class="teacher-hub-card-icon">💬</div>
+                        <h3>Climate Conversations</h3>
+                        <p>Discussion prompts for each HOPE marker to spark meaningful student dialogue.</p>
+                        <button class="btn btn-small" id="btn-teacher-hub-convo">Open</button>
+                    </div>
+                    <div class="teacher-hub-card">
+                        <div class="teacher-hub-card-icon">🎬</div>
+                        <h3>Guided Example</h3>
+                        <p>Watch a story get analyzed step-by-step — great for modeling the framework in class.</p>
+                        <button class="btn btn-small" id="btn-teacher-hub-guided">Open</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ④ Resources -->
+            <div class="teacher-hub-section">
+                <h4 class="teacher-hub-section-label">📄 Resources</h4>
+                <div class="teacher-hub-grid teacher-hub-grid--2">
+                    <div class="teacher-hub-card">
+                        <div class="teacher-hub-card-icon">📝</div>
+                        <h3>Student Worksheets</h3>
+                        <p>Printable, fillable worksheets for students to find HOPE markers in any story.</p>
+                        <button class="btn btn-small" id="btn-teacher-hub-worksheets">Browse</button>
+                    </div>
+                    <div class="teacher-hub-card">
+                        <div class="teacher-hub-card-icon">📄</div>
+                        <h3>Original Research Paper</h3>
+                        <p>Read Dr. Colleen Redmond's published article in <em>Climate Literacy in Education</em>.</p>
+                        <a href="https://doi.org/10.24926/cle.v2i1.6231" target="_blank" rel="noopener noreferrer" class="btn btn-small">Read Paper</a>
                     </div>
                 </div>
             </div>
@@ -784,6 +805,24 @@
                             <p class="journey-step-desc">Books, shows, websites, and more to continue your journey with the HOPE Framework.</p>
                         </div>
                         <button class="btn btn-small" id="btn-resources" aria-label="View resources">Browse</button>
+                    </div>
+                </div>
+
+                <!-- Step 6: Classroom Gallery (only visible when joined) -->
+                <div class="journey-step journey-step--classroom hidden" id="journey-classroom-step" data-step="6">
+                    <div class="journey-step-marker">
+                        <span class="journey-step-number">6</span>
+                    </div>
+                    <div class="journey-step-card">
+                        <div class="journey-step-icon">🏫</div>
+                        <div class="journey-step-body">
+                            <h3 class="journey-step-title">Your Classroom</h3>
+                            <p class="journey-step-desc">See what your classmates have created. Publish your own work from any activity above.</p>
+                            <div class="journey-classroom-info">
+                                <span class="join-classroom-badge" id="journey-classroom-badge"></span>
+                            </div>
+                        </div>
+                        <button class="btn btn-small" id="btn-student-gallery" aria-label="View classroom gallery">View Gallery</button>
                     </div>
                 </div>
             </div>
