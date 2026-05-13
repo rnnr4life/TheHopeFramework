@@ -230,7 +230,14 @@
             <!-- Top bar -->
             <div class="welcome-topbar">
                 <div class="welcome-topbar-left">
-                    <span class="welcome-topbar-icon">🌍</span>
+                    <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" class="welcome-topbar-wheel" aria-hidden="true">
+                        <path d="M200 200 L200 28 A172 172 0 0 1 372 200 Z" fill="rgba(255,107,107,0.2)"/>
+                        <path d="M200 200 L372 200 A172 172 0 0 1 200 372 Z" fill="rgba(52,211,153,0.2)"/>
+                        <path d="M200 200 L200 372 A172 172 0 0 1 28 200 Z" fill="rgba(56,189,248,0.2)"/>
+                        <path d="M200 200 L28 200 A172 172 0 0 1 200 28 Z" fill="rgba(168,85,247,0.2)"/>
+                        <circle cx="200" cy="200" r="172" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3"/>
+                        <circle cx="200" cy="200" r="80" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+                    </svg>
                     <span class="welcome-topbar-title" id="welcome-topbar-title">The HOPE Framework</span>
                 </div>
                 <button class="btn btn-small btn-muted" id="btn-change-age" aria-label="Change grade level">
@@ -241,6 +248,34 @@
             <!-- Hero -->
             <div class="welcome-hero-section">
                 <div class="welcome-hero-text">
+                    <div class="welcome-hero-wheel" aria-hidden="true">
+                        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" class="hope-wheel-svg hope-wheel-mini">
+                            <defs>
+                                <linearGradient id="grad-mot2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff6b6b" stop-opacity="0.2"/><stop offset="100%" stop-color="#ff6b6b" stop-opacity="0.05"/></linearGradient>
+                                <linearGradient id="grad-age2" x1="1" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#34d399" stop-opacity="0.2"/><stop offset="100%" stop-color="#34d399" stop-opacity="0.05"/></linearGradient>
+                                <linearGradient id="grad-pln2" x1="1" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#38bdf8" stop-opacity="0.2"/><stop offset="100%" stop-color="#38bdf8" stop-opacity="0.05"/></linearGradient>
+                                <linearGradient id="grad-bel2" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#a855f7" stop-opacity="0.2"/><stop offset="100%" stop-color="#a855f7" stop-opacity="0.05"/></linearGradient>
+                                <radialGradient id="centerFrost2" cx="50%" cy="45%" r="55%"><stop offset="0%" stop-color="rgba(255,255,255,0.1)"/><stop offset="100%" stop-color="rgba(15,23,42,0.5)"/></radialGradient>
+                                <filter id="softGlow2"><feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                            </defs>
+                            <circle cx="200" cy="200" r="172" fill="none" stroke="rgba(52,211,153,0.05)" stroke-width="35"/>
+                            <path d="M200 200 L200 28 A172 172 0 0 1 372 200 Z" fill="url(#grad-mot2)"/>
+                            <path d="M200 200 L372 200 A172 172 0 0 1 200 372 Z" fill="url(#grad-age2)"/>
+                            <path d="M200 200 L200 372 A172 172 0 0 1 28 200 Z" fill="url(#grad-pln2)"/>
+                            <path d="M200 200 L28 200 A172 172 0 0 1 200 28 Z" fill="url(#grad-bel2)"/>
+                            <circle cx="200" cy="200" r="172" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+                            <path d="M200 28 A172 172 0 0 1 372 200" fill="none" stroke="#ff6b6b" stroke-width="3" opacity="0.7" stroke-linecap="round" filter="url(#softGlow2)"/>
+                            <path d="M372 200 A172 172 0 0 1 200 372" fill="none" stroke="#34d399" stroke-width="3" opacity="0.7" stroke-linecap="round" filter="url(#softGlow2)"/>
+                            <path d="M200 372 A172 172 0 0 1 28 200" fill="none" stroke="#38bdf8" stroke-width="3" opacity="0.7" stroke-linecap="round" filter="url(#softGlow2)"/>
+                            <path d="M28 200 A172 172 0 0 1 200 28" fill="none" stroke="#a855f7" stroke-width="3" opacity="0.7" stroke-linecap="round" filter="url(#softGlow2)"/>
+                            <circle cx="200" cy="200" r="80" fill="url(#centerFrost2)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+                            <text x="200" y="195" text-anchor="middle" font-family="var(--font-heading)" font-size="22" font-weight="800" fill="white" letter-spacing="0.1em">H.O.P.E</text>
+                            <text x="200" y="62" text-anchor="middle" font-family="var(--font-heading)" font-size="16" font-weight="800" fill="#ff6b6b">Motivation</text>
+                            <text x="330" y="200" text-anchor="middle" font-family="var(--font-heading)" font-size="16" font-weight="800" fill="#34d399">Agency</text>
+                            <text x="200" y="348" text-anchor="middle" font-family="var(--font-heading)" font-size="16" font-weight="800" fill="#38bdf8">Plans</text>
+                            <text x="70" y="200" text-anchor="middle" font-family="var(--font-heading)" font-size="16" font-weight="800" fill="#a855f7">Belief</text>
+                        </svg>
+                    </div>
                     <h1 id="welcome-title">The HOPE Framework</h1>
                     <p class="subtitle" id="welcome-subtitle">Healing Opportunities for Processing Eco-grief</p>
                     <p class="description" id="welcome-desc">
