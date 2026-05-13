@@ -190,110 +190,44 @@ h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
    ================================================ */
 .welcome-hero { margin-bottom: 1rem; }
 
-/* HOPE Wheel Logo — Premium */
-.hope-wheel-logo {
-    width: 320px; height: 320px;
+/* HOPE H-Logo Mark */
+.hope-logo-mark {
+    width: 200px; height: 200px;
     margin: 1.5rem auto 0.5rem;
-    animation: wheel-fade-in 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: logo-fade-in 1s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.4s ease;
 }
-.hope-wheel-logo:hover { transform: scale(1.03); }
-@keyframes wheel-fade-in {
+.hope-logo-mark:hover { transform: scale(1.05); }
+@keyframes logo-fade-in {
     from { opacity: 0; transform: scale(0.85); }
     to { opacity: 1; transform: scale(1); }
 }
-.hope-wheel-svg { width: 100%; height: 100%; overflow: visible; }
-
-/* Arc ring — draw in */
-.wheel-arc {
-    stroke-dasharray: 270;
-    stroke-dashoffset: 270;
-    animation: arc-draw 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+.hope-logo-svg { width: 100%; height: 100%; overflow: visible; }
+.logo-arc {
+    stroke-dasharray: 133; stroke-dashoffset: 133;
+    animation: arc-draw 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
-.arc-motivation { animation-delay: 0.3s; }
-.arc-agency { animation-delay: 0.6s; }
-.arc-plans { animation-delay: 0.9s; }
-.arc-belief { animation-delay: 1.2s; }
+.la1 { animation-delay: 0.2s; } .la2 { animation-delay: 0.4s; }
+.la3 { animation-delay: 0.6s; } .la4 { animation-delay: 0.8s; }
 @keyframes arc-draw { to { stroke-dashoffset: 0; } }
-
-/* Icon circles — pop in */
-.wheel-icon-circle {
+.logo-dot {
     transform-origin: center;
-    animation: icon-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    animation: dot-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
 }
-.wheel-icon-circle:nth-of-type(1) { animation-delay: 0.5s; }
-.wheel-icon-circle:nth-of-type(2) { animation-delay: 0.8s; }
-.wheel-icon-circle:nth-of-type(3) { animation-delay: 1.1s; }
-.wheel-icon-circle:nth-of-type(4) { animation-delay: 1.4s; }
-@keyframes icon-pop {
-    from { transform: scale(0); opacity: 0; }
-    to { transform: scale(1); opacity: 0.9; }
+.ld1 { animation-delay: 0.3s; } .ld2 { animation-delay: 0.5s; }
+.ld3 { animation-delay: 0.7s; } .ld4 { animation-delay: 0.9s; }
+@keyframes dot-pop { from { transform: scale(0); } to { transform: scale(1); } }
+.logo-h {
+    stroke-dasharray: 300; stroke-dashoffset: 300;
+    animation: h-draw 1.2s ease forwards 0.6s;
 }
+@keyframes h-draw { to { stroke-dashoffset: 0; } }
 
-/* Center circle */
-.wheel-center {
-    animation: center-glow 5s ease-in-out infinite;
-}
-@keyframes center-glow {
-    0%, 100% { filter: drop-shadow(0 0 8px rgba(52,211,153,0.05)); }
-    50% { filter: drop-shadow(0 0 18px rgba(52,211,153,0.15)); }
-}
-
-/* Center text */
-.wheel-the-label {
-    font-family: var(--font-body); font-size: 14px; font-weight: 400;
-    fill: rgba(200,215,230,0.7); letter-spacing: 0.1em;
-    opacity: 0; animation: text-reveal 0.6s ease forwards 1.5s;
-}
-.wheel-center-title {
-    font-family: var(--font-heading); font-size: 36px; font-weight: 800;
-    fill: var(--color-text); letter-spacing: 0.12em;
-    opacity: 0; animation: text-reveal 0.6s ease forwards 1.5s;
-}
-.wheel-framework-label {
-    font-family: var(--font-heading); font-size: 18px; font-weight: 600;
-    fill: rgba(200,215,230,0.8); letter-spacing: 0.06em;
-    opacity: 0; animation: text-reveal 0.6s ease forwards 1.6s;
-}
-.wheel-center-sub {
-    font-family: var(--font-body); font-size: 12px; fill: rgba(200,215,230,0.6);
-    letter-spacing: 0.02em;
-    opacity: 0; animation: text-reveal 0.6s ease forwards 1.7s;
-}
-@keyframes text-reveal {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Marker labels */
-.wheel-label {
-    font-family: var(--font-heading); font-size: 17px; font-weight: 800;
-    letter-spacing: 0.02em;
-    opacity: 0; animation: text-reveal 0.5s ease forwards;
-    transition: filter 0.3s ease;
-}
-.wheel-sub {
-    font-family: var(--font-body); font-size: 11px; fill: rgba(148,163,184,0.7);
-    opacity: 0; animation: text-reveal 0.5s ease forwards;
-}
-
-.wl-mot { fill: #ff6b6b; animation-delay: 0.6s; }
-.wl-mot + .wheel-sub { animation-delay: 0.7s; }
-.wl-age { fill: #34d399; animation-delay: 0.9s; }
-.wl-age + .wheel-sub { animation-delay: 1.0s; }
-.wl-pln { fill: #38bdf8; animation-delay: 1.2s; }
-.wl-pln + .wheel-sub { animation-delay: 1.3s; }
-.wl-bel { fill: #a855f7; animation-delay: 1.5s; }
-.wl-bel + .wheel-sub { animation-delay: 1.6s; }
-
-/* Hover glow on labels */
-.hope-wheel-logo:hover .wl-mot { filter: drop-shadow(0 0 8px rgba(255,107,107,0.6)); }
-.hope-wheel-logo:hover .wl-age { filter: drop-shadow(0 0 8px rgba(52,211,153,0.6)); }
-.hope-wheel-logo:hover .wl-pln { filter: drop-shadow(0 0 8px rgba(56,189,248,0.6)); }
-.hope-wheel-logo:hover .wl-bel { filter: drop-shadow(0 0 8px rgba(168,85,247,0.6)); }
-
-/* Responsive */
-@media (max-width: 500px) { .hope-wheel-logo { width: 260px; height: 260px; } }
+/* Topbar mini logo */
+.topbar-logo-svg { width: 28px; height: 28px; flex-shrink: 0; }
+/* Welcome hero logo */
+.welcome-hero-logo { width: 80px; height: 80px; margin: 0 auto 0.5rem; }
+@media (max-width: 500px) { .hope-logo-mark { width: 160px; height: 160px; } }
 .framework-about {
     max-width: 560px; margin: 1.5rem auto 0; text-align: left;
     background: var(--color-surface); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
@@ -401,16 +335,6 @@ h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
     align-items: center;
     gap: 0.5rem;
 }
-.welcome-topbar-wheel {
-    width: 28px; height: 28px; flex-shrink: 0;
-}
-
-/* Mini wheel on welcome hero */
-.welcome-hero-wheel {
-    width: 160px; height: 160px;
-    margin: 0 auto 0.5rem;
-}
-.hope-wheel-mini { width: 100%; height: 100%; overflow: visible; }
 .welcome-topbar-title {
     font-family: var(--font-heading);
     font-size: 0.85rem;
