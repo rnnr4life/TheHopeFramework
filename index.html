@@ -24,6 +24,71 @@
         <div class="leaf leaf-5">🦋</div>
     </div>
 
+    <!-- ===== Global Navigation ===== -->
+    <nav class="global-nav" id="global-nav" aria-label="Main navigation">
+        <div class="global-nav-inner">
+            <button class="global-nav-brand" id="nav-home" aria-label="Home">
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="global-nav-logo" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="nr1" x1="0.5" y1="0" x2="1" y2="0.5"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="100%" stop-color="#e84575"/></linearGradient>
+                        <linearGradient id="nr2" x1="1" y1="0.5" x2="0.5" y2="1"><stop offset="0%" stop-color="#d63a3a"/><stop offset="100%" stop-color="#34d399"/></linearGradient>
+                        <linearGradient id="nr3" x1="0.5" y1="1" x2="0" y2="0.5"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
+                        <linearGradient id="nr4" x1="0" y1="0.5" x2="0.5" y2="0"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#a855f7"/></linearGradient>
+                    </defs>
+                    <path d="M100 16 A84 84 0 0 1 184 100" fill="none" stroke="url(#nr1)" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M184 100 A84 84 0 0 1 100 184" fill="none" stroke="url(#nr2)" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M100 184 A84 84 0 0 1 16 100" fill="none" stroke="url(#nr3)" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M16 100 A84 84 0 0 1 100 16" fill="none" stroke="url(#nr4)" stroke-width="8" stroke-linecap="round"/>
+                    <circle cx="100" cy="16" r="7" fill="#ff6b6b"/><circle cx="184" cy="100" r="7" fill="#34d399"/>
+                    <circle cx="100" cy="184" r="7" fill="#38bdf8"/><circle cx="16" cy="100" r="7" fill="#a855f7"/>
+                    <path d="M68 55 L68 145 M68 100 L132 100 M132 55 L132 145" fill="none" stroke="white" stroke-width="14" stroke-linecap="round"/>
+                </svg>
+                <span class="global-nav-title">HOPE</span>
+            </button>
+
+            <button class="global-nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </button>
+
+            <div class="global-nav-links" id="nav-links">
+                <button class="global-nav-link" data-nav="welcome-screen" data-group="home">
+                    <span class="global-nav-link-icon">🏠</span> Home
+                </button>
+                <button class="global-nav-link" data-nav="learn-screen" data-group="learn">
+                    <span class="global-nav-link-icon">📖</span> Learn
+                </button>
+                <button class="global-nav-link" data-nav="games" data-group="games">
+                    <span class="global-nav-link-icon">🎮</span> Games
+                    <span class="global-nav-dropdown-arrow">▾</span>
+                </button>
+                <div class="global-nav-dropdown" id="nav-dropdown-games">
+                    <button class="global-nav-dropdown-item" data-nav="detective-screen">🔍 Hope Detective</button>
+                    <button class="global-nav-dropdown-item" data-nav="quest-screen" data-init="quest">🧭 Hope Quest</button>
+                    <button class="global-nav-dropdown-item" data-nav="walk-screen">🌿 Hope Walk</button>
+                </div>
+                <button class="global-nav-link" data-nav="tools" data-group="tools">
+                    <span class="global-nav-link-icon">🛠️</span> Tools
+                    <span class="global-nav-dropdown-arrow">▾</span>
+                </button>
+                <div class="global-nav-dropdown" id="nav-dropdown-tools">
+                    <button class="global-nav-dropdown-item" data-nav="activity-screen">🔬 Text Analyzer</button>
+                    <button class="global-nav-dropdown-item" data-nav="guided-screen">🎬 Guided Example</button>
+                    <button class="global-nav-dropdown-item" data-nav="resources-screen" data-init="resources">📚 Resources</button>
+                </div>
+                <button class="global-nav-link" data-nav="teacher-hub-screen" data-group="teacher">
+                    <span class="global-nav-link-icon">🍎</span> Teacher
+                </button>
+            </div>
+
+            <div class="global-nav-grade" id="nav-grade">
+                <button class="global-nav-grade-btn" id="nav-change-grade" aria-label="Change grade level">
+                    <span id="nav-grade-label">Middle</span>
+                    <span class="global-nav-grade-arrow">▾</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
     <!-- ===== Age Selector Screen ===== -->
     <section id="age-screen" class="screen active" role="main">
         <div class="container center-content">
@@ -174,42 +239,59 @@
                 <p class="section-intro">Everything you need to bring the HOPE Framework into your classroom.</p>
             </div>
 
-            <div class="teacher-hub-grid">
-                <div class="teacher-hub-card">
+            <!-- Quick Start — featured -->
+            <div class="teacher-hub-featured">
+                <div class="teacher-hub-card teacher-hub-card--featured">
                     <div class="teacher-hub-card-icon">⚙️</div>
-                    <h3>Classroom Setup</h3>
-                    <p>Pre-configure the app for your students — pick a grade level, paste a story, and skip steps.</p>
-                    <button class="btn btn-small btn-primary" id="btn-teacher-hub-setup">Set Up</button>
+                    <div class="teacher-hub-card-body">
+                        <h3>Classroom Setup</h3>
+                        <p>Pre-configure the app for your students — pick a grade level, paste a story, and skip steps. The fastest way to get started.</p>
+                    </div>
+                    <button class="btn btn-primary" id="btn-teacher-hub-setup">Get Started</button>
                 </div>
-                <div class="teacher-hub-card">
-                    <div class="teacher-hub-card-icon">📋</div>
-                    <h3>Teacher Planning Page</h3>
-                    <p>Record HOPE markers while reading climate literature — a structured planning tool.</p>
-                    <button class="btn btn-small" id="btn-teacher-hub-planning">Open</button>
+            </div>
+
+            <!-- Lesson Planning -->
+            <div class="teacher-hub-section">
+                <h4 class="teacher-hub-section-label">📖 Lesson Planning</h4>
+                <div class="teacher-hub-grid teacher-hub-grid--3">
+                    <div class="teacher-hub-card">
+                        <div class="teacher-hub-card-icon">📋</div>
+                        <h3>Planning Page</h3>
+                        <p>Record HOPE markers while reading climate literature — a structured planning tool.</p>
+                        <button class="btn btn-small" id="btn-teacher-hub-planning">Open</button>
+                    </div>
+                    <div class="teacher-hub-card">
+                        <div class="teacher-hub-card-icon">💬</div>
+                        <h3>Climate Conversations</h3>
+                        <p>Discussion prompts for each HOPE marker to spark meaningful student dialogue.</p>
+                        <button class="btn btn-small" id="btn-teacher-hub-convo">Open</button>
+                    </div>
+                    <div class="teacher-hub-card">
+                        <div class="teacher-hub-card-icon">🎬</div>
+                        <h3>Guided Example</h3>
+                        <p>Watch a story get analyzed step-by-step — great for modeling the framework in class.</p>
+                        <button class="btn btn-small" id="btn-teacher-hub-guided">Open</button>
+                    </div>
                 </div>
-                <div class="teacher-hub-card">
-                    <div class="teacher-hub-card-icon">💬</div>
-                    <h3>Climate Conversations</h3>
-                    <p>Discussion prompts for each HOPE marker to spark meaningful student dialogue.</p>
-                    <button class="btn btn-small" id="btn-teacher-hub-convo">Open</button>
-                </div>
-                <div class="teacher-hub-card">
-                    <div class="teacher-hub-card-icon">📝</div>
-                    <h3>Student Worksheets</h3>
-                    <p>Printable, fillable worksheets for students to find HOPE markers in any story.</p>
-                    <button class="btn btn-small" id="btn-teacher-hub-worksheets">Browse</button>
-                </div>
-                <div class="teacher-hub-card">
-                    <div class="teacher-hub-card-icon">📄</div>
-                    <h3>Original Research Paper</h3>
-                    <p>Read Dr. Colleen Redmond's published article in <em>Climate Literacy in Education</em>.</p>
-                    <a href="https://doi.org/10.24926/cle.v2i1.6231" target="_blank" rel="noopener noreferrer" class="btn btn-small">Read Paper</a>
-                </div>
-                <div class="teacher-hub-card">
-                    <div class="teacher-hub-card-icon">🎬</div>
-                    <h3>Guided Example</h3>
-                    <p>Watch a story get analyzed step-by-step — great for modeling the framework in class.</p>
-                    <button class="btn btn-small" id="btn-teacher-hub-guided">Open</button>
+            </div>
+
+            <!-- Student & Research Resources -->
+            <div class="teacher-hub-section">
+                <h4 class="teacher-hub-section-label">📚 Resources</h4>
+                <div class="teacher-hub-grid teacher-hub-grid--2">
+                    <div class="teacher-hub-card">
+                        <div class="teacher-hub-card-icon">📝</div>
+                        <h3>Student Worksheets</h3>
+                        <p>Printable, fillable worksheets for students to find HOPE markers in any story.</p>
+                        <button class="btn btn-small" id="btn-teacher-hub-worksheets">Browse</button>
+                    </div>
+                    <div class="teacher-hub-card">
+                        <div class="teacher-hub-card-icon">📄</div>
+                        <h3>Original Research Paper</h3>
+                        <p>Read Dr. Colleen Redmond's published article in <em>Climate Literacy in Education</em>.</p>
+                        <a href="https://doi.org/10.24926/cle.v2i1.6231" target="_blank" rel="noopener noreferrer" class="btn btn-small">Read Paper</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -218,63 +300,17 @@
     <!-- ===== Welcome Screen ===== -->
     <section id="welcome-screen" class="screen">
         <div class="container-wide">
-            <!-- Top bar -->
-            <div class="welcome-topbar">
-                <div class="welcome-topbar-left">
-                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="topbar-logo-svg" aria-hidden="true">
-                        <defs>
-                            <linearGradient id="tr1" x1="0.5" y1="0" x2="1" y2="0.5"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="100%" stop-color="#e84575"/></linearGradient>
-                            <linearGradient id="tr2" x1="1" y1="0.5" x2="0.5" y2="1"><stop offset="0%" stop-color="#d63a3a"/><stop offset="100%" stop-color="#34d399"/></linearGradient>
-                            <linearGradient id="tr3" x1="0.5" y1="1" x2="0" y2="0.5"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
-                            <linearGradient id="tr4" x1="0" y1="0.5" x2="0.5" y2="0"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#a855f7"/></linearGradient>
-                        </defs>
-                        <path d="M100 16 A84 84 0 0 1 184 100" fill="none" stroke="url(#tr1)" stroke-width="8" stroke-linecap="round"/>
-                        <path d="M184 100 A84 84 0 0 1 100 184" fill="none" stroke="url(#tr2)" stroke-width="8" stroke-linecap="round"/>
-                        <path d="M100 184 A84 84 0 0 1 16 100" fill="none" stroke="url(#tr3)" stroke-width="8" stroke-linecap="round"/>
-                        <path d="M16 100 A84 84 0 0 1 100 16" fill="none" stroke="url(#tr4)" stroke-width="8" stroke-linecap="round"/>
-                        <circle cx="100" cy="16" r="7" fill="#ff6b6b"/><circle cx="184" cy="100" r="7" fill="#34d399"/>
-                        <circle cx="100" cy="184" r="7" fill="#38bdf8"/><circle cx="16" cy="100" r="7" fill="#a855f7"/>
-                        <path d="M68 55 L68 145 M68 100 L132 100 M132 55 L132 145" fill="none" stroke="white" stroke-width="14" stroke-linecap="round"/>
-                        <ellipse cx="113" cy="108" rx="7" ry="4.5" transform="rotate(-25 113 108)" fill="#34d399"/>
-                        <ellipse cx="89" cy="110" rx="7" ry="4.5" transform="rotate(25 89 110)" fill="#34d399"/>
-                    </svg>
-                    <span class="welcome-topbar-title" id="welcome-topbar-title">The HOPE Framework</span>
-                </div>
-                <button class="btn btn-small btn-muted" id="btn-change-age" aria-label="Change grade level">
-                    ⚙️ Change Grade Level
-                </button>
-            </div>
 
-            <!-- Hero -->
-            <div class="welcome-hero-section">
-                <div class="welcome-hero-text">
-                    <div class="welcome-hero-logo" aria-hidden="true">
-                        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="hope-logo-svg">
-                            <defs>
-                                <linearGradient id="hr1" x1="0.5" y1="0" x2="1" y2="0.5"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="100%" stop-color="#e84575"/></linearGradient>
-                                <linearGradient id="hr2" x1="1" y1="0.5" x2="0.5" y2="1"><stop offset="0%" stop-color="#d63a3a"/><stop offset="100%" stop-color="#34d399"/></linearGradient>
-                                <linearGradient id="hr3" x1="0.5" y1="1" x2="0" y2="0.5"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
-                                <linearGradient id="hr4" x1="0" y1="0.5" x2="0.5" y2="0"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#a855f7"/></linearGradient>
-                            </defs>
-                            <path d="M100 16 A84 84 0 0 1 184 100" fill="none" stroke="url(#hr1)" stroke-width="7" stroke-linecap="round"/>
-                            <path d="M184 100 A84 84 0 0 1 100 184" fill="none" stroke="url(#hr2)" stroke-width="7" stroke-linecap="round"/>
-                            <path d="M100 184 A84 84 0 0 1 16 100" fill="none" stroke="url(#hr3)" stroke-width="7" stroke-linecap="round"/>
-                            <path d="M16 100 A84 84 0 0 1 100 16" fill="none" stroke="url(#hr4)" stroke-width="7" stroke-linecap="round"/>
-                            <circle cx="100" cy="16" r="6" fill="#ff6b6b"/><circle cx="184" cy="100" r="6" fill="#34d399"/>
-                            <circle cx="100" cy="184" r="6" fill="#38bdf8"/><circle cx="16" cy="100" r="6" fill="#a855f7"/>
-                            <path d="M68 55 L68 145 M68 100 L132 100 M132 55 L132 145" fill="none" stroke="white" stroke-width="13" stroke-linecap="round"/>
-                            <ellipse cx="113" cy="108" rx="7" ry="4" transform="rotate(-25 113 108)" fill="#34d399"/>
-                            <ellipse cx="89" cy="110" rx="7" ry="4" transform="rotate(25 89 110)" fill="#34d399"/>
-                        </svg>
-                    </div>
+            <!-- Compact Hero -->
+            <div class="journey-hero">
+                <div class="journey-hero-text">
                     <h1 id="welcome-title">The HOPE Framework</h1>
                     <p class="subtitle" id="welcome-subtitle">Healing Opportunities for Processing Eco-grief</p>
                     <p class="description" id="welcome-desc">
-                        Discover hope in the stories we read. Use four markers to find 
+                        Discover hope in the stories we read. Use four markers to find
                         how authors show us that change is possible and that we can make a difference.
                     </p>
                 </div>
-                <!-- Compact marker pills -->
                 <div class="welcome-markers">
                     <div class="welcome-marker-pill" data-marker="motivation"><span>🔥</span> Motivation</div>
                     <div class="welcome-marker-pill" data-marker="belief"><span>✨</span> Belief</div>
@@ -283,85 +319,116 @@
                 </div>
             </div>
 
-            <!-- Primary action — Start Learning -->
-            <div class="welcome-primary">
-                <button class="btn btn-primary btn-xl" id="btn-start" aria-label="Start learning">
-                    <span id="btn-start-text">Start Learning</span>
-                    <span class="btn-arrow" aria-hidden="true">&rarr;</span>
-                </button>
-                <span class="welcome-primary-hint" id="welcome-primary-hint">Learn the markers → Practice matching → Analyze a story</span>
-            </div>
+            <!-- Journey Trail -->
+            <div class="journey-trail">
+                <div class="journey-trail-line" aria-hidden="true"></div>
 
-            <!-- Activity cards grouped by category -->
-
-            <!-- Learn -->
-            <div class="welcome-category">
-                <div class="welcome-category-label">📖 Learn</div>
-                <div class="welcome-activities">
-                    <div class="welcome-activity-card" id="card-guided">
-                        <div class="welcome-card-icon">🎬</div>
-                        <div class="welcome-card-body">
-                            <div class="welcome-card-title" id="btn-guided-text">Guided Example</div>
-                            <div class="welcome-card-desc">Watch a story get analyzed step-by-step with think-aloud explanations.</div>
+                <!-- Step 1: Guided Example -->
+                <div class="journey-step journey-step--featured" data-step="1">
+                    <div class="journey-step-marker">
+                        <span class="journey-step-number">1</span>
+                    </div>
+                    <div class="journey-step-card">
+                        <div class="journey-step-badge">Start Here</div>
+                        <div class="journey-step-icon">🎬</div>
+                        <div class="journey-step-body">
+                            <h3 class="journey-step-title">See It In Action</h3>
+                            <p class="journey-step-desc">Watch a story get analyzed step-by-step. You'll see exactly how the four HOPE markers work before trying it yourself.</p>
                         </div>
-                        <button class="btn btn-small" id="btn-guided" aria-label="Watch a guided example">Open</button>
+                        <button class="btn btn-primary" id="btn-guided" aria-label="Watch a guided example">
+                            <span id="btn-guided-text">Watch Example</span>
+                        </button>
                     </div>
                 </div>
-            </div>
 
-            <!-- Games -->
-            <div class="welcome-category">
-                <div class="welcome-category-label">🎮 Games</div>
-                <div class="welcome-activities">
-                    <div class="welcome-activity-card" id="card-quest">
-                        <div class="welcome-card-icon">🎮</div>
-                        <div class="welcome-card-body">
-                            <div class="welcome-card-title" id="btn-quest-text">Hope Quest</div>
-                            <div class="welcome-card-desc">Adventure through four environments and collect Hope Fragments.</div>
-                        </div>
-                        <button class="btn btn-small btn-game" id="btn-quest" aria-label="Play Hope Quest">Play</button>
+                <!-- Step 2: Learn the Framework -->
+                <div class="journey-step" data-step="2">
+                    <div class="journey-step-marker">
+                        <span class="journey-step-number">2</span>
                     </div>
-                    <div class="welcome-activity-card" id="card-walk">
-                        <div class="welcome-card-icon">🚶</div>
-                        <div class="welcome-card-body">
-                            <div class="welcome-card-title" id="btn-walk-text">Hope Walk</div>
-                            <div class="welcome-card-desc">Walk through scenes and find hidden hope in distressing environments.</div>
+                    <div class="journey-step-card">
+                        <div class="journey-step-icon">📖</div>
+                        <div class="journey-step-body">
+                            <h3 class="journey-step-title" id="btn-start-label">Learn the Framework</h3>
+                            <p class="journey-step-desc">Study each marker, practice matching them to phrases, then analyze a full story on your own.</p>
+                            <div class="journey-substeps">
+                                <span class="journey-substep">① Learn markers</span>
+                                <span class="journey-substep-arrow">→</span>
+                                <span class="journey-substep">② Practice matching</span>
+                                <span class="journey-substep-arrow">→</span>
+                                <span class="journey-substep">③ Analyze a text</span>
+                            </div>
                         </div>
-                        <button class="btn btn-small btn-game-2" id="btn-walk" aria-label="Play Hope Walk">Play</button>
-                    </div>
-                    <div class="welcome-activity-card" id="card-detective">
-                        <div class="welcome-card-icon">🔍</div>
-                        <div class="welcome-card-body">
-                            <div class="welcome-card-title" id="btn-detective-text">Hope Detective</div>
-                            <div class="welcome-card-desc">Investigate clues from a story and pin them to the right HOPE marker on the case board.</div>
-                        </div>
-                        <button class="btn btn-small btn-game" id="btn-detective" aria-label="Play Hope Detective">Investigate</button>
+                        <button class="btn" id="btn-start" aria-label="Start learning">
+                            <span id="btn-start-text">Start Learning</span>
+                        </button>
                     </div>
                 </div>
-            </div>
 
-            <!-- Tools -->
-            <div class="welcome-category">
-                <div class="welcome-category-label">🛠️ Tools</div>
-                <div class="welcome-activities">
-                    <div class="welcome-activity-card" id="card-worksheet">
-                        <div class="welcome-card-icon">📝</div>
-                        <div class="welcome-card-body">
-                            <div class="welcome-card-title" id="btn-worksheet-text">Worksheet</div>
-                            <div class="welcome-card-desc">A fillable worksheet for finding HOPE markers in any story.</div>
+                <!-- Step 3: Tools -->
+                <div class="journey-step" data-step="3">
+                    <div class="journey-step-marker">
+                        <span class="journey-step-number">3</span>
+                    </div>
+                    <div class="journey-step-card">
+                        <div class="journey-step-icon">🛠️</div>
+                        <div class="journey-step-body">
+                            <h3 class="journey-step-title" id="btn-worksheet-text">Try the Tools</h3>
+                            <p class="journey-step-desc">Use a worksheet to find HOPE markers in any story your class is reading.</p>
                         </div>
                         <button class="btn btn-small" id="btn-worksheet" aria-label="Open worksheet">Open</button>
                     </div>
-                    <div class="welcome-activity-card" id="card-resources">
-                        <div class="welcome-card-icon">📚</div>
-                        <div class="welcome-card-body">
-                            <div class="welcome-card-title" id="btn-resources-text">Resources</div>
-                            <div class="welcome-card-desc">Books, shows, websites, and more to keep exploring.</div>
+                </div>
+
+                <!-- Step 4: Games -->
+                <div class="journey-step" data-step="4">
+                    <div class="journey-step-marker">
+                        <span class="journey-step-number">4</span>
+                    </div>
+                    <div class="journey-step-card">
+                        <div class="journey-step-icon">🎮</div>
+                        <div class="journey-step-body">
+                            <h3 class="journey-step-title">Play &amp; Practice</h3>
+                            <p class="journey-step-desc">Test your skills with interactive games that put the HOPE markers to work.</p>
+                        </div>
+                        <div class="journey-game-grid">
+                            <button class="journey-game-btn" id="btn-detective" aria-label="Play Hope Detective">
+                                <span class="journey-game-icon">🔍</span>
+                                <span class="journey-game-label">Detective</span>
+                            </button>
+                            <button class="journey-game-btn" id="btn-quest" aria-label="Play Hope Quest">
+                                <span class="journey-game-icon">🧭</span>
+                                <span class="journey-game-label">Quest</span>
+                            </button>
+                            <button class="journey-game-btn" id="btn-walk" aria-label="Play Hope Walk">
+                                <span class="journey-game-icon">🌿</span>
+                                <span class="journey-game-label">Walk</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Resources -->
+                <div class="journey-step" data-step="5">
+                    <div class="journey-step-marker">
+                        <span class="journey-step-number">5</span>
+                    </div>
+                    <div class="journey-step-card">
+                        <div class="journey-step-icon">📚</div>
+                        <div class="journey-step-body">
+                            <h3 class="journey-step-title" id="btn-resources-text">Keep Exploring</h3>
+                            <p class="journey-step-desc">Books, shows, websites, and more to continue your journey with the HOPE Framework.</p>
                         </div>
                         <button class="btn btn-small" id="btn-resources" aria-label="View resources">Browse</button>
                     </div>
                 </div>
             </div>
+
+            <!-- Hidden elements needed by JS -->
+            <span class="hidden" id="welcome-primary-hint"></span>
+            <span class="hidden" id="btn-quest-text"></span>
+            <span class="hidden" id="btn-walk-text"></span>
+            <span class="hidden" id="btn-detective-text"></span>
         </div>
     </section>
 

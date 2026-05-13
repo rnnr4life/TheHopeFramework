@@ -98,6 +98,13 @@ function setAge(age) {
     currentAge = age;
     document.body.className = `age-${age}`;
 
+    // Show global nav and update grade label
+    const nav = document.getElementById('global-nav');
+    if (nav) nav.classList.add('visible');
+    const gradeLabels = { elementary: 'Elementary', middle: 'Middle', high: 'High School' };
+    const gradeEl = document.getElementById('nav-grade-label');
+    if (gradeEl) gradeEl.textContent = gradeLabels[age] || age;
+
     const c = ageContent[age];
     document.getElementById('welcome-title').textContent = c.welcomeTitle;
     document.getElementById('welcome-subtitle').textContent = c.welcomeSubtitle;
@@ -146,12 +153,15 @@ const screens = document.querySelectorAll('.screen');
 function showScreen(id) {
     // Stop any playing audio/guided narration on screen change
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-    if (typeof guidedTimer !== 'undefined') clearTimeout(guidedTimer);
-    if (typeof guidedPlaying !== 'undefined') guidedPlaying = false;
+    try { clearTimeout(guidedTimer); } catch(e) {}
+    try { guidedPlaying = false; } catch(e) {}
 
     screens.forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     window.scrollTo(0, 0);
+
+    // Update global nav active state
+    updateNavActive(id);
 }
 
 document.getElementById('btn-start').addEventListener('click', () => showScreen('learn-screen'));
@@ -170,9 +180,108 @@ document.getElementById('btn-to-find-hope').addEventListener('click', () => {
     }
     maybeShowTutorial();
 });
-document.getElementById('btn-change-age').addEventListener('click', () => showScreen('age-screen'));
+// btn-change-age removed — global nav handles grade changes
 document.getElementById('btn-reflect').addEventListener('click', () => showScreen('reflect-screen'));
 document.getElementById('btn-back-reflect').addEventListener('click', () => showScreen('activity-screen'));
+
+
+// ===== Global Navigation =====
+const screenToGroup = {
+    'welcome-screen': 'home',
+    'learn-screen': 'learn', 'match-screen': 'learn', 'activity-screen': 'learn', 'reflect-screen': 'learn',
+    'detective-screen': 'games', 'quest-screen': 'games', 'walk-screen': 'games',
+    'guided-screen': 'tools', 'resources-screen': 'tools',
+    'teacher-hub-screen': 'teacher',
+    'worksheet-teacher-screen': 'teacher', 'worksheet-conversations-screen': 'teacher',
+    'worksheet-search-screen': 'tools', 'worksheet-literature-screen': 'tools',
+};
+
+function updateNavActive(screenId) {
+    const group = screenToGroup[screenId] || '';
+    document.querySelectorAll('.global-nav-link').forEach(link => {
+        link.classList.toggle('active', link.dataset.group === group);
+    });
+    // Hide nav on age screen
+    const nav = document.getElementById('global-nav');
+    if (nav) {
+        if (screenId === 'age-screen') nav.classList.remove('visible');
+        else nav.classList.add('visible');
+    }
+}
+
+// Nav link clicks
+document.querySelectorAll('.global-nav-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+        const target = link.dataset.nav;
+        // If it's a dropdown parent (games/tools), toggle dropdown
+        if (target === 'games' || target === 'tools') {
+            e.stopPropagation();
+            const dd = document.getElementById(`nav-dropdown-${target}`);
+            const wasOpen = dd.classList.contains('open');
+            // Close all dropdowns first
+            document.querySelectorAll('.global-nav-dropdown').forEach(d => d.classList.remove('open'));
+            if (!wasOpen) dd.classList.add('open');
+            return;
+        }
+        // Direct navigation
+        closeNavDropdowns();
+        closeNavMobile();
+        showScreen(target);
+    });
+});
+
+// Dropdown item clicks
+document.querySelectorAll('.global-nav-dropdown-item').forEach(item => {
+    item.addEventListener('click', () => {
+        const target = item.dataset.nav;
+        closeNavDropdowns();
+        closeNavMobile();
+        // Init functions for certain screens
+        if (item.dataset.init === 'quest' && typeof initQuest === 'function') initQuest();
+        if (item.dataset.init === 'resources' && typeof renderResources === 'function') renderResources();
+        if (target === 'detective-screen' && typeof initDetective === 'function') initDetective();
+        showScreen(target);
+    });
+});
+
+// Home button
+document.getElementById('nav-home').addEventListener('click', () => {
+    closeNavDropdowns();
+    closeNavMobile();
+    showScreen('welcome-screen');
+});
+
+// Grade change
+document.getElementById('nav-change-grade').addEventListener('click', () => {
+    closeNavDropdowns();
+    closeNavMobile();
+    showScreen('age-screen');
+});
+
+// Hamburger toggle
+document.getElementById('nav-toggle').addEventListener('click', () => {
+    const links = document.getElementById('nav-links');
+    const toggle = document.getElementById('nav-toggle');
+    const isOpen = links.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', isOpen);
+});
+
+// Close dropdowns on outside click
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.global-nav-link') && !e.target.closest('.global-nav-dropdown')) {
+        closeNavDropdowns();
+    }
+});
+
+function closeNavDropdowns() {
+    document.querySelectorAll('.global-nav-dropdown').forEach(d => d.classList.remove('open'));
+}
+function closeNavMobile() {
+    const links = document.getElementById('nav-links');
+    const toggle = document.getElementById('nav-toggle');
+    if (links) links.classList.remove('open');
+    if (toggle) toggle.setAttribute('aria-expanded', 'false');
+}
 
 
 // ===== Learn Screen — Expand/Collapse Cards =====

@@ -314,15 +314,38 @@ h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
 .teacher-entry-sub { font-size: 0.75rem; color: var(--color-text-light); display: block; margin-top: 0.15rem; }
 
 /* Teacher Hub Screen */
-.teacher-hub-header { text-align: center; margin-bottom: 1.5rem; }
+.teacher-hub-header { text-align: center; margin-bottom: 2rem; }
 .teacher-hub-header h2 { font-family: var(--font-heading); font-size: 1.6rem; margin-bottom: 0.4rem; }
 
-.teacher-hub-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
-    max-width: 900px; margin: 0 auto;
+/* Featured card */
+.teacher-hub-featured {
+    max-width: 900px; margin: 0 auto 2rem;
 }
-@media (max-width: 768px) { .teacher-hub-grid { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 500px) { .teacher-hub-grid { grid-template-columns: 1fr; } }
+
+/* Section groups */
+.teacher-hub-section {
+    max-width: 900px; margin: 0 auto 2rem;
+}
+.teacher-hub-section-label {
+    font-family: var(--font-heading); font-size: 0.82rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--color-text-light); margin-bottom: 0.75rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.teacher-hub-grid {
+    display: grid; gap: 1rem;
+}
+.teacher-hub-grid--3 { grid-template-columns: repeat(3, 1fr); }
+.teacher-hub-grid--2 { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 768px) {
+    .teacher-hub-grid--3 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 500px) {
+    .teacher-hub-grid--3 { grid-template-columns: 1fr; }
+    .teacher-hub-grid--2 { grid-template-columns: 1fr; }
+}
 
 .teacher-hub-card {
     background: var(--color-surface); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
@@ -340,200 +363,267 @@ h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
 .teacher-hub-card p { font-size: 0.82rem; color: var(--color-text-light); line-height: 1.5; flex: 1; margin: 0; }
 .teacher-hub-card .btn { align-self: flex-start; margin-top: 0.5rem; }
 
+/* Featured override (needs higher specificity than base card) */
+.teacher-hub-featured .teacher-hub-card--featured {
+    flex-direction: row; align-items: center; gap: 1.25rem;
+    padding: 1.5rem 2rem;
+    border-color: var(--color-agency);
+    background: linear-gradient(135deg, rgba(52,211,153,0.08), rgba(56,189,248,0.06));
+}
+.teacher-hub-featured .teacher-hub-card-icon { font-size: 2.5rem; }
+.teacher-hub-featured .teacher-hub-card-body { flex: 1; }
+.teacher-hub-featured h3 { font-size: 1.15rem; }
+.teacher-hub-featured p { margin-top: 0.3rem; }
+.teacher-hub-featured .btn { flex-shrink: 0; white-space: nowrap; align-self: center; margin-top: 0; }
+@media (max-width: 600px) {
+    .teacher-hub-featured .teacher-hub-card--featured { flex-direction: column; align-items: flex-start; padding: 1.25rem; }
+    .teacher-hub-featured .btn { align-self: stretch; text-align: center; }
+}
+
 
 /* ================================================
-   WELCOME — Hub Layout
+   WELCOME — Journey Trail Layout
    ================================================ */
 
-/* Top bar */
-.welcome-topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 1rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid var(--color-border);
-}
-.welcome-topbar-left {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.welcome-topbar-title {
-    font-family: var(--font-heading);
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--color-text-light);
-}
-
-/* Hero section */
-.welcome-hero-section {
+/* Hero */
+.journey-hero {
     text-align: center;
-    padding: 1rem 0 0.75rem;
-}
-
-.welcome-hero-text {
+    padding: 1.25rem 0 1.5rem;
     max-width: 600px;
-    margin: 0 auto 1rem;
+    margin: 0 auto;
 }
-
+.journey-hero-text { margin-bottom: 1rem; }
+.journey-hero-text h1 { font-family: var(--font-heading); font-weight: 800; margin-bottom: 0.2rem; }
 .subtitle { font-size: 0.95rem; color: var(--color-text-light); font-weight: 500; margin-top: 0.15rem; }
 .description { color: var(--color-text-light); font-size: 0.9rem; max-width: 460px; margin: 0.5rem auto 0; line-height: 1.5; }
 
-/* Marker pills row */
+/* Marker pills (kept from before) */
 .welcome-markers {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
+    display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap;
 }
-
 .welcome-marker-pill {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.35rem 0.75rem;
-    border-radius: 999px;
-    font-size: 0.78rem;
-    font-weight: 600;
+    display: flex; align-items: center; gap: 0.3rem;
+    padding: 0.35rem 0.75rem; border-radius: 999px;
+    font-size: 0.78rem; font-weight: 600;
     border: 1px solid var(--color-border);
-    background: var(--color-surface);
-    backdrop-filter: blur(8px);
+    background: var(--color-surface); backdrop-filter: blur(8px);
     transition: all var(--transition);
 }
-
 .welcome-marker-pill:hover { transform: scale(1.05); }
-
 .welcome-marker-pill[data-marker="motivation"] { border-color: var(--color-motivation-border); color: var(--color-motivation); }
 .welcome-marker-pill[data-marker="belief"] { border-color: var(--color-belief-border); color: var(--color-belief); }
 .welcome-marker-pill[data-marker="plans"] { border-color: var(--color-plans-border); color: var(--color-plans); }
 .welcome-marker-pill[data-marker="agency"] { border-color: var(--color-agency-border); color: var(--color-agency); }
 
-/* Primary CTA */
-.welcome-primary {
-    text-align: center;
-    padding: 0.75rem 0 1rem;
+/* Journey Trail */
+.journey-trail {
+    position: relative;
+    max-width: 640px;
+    margin: 0 auto;
+    padding-bottom: 2rem;
 }
 
-.btn-xl {
-    padding: 1rem 3rem;
-    font-size: 1.2rem;
-    border-radius: var(--radius-lg);
-    box-shadow: 0 6px 28px rgba(52,211,153,0.3);
+/* Vertical connecting line */
+.journey-trail-line {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    bottom: 20px;
+    width: 2px;
+    background: linear-gradient(to bottom,
+        var(--color-motivation) 0%,
+        var(--color-belief) 25%,
+        var(--color-plans) 50%,
+        var(--color-agency) 75%,
+        var(--color-agency) 100%
+    );
+    opacity: 0.3;
+    border-radius: 1px;
 }
 
-.btn-xl:hover {
-    box-shadow: 0 8px 36px rgba(52,211,153,0.4);
-    transform: translateY(-2px);
-}
-
-.welcome-primary-hint {
-    display: block;
-    margin-top: 0.6rem;
-    font-size: 0.78rem;
-    color: var(--color-text-light);
-    font-weight: 500;
-}
-
-/* Category sections */
-.welcome-category {
+/* Individual step */
+.journey-step {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
     margin-bottom: 1rem;
 }
-.welcome-category-label {
+
+/* Step number circle */
+.journey-step-marker {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+.journey-step-number {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
     font-family: var(--font-heading);
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    font-size: 0.85rem; font-weight: 800;
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
     color: var(--color-text-light);
-    margin-bottom: 0.4rem;
-    padding-bottom: 0.3rem;
-    border-bottom: 1px solid var(--color-border);
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
+    transition: all var(--transition);
+}
+.journey-step--featured .journey-step-number {
+    background: var(--color-agency);
+    border-color: var(--color-agency);
+    color: #0f1f2e;
+    box-shadow: 0 0 12px rgba(52,211,153,0.4);
 }
 
-/* Activity cards grid */
-.welcome-activities {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
-}
-/* Learn section — single card spans full width as featured banner */
-.welcome-category:first-child .welcome-activities {
-    grid-template-columns: 1fr;
-}
-.welcome-category:first-child .welcome-activity-card {
-    background: linear-gradient(135deg, var(--color-surface) 0%, rgba(52,211,153,0.06) 100%);
-    border-color: rgba(52,211,153,0.15);
-    padding: 1.25rem 1.5rem;
-}
-.welcome-category:first-child .welcome-card-icon { font-size: 2.2rem; }
-.welcome-category:first-child .welcome-card-title { font-size: 1.05rem; }
-/* Tools section — 2 columns */
-.welcome-category:last-child .welcome-activities {
-    grid-template-columns: 1fr 1fr;
-}
-
-.welcome-activity-card {
+/* Step card */
+.journey-step-card {
+    flex: 1;
     display: flex;
     align-items: center;
-    gap: 0.85rem;
+    gap: 1rem;
     padding: 1rem 1.25rem;
     background: var(--color-surface);
-    backdrop-filter: var(--glass);
-    -webkit-backdrop-filter: var(--glass);
+    backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
     border: 1px solid var(--color-border);
     border-radius: var(--card-radius);
     box-shadow: var(--shadow);
     transition: all var(--transition);
+    position: relative;
 }
-
-.welcome-activity-card:hover {
+.journey-step-card:hover {
     box-shadow: var(--shadow-md);
     border-color: rgba(255,255,255,0.15);
     transform: translateY(-2px);
 }
 
-.welcome-card-icon {
+/* Featured step (Step 1) */
+.journey-step--featured .journey-step-card {
+    background: linear-gradient(135deg, var(--color-surface) 0%, rgba(52,211,153,0.08) 100%);
+    border-color: rgba(52,211,153,0.25);
+    padding: 1.25rem 1.5rem;
+}
+
+/* "Start Here" badge */
+.journey-step-badge {
+    position: absolute;
+    top: -10px; right: 16px;
+    padding: 0.2rem 0.6rem;
+    font-family: var(--font-heading);
+    font-size: 0.65rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    background: var(--color-agency);
+    color: #0f1f2e;
+    border-radius: 99px;
+}
+
+.journey-step-icon {
     font-size: 1.8rem;
     flex-shrink: 0;
     filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
 }
 
-.welcome-card-body {
+.journey-step-body {
     flex: 1;
     min-width: 0;
 }
 
-.welcome-card-title {
+.journey-step-title {
     font-family: var(--font-heading);
     font-size: 0.95rem;
     font-weight: 700;
-    margin-bottom: 0.15rem;
+    margin-bottom: 0.2rem;
 }
-
-.welcome-card-desc {
+.journey-step-desc {
     font-size: 0.78rem;
     color: var(--color-text-light);
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
-.welcome-activity-card .btn {
+/* Sub-steps (for the Learn step) */
+.journey-substeps {
+    display: flex; align-items: center;
+    gap: 0.35rem; flex-wrap: wrap;
+    margin-top: 0.4rem;
+}
+.journey-substep {
+    font-size: 0.7rem; font-weight: 600;
+    color: var(--color-text-light);
+    padding: 0.15rem 0.5rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 99px;
+    border: 1px solid var(--color-border);
+}
+.journey-substep-arrow {
+    font-size: 0.65rem; color: var(--color-text-light); opacity: 0.5;
+}
+
+/* Game buttons grid (inside step 4) */
+.journey-game-grid {
+    display: flex;
+    gap: 0.5rem;
     flex-shrink: 0;
 }
+.journey-game-btn {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.2rem;
+    padding: 0.6rem 0.75rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    cursor: pointer; color: var(--color-text-light);
+    transition: all var(--transition);
+    min-width: 64px;
+}
+.journey-game-btn:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.2);
+    color: white;
+    transform: translateY(-2px);
+}
+.journey-game-icon { font-size: 1.2rem; }
+.journey-game-label { font-size: 0.65rem; font-weight: 600; }
 
-/* Elementary overrides */
-.age-elementary .btn-xl { font-size: 1.4rem; padding: 1.1rem 3rem; border-radius: 999px; }
-.age-elementary .welcome-card-icon { font-size: 2.2rem; }
-.age-elementary .welcome-activity-card { border-radius: 24px; padding: 1.25rem; }
+/* Button inside step card */
+.journey-step-card > .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* ===== Age-specific overrides ===== */
+
+/* Elementary — larger, rounder, more playful */
+.age-elementary .journey-step-card { border-radius: 20px; padding: 1.25rem; }
+.age-elementary .journey-step-icon { font-size: 2.2rem; }
+.age-elementary .journey-step-title { font-size: 1.05rem; }
+.age-elementary .journey-step-number { width: 38px; height: 38px; font-size: 1rem; }
+.age-elementary .journey-game-btn { border-radius: 16px; padding: 0.7rem 0.85rem; }
 .age-elementary .welcome-marker-pill { font-size: 0.85rem; padding: 0.4rem 0.85rem; }
 
-/* High school overrides */
-.age-high .welcome-activity-card { border-radius: 10px; }
-.age-high .welcome-card-icon { font-size: 1.4rem; }
+/* High school — tighter, sharper */
+.age-high .journey-step-card { border-radius: 10px; }
+.age-high .journey-step-icon { font-size: 1.4rem; }
+.age-high .journey-step-number { width: 28px; height: 28px; font-size: 0.75rem; }
 .age-high .welcome-marker-pill { font-size: 0.72rem; }
+.age-high .journey-game-btn { border-radius: 8px; }
+
+/* Responsive */
+@media (max-width: 600px) {
+    .journey-trail-line { left: 16px; }
+    .journey-step-marker { width: 34px; height: 34px; }
+    .journey-step-number { width: 28px; height: 28px; font-size: 0.75rem; }
+    .journey-step-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+    }
+    .journey-step-card > .btn { align-self: stretch; text-align: center; }
+    .journey-game-grid { align-self: stretch; justify-content: center; }
+    .journey-substeps { flex-direction: column; align-items: flex-start; }
+    .journey-substep-arrow { display: none; }
+}
 
 @keyframes gentle-bounce {
     0%, 100% { transform: translateY(0); }
@@ -3777,6 +3867,153 @@ button.resource-card-action {
 }
 
 
+/* ================================================
+   GLOBAL NAVIGATION BAR
+   ================================================ */
+.global-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(15,31,46,0.92);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--color-border);
+    display: none; /* hidden until age selected */
+}
+.global-nav.visible { display: block; }
+
+.global-nav-inner {
+    display: flex; align-items: center; gap: 0.25rem;
+    max-width: 1100px; margin: 0 auto;
+    padding: 0.5rem 1rem;
+    position: relative;
+}
+
+/* Brand / Home button */
+.global-nav-brand {
+    display: flex; align-items: center; gap: 0.4rem;
+    background: none; border: none; cursor: pointer;
+    color: white; padding: 0.25rem 0.5rem 0.25rem 0;
+    flex-shrink: 0;
+}
+.global-nav-logo { width: 28px; height: 28px; }
+.global-nav-title {
+    font-family: var(--font-heading); font-weight: 800;
+    font-size: 1rem; letter-spacing: 0.05em;
+}
+
+/* Nav links container */
+.global-nav-links {
+    display: flex; align-items: center; gap: 0.15rem;
+    flex: 1; margin-left: 0.5rem;
+    position: relative;
+}
+
+/* Individual nav link */
+.global-nav-link {
+    display: flex; align-items: center; gap: 0.3rem;
+    background: none; border: none; cursor: pointer;
+    color: var(--color-text-light);
+    font-family: var(--font-body); font-size: 0.85rem; font-weight: 600;
+    padding: 0.45rem 0.65rem; border-radius: var(--radius);
+    transition: all var(--transition);
+    white-space: nowrap; position: relative;
+}
+.global-nav-link:hover {
+    color: var(--color-text);
+    background: rgba(255,255,255,0.06);
+}
+.global-nav-link.active {
+    color: white;
+    background: rgba(255,255,255,0.1);
+}
+.global-nav-link-icon { font-size: 0.95rem; }
+.global-nav-dropdown-arrow {
+    font-size: 0.6rem; opacity: 0.5; margin-left: 0.1rem;
+}
+
+/* Dropdown */
+.global-nav-dropdown {
+    display: none; position: absolute; top: 100%; left: 0;
+    background: rgba(20,40,56,0.97);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 0.35rem; min-width: 180px;
+    box-shadow: var(--shadow-lg);
+    z-index: 110;
+}
+.global-nav-dropdown.open { display: block; }
+
+.global-nav-dropdown-item {
+    display: block; width: 100%;
+    background: none; border: none; cursor: pointer;
+    color: var(--color-text-light);
+    font-family: var(--font-body); font-size: 0.82rem; font-weight: 500;
+    padding: 0.55rem 0.75rem; border-radius: calc(var(--radius) - 2px);
+    text-align: left; transition: all var(--transition);
+}
+.global-nav-dropdown-item:hover {
+    background: rgba(255,255,255,0.08);
+    color: white;
+}
+
+/* Grade badge */
+.global-nav-grade {
+    flex-shrink: 0; margin-left: auto;
+}
+.global-nav-grade-btn {
+    display: flex; align-items: center; gap: 0.35rem;
+    background: rgba(255,255,255,0.06); border: 1px solid var(--color-border);
+    border-radius: 99px; padding: 0.3rem 0.75rem;
+    color: var(--color-text-light); cursor: pointer;
+    font-family: var(--font-body); font-size: 0.78rem; font-weight: 600;
+    transition: all var(--transition);
+}
+.global-nav-grade-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+.global-nav-grade-arrow { font-size: 0.6rem; opacity: 0.5; }
+
+/* Hamburger toggle (hidden on desktop) */
+.global-nav-toggle {
+    display: none; background: none; border: none; cursor: pointer;
+    padding: 0.5rem; flex-direction: column; gap: 4px;
+}
+.global-nav-toggle span {
+    display: block; width: 20px; height: 2px;
+    background: var(--color-text-light);
+    border-radius: 2px; transition: all 0.2s;
+}
+
+/* Mobile nav */
+@media (max-width: 700px) {
+    .global-nav-toggle { display: flex; }
+
+    .global-nav-links {
+        display: none; flex-direction: column; align-items: stretch;
+        position: absolute; top: 100%; left: 0; right: 0;
+        background: rgba(15,31,46,0.97);
+        backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--color-border);
+        padding: 0.5rem;
+        gap: 0.15rem;
+    }
+    .global-nav-links.open { display: flex; }
+
+    .global-nav-link { padding: 0.6rem 0.75rem; font-size: 0.9rem; }
+
+    .global-nav-dropdown {
+        position: static; box-shadow: none;
+        border: none; background: rgba(255,255,255,0.03);
+        margin: 0 0 0.25rem; padding: 0.25rem 0.25rem 0.25rem 1.5rem;
+    }
+    .global-nav-dropdown.open { display: block; }
+}
+
+/* Offset screen content so it doesn't sit behind sticky nav */
+.global-nav.visible ~ main .screen,
+.global-nav.visible ~ .screen { scroll-margin-top: 3.5rem; }
+
+
 /* ===== Accessibility ===== */
 .skip-nav {
     position: absolute; top: -100%; left: 0;
@@ -3811,13 +4048,7 @@ button.resource-card-action {
 
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
-    .welcome-activities,
-    .welcome-category:first-child .welcome-activities,
-    .welcome-category:last-child .welcome-activities { grid-template-columns: 1fr; }
-    .welcome-activity-card { flex-direction: column; text-align: center; gap: 0.5rem; }
-    .welcome-card-body { text-align: center; }
-    .welcome-hero-section { padding: 1rem 0 0.5rem; }
-    .btn-xl { padding: 0.85rem 2rem; font-size: 1.05rem; }
+    .journey-hero { padding: 1rem 0; }
     .activity-workspace { grid-template-columns: 1fr; }
     .activity-sidebar { position: static; }
     .marker-toolbar-sticky { flex-direction: column; align-items: stretch; position: static; }
