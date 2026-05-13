@@ -190,7 +190,7 @@ const screenToGroup = {
     'welcome-screen': 'home',
     'learn-screen': 'learn', 'match-screen': 'learn', 'activity-screen': 'learn', 'reflect-screen': 'learn', 'marker-detail-screen': 'learn',
     'detective-screen': 'games', 'quest-screen': 'games', 'walk-screen': 'games',
-    'guided-screen': 'tools', 'resources-screen': 'tools',
+    'guided-screen': 'tools', 'resources-screen': 'tools', 'my-hope-screen': 'tools',
     'teacher-hub-screen': 'teacher',
     'worksheet-teacher-screen': 'teacher', 'worksheet-conversations-screen': 'teacher',
     'worksheet-search-screen': 'tools', 'worksheet-literature-screen': 'tools',
@@ -401,6 +401,240 @@ document.getElementById('marker-deep-dots').addEventListener('click', (e) => {
     currentMarkerIdx = parseInt(dot.dataset.idx);
     renderMarkerDetail(markerOrder[currentMarkerIdx]);
     window.scrollTo(0, 0);
+});
+
+
+// ===== My HOPE Story — Personal Reflection Activity =====
+const myhopeMarkers = ['motivation', 'belief', 'plans', 'agency'];
+const myhopeIcons = { motivation: '🔥', belief: '✨', plans: '🗺️', agency: '💪' };
+const myhopeColors = { motivation: 'motivation', belief: 'belief', plans: 'plans', agency: 'agency' };
+const myhopeTitles = {
+    motivation: 'Motivation for Change',
+    belief: 'Belief that Change is Possible',
+    plans: 'Plans for a Path Forward',
+    agency: 'Agency to Take Action'
+};
+
+const myhopePrompts = {
+    story: {
+        motivation: {
+            elementary: "Think of a time you saw something in nature that made you feel sad, worried, or angry. Maybe a tree got cut down, or you saw trash in a river. What happened? How did it make you feel?",
+            middle: "Describe a moment when you felt a strong urge to help the environment. What triggered that feeling? Was it something you saw, read, or experienced?",
+            high: "Reflect on an environmental issue that personally affects your life or community. What emotional response does it create, and how does that connect to a desire for change?"
+        },
+        belief: {
+            elementary: "Can you think of a time when something that seemed broken actually got better? Maybe a garden grew back, or people worked together to clean something up. What happened?",
+            middle: "What gives you hope that environmental problems can be solved? Have you seen an example — in your life, school, or community — where people made a real difference?",
+            high: "What evidence have you encountered that environmental restoration is possible? How does seeing real-world success stories affect your belief in the possibility of change?"
+        },
+        plans: {
+            elementary: "If you could help fix one thing in nature, what would you do? What steps would you take? Who would help you?",
+            middle: "Think about an environmental problem you care about. What concrete steps could you and your classmates take to address it? Try to list at least three specific actions.",
+            high: "Choose an environmental challenge in your community. Outline a realistic action plan — what resources would you need, who would you collaborate with, and what would your timeline look like?"
+        },
+        agency: {
+            elementary: "Have you ever done something to help nature or the environment? Even something small, like picking up trash or planting a seed? Tell the story of what you did!",
+            middle: "Describe a time when you or someone you know actually took action on an environmental issue. What did they do? What happened as a result?",
+            high: "Reflect on a moment when you moved from thinking about an environmental issue to actually doing something about it. What pushed you to act, and what impact did your actions have?"
+        }
+    },
+    art: {
+        motivation: {
+            elementary: "Imagine a picture that shows how you feel when you see nature being hurt. What colors would you use? What would be in the picture? Describe your artwork!",
+            middle: "Plan a piece of art that captures the moment someone realizes they need to help the environment. What would it look like? What medium would you use (drawing, collage, sculpture)?",
+            high: "Conceptualize artwork that expresses the emotional catalyst of environmental motivation. What imagery, colors, and symbolism would you use to convey that shift from awareness to urgency?"
+        },
+        belief: {
+            elementary: "Draw or describe a 'before and after' picture — nature when it's hurt and nature when it's healed. What changes between the two pictures?",
+            middle: "Design an artwork that shows hope and proof that change is possible. Think about using contrasts — what was vs. what could be. What story does your art tell?",
+            high: "Create a concept for art that visualizes evidence-based hope — not wishful thinking, but grounded belief in change. How would you represent data, success stories, or transformation artistically?"
+        },
+        plans: {
+            elementary: "Make a map or picture that shows the steps to help fix something in nature. Like a treasure map, but for saving the environment! What stops are along the way?",
+            middle: "Design a visual plan — like an infographic, flowchart, or illustrated timeline — showing the steps to solve an environmental problem you care about.",
+            high: "Conceptualize a piece that visualizes a strategic environmental plan. Think about how to artistically represent timelines, stakeholders, resources, and milestones."
+        },
+        agency: {
+            elementary: "Draw or describe a picture of YOU being a nature hero! What are you doing? Who's helping you? What does the world look like after your actions?",
+            middle: "Create art that shows people taking environmental action. Capture the energy of doing, not just planning. What does agency look like as an image?",
+            high: "Design artwork that embodies collective agency — people moving from intention to impact. How do you visually represent the power of taking action?"
+        }
+    }
+};
+
+const myhopeTips = {
+    story: {
+        motivation: {
+            elementary: "Tip: Think about your senses — what did you see, hear, or smell? Feelings words like 'worried,' 'angry,' or 'sad' are great to use!",
+            middle: "Tip: Try to describe not just what happened, but how it changed the way you think. What was the 'before' and 'after' in your mind?",
+            high: "Tip: Consider how personal identity, place, and values shape your emotional response to environmental issues."
+        },
+        belief: {
+            elementary: "Tip: Think about stories of animals or plants that came back, or a place that got cleaned up. Those are signs of hope!",
+            middle: "Tip: Evidence is powerful — a specific example is stronger than a general feeling. What's one thing you can point to?",
+            high: "Tip: Distinguish between optimism (things will work out) and agency-based belief (we can make it work). What evidence shifts you from one to the other?"
+        },
+        plans: {
+            elementary: "Tip: Even small plans count! You could start with 'First, I would… Then, I would… After that…'",
+            middle: "Tip: Good plans are specific. Instead of 'help the environment,' try 'organize a creek cleanup every first Saturday.'",
+            high: "Tip: Consider feasibility, partnerships, and measurable outcomes. What would success look like, and how would you know you achieved it?"
+        },
+        agency: {
+            elementary: "Tip: No action is too small! Turning off lights, using less water, or telling a friend about nature all count.",
+            middle: "Tip: Focus on the doing — what specifically happened? How did it feel to go from 'I should' to 'I did'?",
+            high: "Tip: Reflect on the gap between intention and action. What barriers did you overcome, and what enabled you to follow through?"
+        }
+    },
+    art: {
+        motivation: {
+            elementary: "Tip: Dark or warm colors like red, orange, and brown can show worried feelings. Cool colors like blue can show sadness.",
+            middle: "Tip: Think about composition — where the viewer's eye goes first can tell the emotional story. What do you want them to feel?",
+            high: "Tip: Consider how abstract vs. representational approaches differently convey emotional urgency."
+        },
+        belief: {
+            elementary: "Tip: You could use bright greens and blues for the 'after' picture to show nature coming back to life!",
+            middle: "Tip: Contrast is a powerful tool — light/dark, broken/whole, empty/full. What contrasts show that change happened?",
+            high: "Tip: Think about how to represent intangible concepts like 'evidence' and 'proof' visually. Charts, data visualization, and documentary styles can work."
+        },
+        plans: {
+            elementary: "Tip: Use arrows and numbers to show the order of your steps. Make it colorful so people want to follow along!",
+            middle: "Tip: Think about making your plan visual — flowcharts, timelines, and maps all help people see a path forward.",
+            high: "Tip: Consider how design principles (hierarchy, flow, grouping) can make complex plans feel achievable and clear."
+        },
+        agency: {
+            elementary: "Tip: Show action! People moving, hands working, tools in use. Make your hero look strong and brave!",
+            middle: "Tip: Movement and energy in art — dynamic poses, radiating lines, bold colors — can show action happening.",
+            high: "Tip: Think about how to capture both individual and collective agency. How do you show the difference between one person acting and a community mobilizing?"
+        }
+    }
+};
+
+let myhopeMode = 'story';
+let myhopeStep = 0;
+let myhopeResponses = ['', '', '', ''];
+
+function myhopeShowIntro() {
+    document.getElementById('myhope-intro').classList.remove('hidden');
+    document.getElementById('myhope-step').classList.add('hidden');
+    document.getElementById('myhope-summary').classList.add('hidden');
+    document.getElementById('myhope-indicator').textContent = 'My HOPE Story';
+}
+
+function myhopeStartStep() {
+    document.getElementById('myhope-intro').classList.add('hidden');
+    document.getElementById('myhope-step').classList.remove('hidden');
+    document.getElementById('myhope-summary').classList.add('hidden');
+    myhopeRenderStep();
+}
+
+function myhopeRenderStep() {
+    const age = currentAge || 'middle';
+    const marker = myhopeMarkers[myhopeStep];
+
+    // Progress
+    document.getElementById('myhope-progress-fill').style.width = ((myhopeStep + 1) / 4 * 100) + '%';
+    document.getElementById('myhope-progress-label').textContent = (myhopeStep + 1) + ' of 4';
+    document.getElementById('myhope-indicator').textContent = myhopeIcons[marker] + ' ' + myhopeTitles[marker];
+
+    // Header
+    const header = document.getElementById('myhope-prompt-header');
+    header.setAttribute('data-color', myhopeColors[marker]);
+    document.getElementById('myhope-prompt-icon').textContent = myhopeIcons[marker];
+    document.getElementById('myhope-prompt-marker').textContent = myhopeTitles[marker];
+    document.getElementById('myhope-prompt-text').textContent = myhopePrompts[myhopeMode][marker][age];
+
+    // Tip
+    document.getElementById('myhope-prompt-tip').textContent = myhopeTips[myhopeMode][marker][age];
+
+    // Textarea
+    const textarea = document.getElementById('myhope-textarea');
+    textarea.value = myhopeResponses[myhopeStep];
+    textarea.placeholder = myhopeMode === 'art' ? 'Describe your artwork here...' : 'Start writing here...';
+
+    // Nav buttons
+    document.getElementById('btn-myhope-prev').style.visibility = myhopeStep === 0 ? 'hidden' : 'visible';
+    document.getElementById('btn-myhope-next').textContent = myhopeStep === 3 ? 'See My Story ✨' : 'Next →';
+
+    // Dots
+    const dotsEl = document.getElementById('myhope-step-dots');
+    dotsEl.innerHTML = myhopeMarkers.map((m, i) =>
+        `<button class="myhope-step-dot ${i === myhopeStep ? 'active' : ''}" data-marker="${m}" data-idx="${i}" aria-label="${myhopeTitles[m]}"></button>`
+    ).join('');
+
+    window.scrollTo(0, 0);
+}
+
+function myhopeSaveCurrentResponse() {
+    myhopeResponses[myhopeStep] = document.getElementById('myhope-textarea').value;
+}
+
+function myhopeShowSummary() {
+    myhopeSaveCurrentResponse();
+    document.getElementById('myhope-intro').classList.add('hidden');
+    document.getElementById('myhope-step').classList.add('hidden');
+    document.getElementById('myhope-summary').classList.remove('hidden');
+    document.getElementById('myhope-indicator').textContent = '🌿 Your HOPE Story';
+
+    const cardsEl = document.getElementById('myhope-summary-cards');
+    cardsEl.innerHTML = myhopeMarkers.map((m, i) => {
+        const text = myhopeResponses[i].trim();
+        return `<div class="myhope-summary-card" data-marker="${m}">
+            <div class="myhope-summary-card-header">${myhopeIcons[m]} ${myhopeTitles[m]}</div>
+            ${text ? `<div class="myhope-summary-card-text">${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` :
+                `<div class="myhope-summary-card-empty">No response yet</div>`}
+        </div>`;
+    }).join('');
+
+    window.scrollTo(0, 0);
+}
+
+// Mode selection
+document.querySelectorAll('.myhope-mode-card').forEach(card => {
+    card.addEventListener('click', () => {
+        myhopeMode = card.dataset.mode;
+        myhopeStep = 0;
+        myhopeResponses = ['', '', '', ''];
+        myhopeStartStep();
+    });
+});
+
+// Back button
+document.getElementById('btn-back-myhope').addEventListener('click', () => showScreen('welcome-screen'));
+
+// Prev
+document.getElementById('btn-myhope-prev').addEventListener('click', () => {
+    if (myhopeStep > 0) {
+        myhopeSaveCurrentResponse();
+        myhopeStep--;
+        myhopeRenderStep();
+    }
+});
+
+// Next / finish
+document.getElementById('btn-myhope-next').addEventListener('click', () => {
+    myhopeSaveCurrentResponse();
+    if (myhopeStep < 3) {
+        myhopeStep++;
+        myhopeRenderStep();
+    } else {
+        myhopeShowSummary();
+    }
+});
+
+// Dot nav
+document.getElementById('myhope-step-dots').addEventListener('click', (e) => {
+    const dot = e.target.closest('.myhope-step-dot');
+    if (!dot) return;
+    myhopeSaveCurrentResponse();
+    myhopeStep = parseInt(dot.dataset.idx);
+    myhopeRenderStep();
+});
+
+// Restart
+document.getElementById('btn-myhope-restart').addEventListener('click', () => {
+    myhopeResponses = ['', '', '', ''];
+    myhopeStep = 0;
+    myhopeShowIntro();
 });
 
 

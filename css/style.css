@@ -380,6 +380,63 @@ h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
     .teacher-hub-featured .btn { align-self: stretch; text-align: center; }
 }
 
+/* Eco-Grief Section */
+.teacher-ecogrief {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+.teacher-ecogrief-card {
+    padding: 1.5rem;
+    border-radius: var(--card-radius);
+    background: var(--color-surface);
+    backdrop-filter: var(--glass);
+    border: 1px solid var(--color-border);
+}
+.teacher-ecogrief-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+.teacher-ecogrief-card p {
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: var(--color-text-light);
+    margin-bottom: 0.75rem;
+}
+.teacher-ecogrief-card p:last-child { margin-bottom: 0; }
+.teacher-ecogrief-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0.75rem 0;
+}
+.teacher-ecogrief-list li {
+    position: relative;
+    padding-left: 1.4rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--color-text-light);
+}
+.teacher-ecogrief-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0.3rem;
+    color: var(--color-primary);
+    font-weight: 700;
+}
+.teacher-ecogrief-cite {
+    font-size: 0.78rem !important;
+    opacity: 0.7;
+    border-top: 1px solid var(--color-border);
+    padding-top: 0.75rem;
+    margin-top: 0.5rem;
+}
+@media (max-width: 600px) {
+    .teacher-ecogrief { grid-template-columns: 1fr; }
+}
+
 
 /* ================================================
    WELCOME — Journey Trail Layout
@@ -1011,6 +1068,204 @@ h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
 @media (max-width: 600px) {
     .marker-deep-header { flex-direction: column; text-align: center; }
     .marker-deep-nav { flex-direction: column; gap: 0.75rem; }
+}
+
+
+/* ================================================
+   MY HOPE STORY — Personal Reflection Activity
+   ================================================ */
+
+/* Intro */
+.myhope-intro-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.myhope-intro-icon { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+.myhope-intro-title { font-size: 1.8rem; margin-bottom: 0.5rem; }
+.myhope-intro-desc { color: var(--color-text-light); max-width: 440px; margin: 0 auto; font-size: 0.95rem; }
+
+.myhope-mode-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    max-width: 520px;
+    margin: 0 auto;
+}
+.myhope-mode-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2rem 1.25rem;
+    border-radius: var(--card-radius);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    backdrop-filter: var(--glass);
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: var(--font-body);
+    color: var(--color-text);
+    text-align: center;
+}
+.myhope-mode-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+    border-color: var(--color-primary);
+}
+.myhope-mode-icon { font-size: 2.5rem; }
+.myhope-mode-label { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 700; }
+.myhope-mode-desc { font-size: 0.82rem; color: var(--color-text-light); line-height: 1.4; }
+
+/* Progress */
+.myhope-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+.myhope-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--color-border);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.myhope-progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--color-motivation), var(--color-belief), var(--color-plans), var(--color-agency));
+    transition: width 0.4s ease;
+    width: 25%;
+}
+.myhope-progress-label { font-size: 0.78rem; color: var(--color-text-light); white-space: nowrap; }
+
+/* Prompt */
+.myhope-prompt-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--card-radius);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    margin-bottom: 1rem;
+}
+.myhope-prompt-header[data-color="motivation"] { border-left: 4px solid var(--color-motivation); }
+.myhope-prompt-header[data-color="belief"] { border-left: 4px solid var(--color-belief); }
+.myhope-prompt-header[data-color="plans"] { border-left: 4px solid var(--color-plans); }
+.myhope-prompt-header[data-color="agency"] { border-left: 4px solid var(--color-agency); }
+.myhope-prompt-icon { font-size: 2.2rem; flex-shrink: 0; }
+.myhope-prompt-marker { font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; margin-bottom: 0.3rem; }
+.myhope-prompt-text { color: var(--color-text-light); font-size: 0.95rem; line-height: 1.5; }
+
+.myhope-prompt-tip {
+    font-size: 0.82rem;
+    color: var(--color-text-light);
+    background: rgba(168, 85, 247, 0.06);
+    border: 1px solid rgba(168, 85, 247, 0.15);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+.myhope-prompt-tip::before { content: "💡 "; }
+
+/* Textarea */
+.myhope-textarea {
+    width: 100%;
+    min-height: 160px;
+    padding: 1rem 1.25rem;
+    border-radius: var(--card-radius);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    resize: vertical;
+    transition: border-color var(--transition);
+    box-sizing: border-box;
+}
+.myhope-textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15);
+}
+.myhope-textarea::placeholder { color: var(--color-text-light); opacity: 0.5; }
+
+/* Step nav */
+.myhope-step-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    gap: 0.5rem;
+}
+.myhope-step-dots { display: flex; gap: 0.5rem; }
+.myhope-step-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: none;
+    background: var(--color-border);
+    cursor: pointer;
+    transition: all var(--transition);
+    padding: 0;
+}
+.myhope-step-dot.active { transform: scale(1.3); }
+.myhope-step-dot[data-marker="motivation"].active { background: var(--color-motivation); }
+.myhope-step-dot[data-marker="belief"].active { background: var(--color-belief); }
+.myhope-step-dot[data-marker="plans"].active { background: var(--color-plans); }
+.myhope-step-dot[data-marker="agency"].active { background: var(--color-agency); }
+
+/* Summary */
+.myhope-summary-header { text-align: center; margin-bottom: 2rem; }
+.myhope-summary-icon { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; }
+.myhope-summary-title { font-size: 1.6rem; margin-bottom: 0.4rem; }
+.myhope-summary-desc { color: var(--color-text-light); font-size: 0.9rem; }
+
+.myhope-summary-cards { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+.myhope-summary-card {
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--card-radius);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+}
+.myhope-summary-card[data-marker="motivation"] { border-left: 4px solid var(--color-motivation); }
+.myhope-summary-card[data-marker="belief"] { border-left: 4px solid var(--color-belief); }
+.myhope-summary-card[data-marker="plans"] { border-left: 4px solid var(--color-plans); }
+.myhope-summary-card[data-marker="agency"] { border-left: 4px solid var(--color-agency); }
+.myhope-summary-card-header {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+.myhope-summary-card-text {
+    color: var(--color-text-light);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+.myhope-summary-card-empty {
+    color: var(--color-text-light);
+    opacity: 0.5;
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+.myhope-summary-actions { text-align: center; }
+
+/* Age overrides */
+.age-elementary .myhope-intro-icon { font-size: 4rem; }
+.age-elementary .myhope-mode-icon { font-size: 3.5rem; }
+.age-elementary .myhope-mode-card { border-radius: 20px; }
+.age-elementary .myhope-textarea { font-size: 1.05rem; min-height: 180px; border-radius: 16px; }
+
+.age-high .myhope-intro-title { font-size: 1.5rem; }
+.age-high .myhope-mode-card { border-radius: 10px; }
+
+@media (max-width: 500px) {
+    .myhope-mode-grid { grid-template-columns: 1fr; max-width: 280px; }
+    .myhope-prompt-header { flex-direction: column; text-align: center; }
 }
 
 

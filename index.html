@@ -71,6 +71,7 @@
                     <span class="global-nav-dropdown-arrow">▾</span>
                 </button>
                 <div class="global-nav-dropdown" id="nav-dropdown-tools">
+                    <button class="global-nav-dropdown-item" data-nav="my-hope-screen">🌱 My HOPE Story</button>
                     <button class="global-nav-dropdown-item" data-nav="activity-screen">🔬 Text Analyzer</button>
                     <button class="global-nav-dropdown-item" data-nav="guided-screen">🎬 Guided Example</button>
                     <button class="global-nav-dropdown-item" data-nav="resources-screen" data-init="resources">📚 Resources</button>
@@ -237,6 +238,37 @@
             <div class="teacher-hub-header">
                 <h2>🍎 Teacher Resources</h2>
                 <p class="section-intro">Everything you need to bring the HOPE Framework into your classroom.</p>
+            </div>
+
+            <!-- Understanding Eco-Grief -->
+            <div class="teacher-hub-section">
+                <h4 class="teacher-hub-section-label">🌍 Understanding Eco-Grief</h4>
+                <div class="teacher-ecogrief">
+                    <div class="teacher-ecogrief-card">
+                        <h3>What is Eco-Grief?</h3>
+                        <p>Eco-grief is the sadness, anxiety, or sense of loss people feel in response to environmental destruction and climate change. It can show up as worry about the future, guilt about consumption, or mourning the loss of natural places, species, and ecosystems.</p>
+                        <p>For students, eco-grief often appears as:</p>
+                        <ul class="teacher-ecogrief-list">
+                            <li>Feeling helpless or overwhelmed by news about climate change</li>
+                            <li>Anxiety about the future of the planet</li>
+                            <li>Sadness when seeing pollution, deforestation, or habitat loss</li>
+                            <li>Frustration that adults aren't doing enough</li>
+                            <li>A desire to help but not knowing where to start</li>
+                        </ul>
+                    </div>
+                    <div class="teacher-ecogrief-card">
+                        <h3>Why This Matters</h3>
+                        <p>Research shows that young people are deeply affected by the climate crisis. A 2021 global study of 10,000 young people (ages 16–25) found that <strong>75% described the future as frightening</strong>, and nearly half said climate anxiety affected their daily lives.</p>
+                        <p>Without tools to process these emotions, eco-grief can lead to disengagement, hopelessness, and avoidance. The HOPE Framework gives students a way to:</p>
+                        <ul class="teacher-ecogrief-list">
+                            <li><strong>Name what they feel</strong> — validating eco-grief as a real and healthy response</li>
+                            <li><strong>Find hope in stories</strong> — literature shows that change is possible and that people take action</li>
+                            <li><strong>Move from grief to agency</strong> — the four markers (Motivation, Belief, Plans, Agency) mirror the psychological journey from emotional distress to empowered action</li>
+                            <li><strong>Build resilience</strong> — students who can identify hope are better equipped to face environmental challenges constructively</li>
+                        </ul>
+                        <p class="teacher-ecogrief-cite">Hickman, C., et al. (2021). "Climate anxiety in children and young people and their beliefs about government responses to climate change." <em>The Lancet Planetary Health</em>, 5(12), e863–e873.</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Quick Start — featured -->
@@ -588,6 +620,78 @@
                 <button class="btn btn-small btn-muted" id="btn-marker-prev">&larr; Previous</button>
                 <div class="marker-deep-dots" id="marker-deep-dots"></div>
                 <button class="btn btn-small btn-muted" id="btn-marker-next">Next &rarr;</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== My HOPE Story — Personal Reflection Activity ===== -->
+    <section id="my-hope-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-myhope">&larr; Back</button>
+                <div class="step-indicator" id="myhope-indicator">My HOPE Story</div>
+            </div>
+
+            <!-- Intro / Mode selection -->
+            <div id="myhope-intro">
+                <div class="myhope-intro-header">
+                    <span class="myhope-intro-icon">🌱</span>
+                    <h2 class="myhope-intro-title">My HOPE Story</h2>
+                    <p class="myhope-intro-desc">The HOPE markers aren't just in books — they're in <em>your</em> life too. Choose how you want to explore them.</p>
+                </div>
+                <div class="myhope-mode-grid">
+                    <button class="myhope-mode-card" data-mode="story">
+                        <span class="myhope-mode-icon">✍️</span>
+                        <span class="myhope-mode-label">Write My Story</span>
+                        <span class="myhope-mode-desc">Write about times you've experienced each marker in your own life.</span>
+                    </button>
+                    <button class="myhope-mode-card" data-mode="art">
+                        <span class="myhope-mode-icon">🎨</span>
+                        <span class="myhope-mode-label">Create Art</span>
+                        <span class="myhope-mode-desc">Plan artwork that shows what each marker means to you.</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step view (one marker at a time) -->
+            <div id="myhope-step" class="hidden">
+                <div class="myhope-progress">
+                    <div class="myhope-progress-bar">
+                        <div class="myhope-progress-fill" id="myhope-progress-fill"></div>
+                    </div>
+                    <span class="myhope-progress-label" id="myhope-progress-label">1 of 4</span>
+                </div>
+
+                <div class="myhope-prompt-header" id="myhope-prompt-header">
+                    <span class="myhope-prompt-icon" id="myhope-prompt-icon">🔥</span>
+                    <div>
+                        <div class="myhope-prompt-marker" id="myhope-prompt-marker">Motivation for Change</div>
+                        <p class="myhope-prompt-text" id="myhope-prompt-text"></p>
+                    </div>
+                </div>
+
+                <div class="myhope-prompt-tip" id="myhope-prompt-tip"></div>
+
+                <textarea class="myhope-textarea" id="myhope-textarea" rows="6" placeholder="Start writing here..."></textarea>
+
+                <div class="myhope-step-nav">
+                    <button class="btn btn-small btn-muted" id="btn-myhope-prev">&larr; Previous</button>
+                    <div class="myhope-step-dots" id="myhope-step-dots"></div>
+                    <button class="btn btn-small" id="btn-myhope-next">Next &rarr;</button>
+                </div>
+            </div>
+
+            <!-- Summary view -->
+            <div id="myhope-summary" class="hidden">
+                <div class="myhope-summary-header">
+                    <span class="myhope-summary-icon">🌿</span>
+                    <h2 class="myhope-summary-title">Your HOPE Story</h2>
+                    <p class="myhope-summary-desc">Here's what you shared about hope in your own life.</p>
+                </div>
+                <div class="myhope-summary-cards" id="myhope-summary-cards"></div>
+                <div class="myhope-summary-actions">
+                    <button class="btn btn-small" id="btn-myhope-restart">Start Over</button>
+                </div>
             </div>
         </div>
     </section>
