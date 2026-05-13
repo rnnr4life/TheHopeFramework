@@ -28,112 +28,61 @@
     <section id="age-screen" class="screen active" role="main">
         <div class="container center-content">
             <div class="welcome-hero">
-                <div class="hope-wheel-logo" aria-label="HOPE Framework wheel diagram">
-                    <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" class="hope-wheel-svg">
-                        <defs>
-                            <!-- Quadrant gradients -->
-                            <linearGradient id="grad-mot" x1="0" y1="0" x2="1" y2="1">
-                                <stop offset="0%" stop-color="#ff6b6b" stop-opacity="0.25"/>
-                                <stop offset="100%" stop-color="#ff6b6b" stop-opacity="0.05"/>
-                            </linearGradient>
-                            <linearGradient id="grad-age" x1="1" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#34d399" stop-opacity="0.25"/>
-                                <stop offset="100%" stop-color="#34d399" stop-opacity="0.05"/>
-                            </linearGradient>
-                            <linearGradient id="grad-pln" x1="1" y1="1" x2="0" y2="0">
-                                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25"/>
-                                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.05"/>
-                            </linearGradient>
-                            <linearGradient id="grad-bel" x1="0" y1="1" x2="1" y2="0">
-                                <stop offset="0%" stop-color="#a855f7" stop-opacity="0.25"/>
-                                <stop offset="100%" stop-color="#a855f7" stop-opacity="0.05"/>
-                            </linearGradient>
-                            <!-- Center frosted glass -->
-                            <radialGradient id="centerFrost" cx="50%" cy="45%" r="55%">
-                                <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
-                                <stop offset="60%" stop-color="rgba(255,255,255,0.04)"/>
-                                <stop offset="100%" stop-color="rgba(15,23,42,0.6)"/>
-                            </radialGradient>
-                            <!-- Outer glow -->
-                            <filter id="outerGlow">
-                                <feGaussianBlur stdDeviation="6" result="blur"/>
-                                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                            </filter>
-                            <filter id="softGlow">
-                                <feGaussianBlur stdDeviation="2.5" result="blur"/>
-                                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                            </filter>
-                        </defs>
-
-                        <!-- Ambient glow ring -->
-                        <circle cx="200" cy="200" r="172" fill="none" stroke="rgba(52,211,153,0.06)" stroke-width="40" class="wheel-ambient"/>
-
-                        <!-- Filled quadrant wedges -->
-                        <path d="M200 200 L200 28 A172 172 0 0 1 372 200 Z" fill="url(#grad-mot)" class="wheel-wedge wedge-mot"/>
-                        <path d="M200 200 L372 200 A172 172 0 0 1 200 372 Z" fill="url(#grad-age)" class="wheel-wedge wedge-age"/>
-                        <path d="M200 200 L200 372 A172 172 0 0 1 28 200 Z" fill="url(#grad-pln)" class="wheel-wedge wedge-pln"/>
-                        <path d="M200 200 L28 200 A172 172 0 0 1 200 28 Z" fill="url(#grad-bel)" class="wheel-wedge wedge-bel"/>
-
-                        <!-- Outer ring -->
-                        <circle cx="200" cy="200" r="172" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2" class="wheel-ring-outer"/>
-
-                        <!-- Colored arc strokes (on top of wedges) -->
-                        <path d="M200 28 A172 172 0 0 1 372 200" fill="none" stroke="#ff6b6b" stroke-width="3.5" stroke-linecap="round" opacity="0.8" filter="url(#softGlow)" class="wheel-arc arc-motivation"/>
-                        <path d="M372 200 A172 172 0 0 1 200 372" fill="none" stroke="#34d399" stroke-width="3.5" stroke-linecap="round" opacity="0.8" filter="url(#softGlow)" class="wheel-arc arc-agency"/>
-                        <path d="M200 372 A172 172 0 0 1 28 200" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" opacity="0.8" filter="url(#softGlow)" class="wheel-arc arc-plans"/>
-                        <path d="M28 200 A172 172 0 0 1 200 28" fill="none" stroke="#a855f7" stroke-width="3.5" stroke-linecap="round" opacity="0.8" filter="url(#softGlow)" class="wheel-arc arc-belief"/>
-
-                        <!-- Divider lines (subtle) -->
-                        <line x1="200" y1="28" x2="200" y2="115" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-                        <line x1="200" y1="285" x2="200" y2="372" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-                        <line x1="28" y1="200" x2="115" y2="200" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-                        <line x1="285" y1="200" x2="372" y2="200" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-
-                        <!-- Orbiting dots -->
-                        <circle r="3" fill="#ff6b6b" opacity="0.7" filter="url(#softGlow)" class="wheel-dot dot-1"/>
-                        <circle r="2.5" fill="#34d399" opacity="0.7" filter="url(#softGlow)" class="wheel-dot dot-2"/>
-                        <circle r="3" fill="#38bdf8" opacity="0.7" filter="url(#softGlow)" class="wheel-dot dot-3"/>
-                        <circle r="2.5" fill="#a855f7" opacity="0.7" filter="url(#softGlow)" class="wheel-dot dot-4"/>
-
-                        <!-- Inner glow ring -->
-                        <circle cx="200" cy="200" r="85" fill="none" stroke="rgba(52,211,153,0.1)" stroke-width="1" class="wheel-inner-ring"/>
-
-                        <!-- Center circle (frosted glass) -->
-                        <circle cx="200" cy="200" r="82" fill="url(#centerFrost)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="wheel-center"/>
-                        <!-- Center highlight arc -->
-                        <path d="M140 170 A65 65 0 0 1 260 170" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="30" stroke-linecap="round"/>
-
-                        <!-- Center text -->
-                        <text x="200" y="178" text-anchor="middle" class="wheel-center-title">H.O.P.E</text>
-                        <text x="200" y="198" text-anchor="middle" class="wheel-center-sub"><tspan font-weight="700" fill="#34d399">H</tspan>ealing <tspan font-weight="700" fill="#34d399">O</tspan>pportunities</text>
-                        <text x="200" y="214" text-anchor="middle" class="wheel-center-sub">for <tspan font-weight="700" fill="#34d399">P</tspan>rocessing <tspan font-weight="700" fill="#34d399">E</tspan>co-Grief</text>
-
-                        <!-- Marker labels -->
-                        <text x="200" y="62" text-anchor="middle" class="wheel-label wl-mot">Motivation</text>
-                        <text x="200" y="78" text-anchor="middle" class="wheel-sub">for Change</text>
-
-                        <text x="330" y="195" text-anchor="middle" class="wheel-label wl-age">Agency</text>
-                        <text x="330" y="211" text-anchor="middle" class="wheel-sub">to take action</text>
-
-                        <text x="200" y="345" text-anchor="middle" class="wheel-label wl-pln">Plans</text>
-                        <text x="200" y="361" text-anchor="middle" class="wheel-sub">for a path forward</text>
-
-                        <text x="70" y="195" text-anchor="middle" class="wheel-label wl-bel">Belief</text>
-                        <text x="70" y="211" text-anchor="middle" class="wheel-sub">that change is possible</text>
-
-                        <!-- Corner accent dots -->
-                        <circle cx="200" cy="28" r="4" fill="#ff6b6b" opacity="0.6" filter="url(#softGlow)"/>
-                        <circle cx="372" cy="200" r="4" fill="#34d399" opacity="0.6" filter="url(#softGlow)"/>
-                        <circle cx="200" cy="372" r="4" fill="#38bdf8" opacity="0.6" filter="url(#softGlow)"/>
-                        <circle cx="28" cy="200" r="4" fill="#a855f7" opacity="0.6" filter="url(#softGlow)"/>
-                    </svg>
-                </div>
                 <h1>The HOPE Framework</h1>
                 <p class="subtitle">Healing Opportunities for Processing Eco-grief</p>
             </div>
             <div class="framework-about">
                 <p>The HOPE Framework is a literacy strategy for identifying hope in narratives as a response to eco-grief. It helps readers find four markers of hope in stories about the environment: <strong>Motivation for Change</strong>, <strong>Belief that Change is Possible</strong>, <strong>Plans for a Path Forward</strong>, and <strong>Agency to Take Action</strong>.</p>
                 <p class="framework-credit">Developed by <strong>Dr. Colleen Redmond</strong>, University of Minnesota. Published in <em>Climate Literacy in Education</em>, Vol. 2, No. 1, 2024.</p>
+            </div>
+            <div class="hope-wheel-logo" aria-label="HOPE Framework wheel diagram">
+                <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" class="hope-wheel-svg">
+                    <defs>
+                        <linearGradient id="grad-mot" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff6b6b" stop-opacity="0.25"/><stop offset="100%" stop-color="#ff6b6b" stop-opacity="0.05"/></linearGradient>
+                        <linearGradient id="grad-age" x1="1" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#34d399" stop-opacity="0.25"/><stop offset="100%" stop-color="#34d399" stop-opacity="0.05"/></linearGradient>
+                        <linearGradient id="grad-pln" x1="1" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25"/><stop offset="100%" stop-color="#38bdf8" stop-opacity="0.05"/></linearGradient>
+                        <linearGradient id="grad-bel" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#a855f7" stop-opacity="0.25"/><stop offset="100%" stop-color="#a855f7" stop-opacity="0.05"/></linearGradient>
+                        <radialGradient id="centerFrost" cx="50%" cy="45%" r="55%"><stop offset="0%" stop-color="rgba(255,255,255,0.12)"/><stop offset="60%" stop-color="rgba(255,255,255,0.04)"/><stop offset="100%" stop-color="rgba(15,23,42,0.6)"/></radialGradient>
+                        <filter id="outerGlow"><feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                        <filter id="softGlow"><feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    </defs>
+                    <circle cx="200" cy="200" r="172" fill="none" stroke="rgba(52,211,153,0.06)" stroke-width="40" class="wheel-ambient"/>
+                    <path d="M200 200 L200 28 A172 172 0 0 1 372 200 Z" fill="url(#grad-mot)" class="wheel-wedge wedge-mot"/>
+                    <path d="M200 200 L372 200 A172 172 0 0 1 200 372 Z" fill="url(#grad-age)" class="wheel-wedge wedge-age"/>
+                    <path d="M200 200 L200 372 A172 172 0 0 1 28 200 Z" fill="url(#grad-pln)" class="wheel-wedge wedge-pln"/>
+                    <path d="M200 200 L28 200 A172 172 0 0 1 200 28 Z" fill="url(#grad-bel)" class="wheel-wedge wedge-bel"/>
+                    <circle cx="200" cy="200" r="172" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2" class="wheel-ring-outer"/>
+                    <path d="M200 28 A172 172 0 0 1 372 200" fill="none" stroke="#ff6b6b" stroke-width="3.5" stroke-linecap="round" opacity="0.8" filter="url(#softGlow)" class="wheel-arc arc-motivation"/>
+                    <path d="M372 200 A172 172 0 0 1 200 372" fill="none" stroke="#34d399" stroke-width="3.5" stroke-linecap="round" opacity="0.8" filter="url(#softGlow)" class="wheel-arc arc-agency"/>
+                    <path d="M200 372 A172 172 0 0 1 28 200" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" opacity="0.8" filter="url(#softGlow)" class="wheel-arc arc-plans"/>
+                    <path d="M28 200 A172 172 0 0 1 200 28" fill="none" stroke="#a855f7" stroke-width="3.5" stroke-linecap="round" opacity="0.8" filter="url(#softGlow)" class="wheel-arc arc-belief"/>
+                    <line x1="200" y1="28" x2="200" y2="115" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+                    <line x1="200" y1="285" x2="200" y2="372" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+                    <line x1="28" y1="200" x2="115" y2="200" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+                    <line x1="285" y1="200" x2="372" y2="200" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+                    <circle r="3" fill="#ff6b6b" opacity="0.7" filter="url(#softGlow)" class="wheel-dot dot-1"/>
+                    <circle r="2.5" fill="#34d399" opacity="0.7" filter="url(#softGlow)" class="wheel-dot dot-2"/>
+                    <circle r="3" fill="#38bdf8" opacity="0.7" filter="url(#softGlow)" class="wheel-dot dot-3"/>
+                    <circle r="2.5" fill="#a855f7" opacity="0.7" filter="url(#softGlow)" class="wheel-dot dot-4"/>
+                    <circle cx="200" cy="200" r="85" fill="none" stroke="rgba(52,211,153,0.1)" stroke-width="1" class="wheel-inner-ring"/>
+                    <circle cx="200" cy="200" r="82" fill="url(#centerFrost)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" class="wheel-center"/>
+                    <path d="M140 170 A65 65 0 0 1 260 170" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="30" stroke-linecap="round"/>
+                    <text x="200" y="178" text-anchor="middle" class="wheel-center-title">H.O.P.E</text>
+                    <text x="200" y="198" text-anchor="middle" class="wheel-center-sub"><tspan font-weight="700" fill="#34d399">H</tspan>ealing <tspan font-weight="700" fill="#34d399">O</tspan>pportunities</text>
+                    <text x="200" y="214" text-anchor="middle" class="wheel-center-sub">for <tspan font-weight="700" fill="#34d399">P</tspan>rocessing <tspan font-weight="700" fill="#34d399">E</tspan>co-Grief</text>
+                    <text x="200" y="62" text-anchor="middle" class="wheel-label wl-mot">Motivation</text>
+                    <text x="200" y="78" text-anchor="middle" class="wheel-sub">for Change</text>
+                    <text x="330" y="195" text-anchor="middle" class="wheel-label wl-age">Agency</text>
+                    <text x="330" y="211" text-anchor="middle" class="wheel-sub">to take action</text>
+                    <text x="200" y="345" text-anchor="middle" class="wheel-label wl-pln">Plans</text>
+                    <text x="200" y="361" text-anchor="middle" class="wheel-sub">for a path forward</text>
+                    <text x="70" y="195" text-anchor="middle" class="wheel-label wl-bel">Belief</text>
+                    <text x="70" y="211" text-anchor="middle" class="wheel-sub">that change is possible</text>
+                    <circle cx="200" cy="28" r="4" fill="#ff6b6b" opacity="0.6" filter="url(#softGlow)"/>
+                    <circle cx="372" cy="200" r="4" fill="#34d399" opacity="0.6" filter="url(#softGlow)"/>
+                    <circle cx="200" cy="372" r="4" fill="#38bdf8" opacity="0.6" filter="url(#softGlow)"/>
+                    <circle cx="28" cy="200" r="4" fill="#a855f7" opacity="0.6" filter="url(#softGlow)"/>
+                </svg>
             </div>
             <div class="age-picker">
                 <p class="age-picker-label">I'm in...</p>
