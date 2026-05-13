@@ -188,7 +188,7 @@ document.getElementById('btn-back-reflect').addEventListener('click', () => show
 // ===== Global Navigation =====
 const screenToGroup = {
     'welcome-screen': 'home',
-    'learn-screen': 'learn', 'match-screen': 'learn', 'activity-screen': 'learn', 'reflect-screen': 'learn',
+    'learn-screen': 'learn', 'match-screen': 'learn', 'activity-screen': 'learn', 'reflect-screen': 'learn', 'marker-detail-screen': 'learn',
     'detective-screen': 'games', 'quest-screen': 'games', 'walk-screen': 'games',
     'guided-screen': 'tools', 'resources-screen': 'tools',
     'teacher-hub-screen': 'teacher',
@@ -286,7 +286,10 @@ function closeNavMobile() {
 
 // ===== Learn Screen — Expand/Collapse Cards =====
 document.querySelectorAll('.marker-card').forEach(card => {
-    card.addEventListener('click', () => {
+    card.addEventListener('click', (e) => {
+        // Don't toggle if they clicked the Deep Dive button
+        if (e.target.closest('.btn-deep-dive')) return;
+
         const detail = card.querySelector('.marker-detail');
         const isOpen = !detail.classList.contains('hidden');
 
@@ -302,6 +305,102 @@ document.querySelectorAll('.marker-card').forEach(card => {
             card.classList.add('expanded');
         }
     });
+});
+
+
+// ===== Marker Deep-Dive =====
+const markerOrder = ['motivation', 'belief', 'plans', 'agency'];
+let currentMarkerIdx = 0;
+
+function openMarkerDetail(markerKey) {
+    currentMarkerIdx = markerOrder.indexOf(markerKey);
+    if (currentMarkerIdx === -1) currentMarkerIdx = 0;
+    renderMarkerDetail(markerKey);
+    showScreen('marker-detail-screen');
+}
+
+function renderMarkerDetail(markerKey) {
+    const data = markerDetails[markerKey];
+    if (!data) return;
+    const age = currentAge || 'middle';
+
+    // Header
+    const header = document.getElementById('marker-deep-header');
+    header.setAttribute('data-color', data.color);
+    document.getElementById('marker-deep-icon').textContent = data.icon;
+    document.getElementById('marker-deep-letter').textContent =
+        markerKey === 'motivation' ? 'H — Healing' :
+        markerKey === 'belief' ? 'O — Opportunities' :
+        markerKey === 'plans' ? 'P — Processing' : 'E — Eco-grief';
+    document.getElementById('marker-deep-title').textContent = data.title[age];
+    document.getElementById('marker-detail-indicator').textContent = data.icon + ' ' + data.title[age];
+
+    // Definition
+    document.getElementById('marker-deep-definition').textContent = data.definition[age];
+
+    // Signals
+    const signalsList = document.getElementById('marker-deep-signals');
+    signalsList.innerHTML = data.lookFor[age].map(s => `<li>${s}</li>`).join('');
+
+    // Example
+    const ex = data.example[age];
+    const quote = document.getElementById('marker-deep-quote');
+    const highlighted = ex.text.replace(ex.highlight, `<mark>${ex.highlight}</mark>`);
+    quote.innerHTML = highlighted;
+    document.getElementById('marker-deep-explanation').textContent = ex.explanation;
+
+    // Quote border color
+    const colors = { motivation: 'var(--color-motivation)', belief: 'var(--color-belief)', plans: 'var(--color-plans)', agency: 'var(--color-agency)' };
+    quote.style.borderLeftColor = colors[markerKey] || 'var(--color-text-light)';
+
+    // Reflection
+    document.getElementById('marker-deep-reflection').textContent = data.reflection[age];
+
+    // Prev/Next buttons
+    document.getElementById('btn-marker-prev').style.visibility = currentMarkerIdx === 0 ? 'hidden' : 'visible';
+    document.getElementById('btn-marker-next').style.visibility = currentMarkerIdx === markerOrder.length - 1 ? 'hidden' : 'visible';
+
+    // Dots
+    const dotsEl = document.getElementById('marker-deep-dots');
+    dotsEl.innerHTML = markerOrder.map((m, i) =>
+        `<button class="marker-deep-dot ${i === currentMarkerIdx ? 'active' : ''}" data-marker="${m}" data-idx="${i}" aria-label="${markerDetails[m].title[age]}"></button>`
+    ).join('');
+}
+
+// Deep Dive buttons on learn screen
+document.querySelectorAll('.btn-deep-dive').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openMarkerDetail(btn.dataset.deepMarker);
+    });
+});
+
+// Back button
+document.getElementById('btn-back-marker-detail').addEventListener('click', () => showScreen('learn-screen'));
+
+// Prev/Next
+document.getElementById('btn-marker-prev').addEventListener('click', () => {
+    if (currentMarkerIdx > 0) {
+        currentMarkerIdx--;
+        renderMarkerDetail(markerOrder[currentMarkerIdx]);
+        window.scrollTo(0, 0);
+    }
+});
+document.getElementById('btn-marker-next').addEventListener('click', () => {
+    if (currentMarkerIdx < markerOrder.length - 1) {
+        currentMarkerIdx++;
+        renderMarkerDetail(markerOrder[currentMarkerIdx]);
+        window.scrollTo(0, 0);
+    }
+});
+
+// Dot clicks
+document.getElementById('marker-deep-dots').addEventListener('click', (e) => {
+    const dot = e.target.closest('.marker-deep-dot');
+    if (!dot) return;
+    currentMarkerIdx = parseInt(dot.dataset.idx);
+    renderMarkerDetail(markerOrder[currentMarkerIdx]);
+    window.scrollTo(0, 0);
 });
 
 
@@ -547,6 +646,240 @@ function updateFindings() {
         });
     });
 }
+
+
+// ===== Marker Deep-Dive Content =====
+
+const markerDetails = {
+    motivation: {
+        icon: '🔥',
+        letter: 'H',
+        color: 'motivation',
+        title: {
+            elementary: 'Motivation for Change',
+            middle: 'Motivation for Change',
+            high: 'Motivation for Change'
+        },
+        definition: {
+            elementary: 'Motivation is the spark — the moment someone feels something so strongly that they want to make things different. It might be sadness about a polluted river, worry about animals losing their homes, or anger that something unfair is happening to the Earth.',
+            middle: 'Motivation for Change is the emotional catalyst that drives people to act. When someone reads about environmental damage and feels a deep urge to respond — that\'s motivation. It\'s the gap between how things are and how they should be.',
+            high: 'Motivation for Change represents the affective dimension of hope — the emotional response to environmental degradation that transitions from passive awareness to active engagement. It emerges when individuals recognize a discrepancy between current conditions and their values.'
+        },
+        lookFor: {
+            elementary: [
+                'A character feeling sad, worried, or upset about nature',
+                'Someone saying "we have to do something!"',
+                'A moment that makes a character want to help',
+                'Strong feelings about animals, plants, or the environment'
+            ],
+            middle: [
+                'Emotional responses to environmental problems (frustration, concern, urgency)',
+                'Language of necessity: "we need to," "we must," "something has to change"',
+                'A turning point where awareness shifts to desire for action',
+                'Personal connections to environmental issues'
+            ],
+            high: [
+                'Affective language signaling emotional engagement with environmental issues',
+                'Expressions of moral urgency or ethical responsibility',
+                'The catalyst moment — where passive observation becomes active concern',
+                'Connections between personal values and systemic environmental problems'
+            ]
+        },
+        example: {
+            elementary: {
+                text: 'Mia looked at the stream behind her school. It was full of trash and the water was brown. "This isn\'t right," she said. "The frogs used to live here. We have to clean this up."',
+                highlight: 'We have to clean this up',
+                explanation: 'Mia sees the problem and feels strongly about it — that feeling is her motivation to want change.'
+            },
+            middle: {
+                text: 'After documenting the declining bird population in their neighborhood for three months, the students couldn\'t ignore what the data showed. "We can\'t just sit here and watch them disappear," Jaylen said, his frustration evident.',
+                highlight: 'We can\'t just sit here and watch them disappear',
+                explanation: 'Jaylen\'s frustration with the data is the emotional spark — motivation. He\'s moved from observing to wanting to act.'
+            },
+            high: {
+                text: 'The report revealed a 60% decline in local biodiversity over two decades. For the research team, the statistics were no longer abstract — they represented a tangible loss that demanded response. "The ethical imperative is clear," Dr. Vasquez noted.',
+                highlight: 'a tangible loss that demanded response',
+                explanation: 'The shift from abstract data to personal ethical urgency demonstrates motivation — the affective bridge between knowing and caring.'
+            }
+        },
+        reflection: {
+            elementary: 'Think of a time you saw something in nature that made you feel like you wanted to help. What was it? How did it make you feel?',
+            middle: 'When you read about environmental problems, what emotions come up? How do those emotions connect to a desire for change?',
+            high: 'How does the concept of motivation challenge the idea that hope is purely rational? What role does emotion play in driving environmental action?'
+        }
+    },
+    belief: {
+        icon: '✨',
+        letter: 'O',
+        color: 'belief',
+        title: {
+            elementary: 'Belief that Change is Possible',
+            middle: 'Belief that Change is Possible',
+            high: 'Belief that Change is Possible'
+        },
+        definition: {
+            elementary: 'Belief is knowing that things CAN get better. Even when something looks really bad, belief means seeing proof that change has happened before — like a dirty beach getting cleaned up, or an endangered animal making a comeback.',
+            middle: 'Belief that Change is Possible is about evidence and confidence. It\'s not blind optimism — it\'s grounded in real examples of success. When a story shows that efforts have worked before or that progress is happening, that builds belief.',
+            high: 'Belief that Change is Possible is the epistemic foundation of hope. It requires evidence — empirical, historical, or experiential — that environmental recovery and positive transformation are achievable. This marker distinguishes hope from wishful thinking.'
+        },
+        lookFor: {
+            elementary: [
+                'Success stories — a place that got cleaner or an animal that was saved',
+                'Characters who say "we can do this!"',
+                'Proof that trying actually works',
+                'Before-and-after moments'
+            ],
+            middle: [
+                'Evidence of successful environmental restoration',
+                'Historical examples of recovery (species comeback, pollution reduction)',
+                'Characters expressing confidence based on facts, not just feelings',
+                'Data or stories showing that interventions have measurable impact'
+            ],
+            high: [
+                'Empirical evidence cited to support the possibility of change',
+                'Historical precedent for environmental recovery',
+                'Epistemic confidence — belief grounded in data rather than sentiment',
+                'Counter-narratives that challenge environmental fatalism'
+            ]
+        },
+        example: {
+            elementary: {
+                text: 'Mr. Torres showed the class photos from five years ago. The park had been covered in litter and weeds. Now it had flowers, benches, and birds singing in new trees. "See what happened when people worked together?" he said.',
+                highlight: 'See what happened when people worked together?',
+                explanation: 'The before-and-after proof shows the class that change really is possible — that\'s belief in action.'
+            },
+            middle: {
+                text: 'Mr. Chen pulled up data from a successful wetland restoration project two counties over. "In three years, native species returned to 80% of pre-damage levels," he explained. The students leaned in — if it worked there, maybe it could work here too.',
+                highlight: 'if it worked there, maybe it could work here too',
+                explanation: 'Real data from a real project gives the students evidence-based belief. This isn\'t just hoping — it\'s knowing change is possible because it\'s happened before.'
+            },
+            high: {
+                text: 'Peer-reviewed studies from the Chesapeake Bay restoration demonstrated that targeted interventions reduced nitrogen levels by 40% within a decade. These findings provided empirical grounding for the coalition\'s confidence in their proposed watershed management plan.',
+                highlight: 'empirical grounding for the coalition\'s confidence',
+                explanation: 'Research evidence transforms hope from abstract to actionable. Belief here is epistemic — grounded in peer-reviewed data, not wishful thinking.'
+            }
+        },
+        reflection: {
+            elementary: 'Can you think of something that was broken or messy that got fixed when people helped? How does knowing that make you feel about other problems?',
+            middle: 'Why is it important that belief is backed by evidence? How is "I believe we can fix this" different from "I hope things get better"?',
+            high: 'How does evidence-based belief differ from optimism? What role does empirical precedent play in sustaining environmental action over time?'
+        }
+    },
+    plans: {
+        icon: '🗺️',
+        letter: 'P',
+        color: 'plans',
+        title: {
+            elementary: 'Plans for a Path Forward',
+            middle: 'Plans for a Path Forward',
+            high: 'Plans for a Path Forward'
+        },
+        definition: {
+            elementary: 'Plans means having a real idea for what to do next. It\'s not just wanting things to be better — it\'s figuring out the steps. Like making a list: first we\'ll test the water, then we\'ll plant native flowers, then we\'ll build a bird feeder.',
+            middle: 'Plans for a Path Forward are the concrete strategies that turn motivation into action. Hope without a plan is just a wish. When a story outlines specific steps, roles, or timelines for addressing an environmental issue — that\'s a plan.',
+            high: 'Plans for a Path Forward represent the strategic dimension of hope — the translation of motivation and belief into actionable frameworks. This marker identifies where narratives move from affective response to structured intervention, including timelines, roles, and measurable objectives.'
+        },
+        lookFor: {
+            elementary: [
+                'A list of steps or actions to take',
+                'Characters dividing up jobs — "you do this, I\'ll do that"',
+                'Ideas for how to fix a problem',
+                'Words like "first," "then," "next," or "our plan is"'
+            ],
+            middle: [
+                'Specific strategies with steps, timelines, or assigned roles',
+                'Problem-solving language: "our approach," "phase one," "we\'ll start by"',
+                'Research or investigation as part of a larger plan',
+                'Proposals, projects, or organized responses to environmental issues'
+            ],
+            high: [
+                'Structured intervention frameworks with defined phases',
+                'Strategic language indicating systematic planning',
+                'Allocation of resources, responsibilities, and timelines',
+                'Evidence-informed strategy development and adaptive management'
+            ]
+        },
+        example: {
+            elementary: {
+                text: '"Okay team," said Coach Lin. "Here\'s our plan. On Monday, we pick up trash along the creek. On Wednesday, we plant wildflowers. And on Friday, we put up signs so people know to keep it clean."',
+                highlight: 'On Monday, we pick up trash. On Wednesday, we plant wildflowers. On Friday, we put up signs',
+                explanation: 'Coach Lin has a step-by-step plan with specific days and actions. That\'s what makes this a plan, not just a wish.'
+            },
+            middle: {
+                text: '"Team one will test water quality weekly and log results. Team two will research native plants for the bank stabilization. Team three handles community outreach — we need buy-in from local businesses," Maya laid out the action plan.',
+                highlight: 'Team one will test... Team two will research... Team three handles outreach',
+                explanation: 'Maya breaks the big goal into specific roles with clear tasks. This organized approach is what turns hope into progress.'
+            },
+            high: {
+                text: 'The coalition outlined a three-phase restoration plan: Phase I involved baseline ecological assessment and stakeholder engagement; Phase II focused on targeted remediation of identified pollutant sources; Phase III established long-term monitoring protocols with community science partnerships.',
+                highlight: 'three-phase restoration plan',
+                explanation: 'A structured, phased approach with defined objectives at each stage. This represents strategic planning — the framework that channels motivation into measurable action.'
+            }
+        },
+        reflection: {
+            elementary: 'If you wanted to help clean up a park near your school, what steps would you put in your plan? Try to think of at least three.',
+            middle: 'Why is having a plan important? What happens when people are motivated but don\'t have a clear strategy?',
+            high: 'How do plans function as a bridge between belief and agency? What makes an environmental plan "actionable" versus merely aspirational?'
+        }
+    },
+    agency: {
+        icon: '💪',
+        letter: 'E',
+        color: 'agency',
+        title: {
+            elementary: 'Agency to Take Action',
+            middle: 'Agency to Take Action',
+            high: 'Agency to Take Action'
+        },
+        definition: {
+            elementary: 'Agency means actually DOING something — not just talking about it, but rolling up your sleeves and making it happen. When a character in a story picks up trash, writes a letter, or stands up for the environment, that\'s agency.',
+            middle: 'Agency to Take Action is where hope becomes real. It\'s the moment when people move from thinking and planning to actually doing. Agency means taking ownership — stepping up, using your voice, and making tangible contributions to change.',
+            high: 'Agency to Take Action is the performative dimension of hope — where intention materializes into behavior. It encompasses both individual and collective action, recognizing that agency is not merely personal empowerment but the enacted capacity to effect systemic change within social and ecological systems.'
+        },
+        lookFor: {
+            elementary: [
+                'Characters actually doing something — planting, cleaning, building',
+                'Someone speaking up or asking for help',
+                'Action words: "they built," "she planted," "he wrote a letter"',
+                'People working together to make change happen'
+            ],
+            middle: [
+                'Concrete actions taken by individuals or groups',
+                'Public engagement: presenting to officials, organizing events, publishing findings',
+                'The shift from planning to execution',
+                'Collective action and community mobilization'
+            ],
+            high: [
+                'Enacted behavior demonstrating individual or collective capacity for change',
+                'Civic engagement: policy advocacy, community organizing, research publication',
+                'The transition from strategic planning to implementation',
+                'Distributed agency — how multiple actors contribute to systemic change'
+            ]
+        },
+        example: {
+            elementary: {
+                text: 'On Saturday morning, 47 students showed up at Riverside Park. They put on gloves, grabbed bags, and got to work. By lunchtime, they had filled 30 bags of trash and planted 15 new trees along the bank.',
+                highlight: 'They put on gloves, grabbed bags, and got to work',
+                explanation: 'The students aren\'t just talking — they\'re doing! Showing up, picking up trash, and planting trees is agency in action.'
+            },
+            middle: {
+                text: 'Amara stood at the podium, her water samples arranged on the table. "We tested the creek every week for six months," she told the city council. "Here\'s the data. Here\'s what it means. And here\'s what we\'re asking you to fund."',
+                highlight: 'she told the city council',
+                explanation: 'Amara is exercising agency by presenting real evidence to decision-makers. She\'s not waiting for someone else to fix it — she\'s taking action herself.'
+            },
+            high: {
+                text: 'The team\'s peer-reviewed findings were cited in the environmental impact assessment that led the city council to approve a $2.1 million watershed restoration fund. Their research had translated academic knowledge into policy change.',
+                highlight: 'translated academic knowledge into policy change',
+                explanation: 'Agency here operates at a systemic level — research becomes a tool for policy change. This demonstrates how individual effort can catalyze institutional action.'
+            }
+        },
+        reflection: {
+            elementary: 'What is one thing YOU could do this week to help the environment? It can be big or small — every action counts!',
+            middle: 'What does it mean to "have agency"? Why is taking action the most important step in the HOPE Framework?',
+            high: 'How does the concept of agency in the HOPE Framework relate to broader discussions of environmental justice and collective action?'
+        }
+    }
+};
 
 
 // ===== Feedback System =====

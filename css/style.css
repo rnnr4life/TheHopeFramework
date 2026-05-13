@@ -853,6 +853,168 @@ h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; }
 
 
 /* ================================================
+   MARKER DEEP-DIVE
+   ================================================ */
+
+/* Header */
+.marker-deep-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--card-radius);
+    border-left: 4px solid var(--color-text-light);
+}
+.marker-deep-header[data-color="motivation"] { border-left-color: var(--color-motivation); }
+.marker-deep-header[data-color="belief"] { border-left-color: var(--color-belief); }
+.marker-deep-header[data-color="plans"] { border-left-color: var(--color-plans); }
+.marker-deep-header[data-color="agency"] { border-left-color: var(--color-agency); }
+
+.marker-deep-icon { font-size: 3rem; flex-shrink: 0; }
+.marker-deep-letter {
+    font-family: var(--font-heading);
+    font-size: 0.7rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--color-text-light); margin-bottom: 0.2rem;
+}
+.marker-deep-title {
+    font-family: var(--font-heading);
+    font-size: 1.4rem; font-weight: 800; margin: 0;
+}
+
+/* Sections */
+.marker-deep-section {
+    margin-bottom: 1.75rem;
+    max-width: 700px;
+}
+.marker-deep-section-label {
+    font-family: var(--font-heading);
+    font-size: 0.78rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--color-text-light);
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.marker-deep-definition {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--color-text);
+}
+
+/* Signals list */
+.marker-deep-signals {
+    list-style: none; padding: 0;
+    display: flex; flex-direction: column; gap: 0.5rem;
+}
+.marker-deep-signals li {
+    display: flex; align-items: flex-start; gap: 0.6rem;
+    padding: 0.6rem 0.85rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    font-size: 0.88rem; line-height: 1.5;
+    color: var(--color-text);
+}
+.marker-deep-signals li::before {
+    content: '👁️';
+    flex-shrink: 0;
+    font-size: 0.85rem;
+}
+
+/* Example */
+.marker-deep-example {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--card-radius);
+    padding: 1.25rem;
+}
+.marker-deep-quote {
+    font-size: 0.95rem; line-height: 1.7;
+    color: var(--color-text);
+    border-left: 3px solid var(--color-text-light);
+    padding-left: 1rem;
+    margin: 0 0 0.75rem;
+    font-style: italic;
+}
+.marker-deep-quote mark {
+    background: rgba(52,211,153,0.2);
+    color: var(--color-agency);
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+    font-style: normal; font-weight: 600;
+}
+.marker-deep-explanation {
+    font-size: 0.85rem;
+    color: var(--color-text-light);
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Reflection */
+.marker-deep-reflection {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--color-text);
+    padding: 1rem 1.25rem;
+    background: rgba(168,85,247,0.06);
+    border: 1px solid rgba(168,85,247,0.15);
+    border-radius: var(--card-radius);
+}
+
+/* Marker nav (prev/next + dots) */
+.marker-deep-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-border);
+}
+.marker-deep-dots {
+    display: flex; gap: 0.5rem;
+}
+.marker-deep-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--color-border);
+    border: none; cursor: pointer;
+    transition: all var(--transition);
+}
+.marker-deep-dot.active { transform: scale(1.3); }
+.marker-deep-dot[data-marker="motivation"].active { background: var(--color-motivation); }
+.marker-deep-dot[data-marker="belief"].active { background: var(--color-belief); }
+.marker-deep-dot[data-marker="plans"].active { background: var(--color-plans); }
+.marker-deep-dot[data-marker="agency"].active { background: var(--color-agency); }
+
+/* Deep dive button in learn cards */
+.btn-deep-dive {
+    margin-top: 0.75rem;
+    display: inline-block;
+}
+
+/* Age overrides */
+.age-elementary .marker-deep-icon { font-size: 4rem; }
+.age-elementary .marker-deep-title { font-size: 1.6rem; }
+.age-elementary .marker-deep-definition { font-size: 1.05rem; }
+.age-elementary .marker-deep-signals li { font-size: 0.95rem; border-radius: 16px; }
+.age-elementary .marker-deep-example { border-radius: 20px; }
+
+.age-high .marker-deep-icon { font-size: 2.2rem; }
+.age-high .marker-deep-title { font-size: 1.2rem; }
+
+@media (max-width: 600px) {
+    .marker-deep-header { flex-direction: column; text-align: center; }
+    .marker-deep-nav { flex-direction: column; gap: 0.75rem; }
+}
+
+
+/* ================================================
    MATCH ACTIVITY
    ================================================ */
 .match-header { margin-bottom: 1.5rem; }

@@ -465,6 +465,7 @@
                             <li>Words like "we need to," "I wish," or "something has to change"</li>
                         </ul>
                         <p class="marker-question"><strong>Ask yourself:</strong> What made this character want to make a difference?</p>
+                        <button class="btn btn-small btn-deep-dive" data-deep-marker="motivation">Deep Dive →</button>
                     </div>
                     <div class="card-expand-hint">Click to explore</div>
                 </div>
@@ -484,6 +485,7 @@
                             <li>Evidence that efforts are working</li>
                         </ul>
                         <p class="marker-question"><strong>Ask yourself:</strong> What gives the characters (or you) hope that change can happen?</p>
+                        <button class="btn btn-small btn-deep-dive" data-deep-marker="belief">Deep Dive →</button>
                     </div>
                     <div class="card-expand-hint">Click to explore</div>
                 </div>
@@ -503,6 +505,7 @@
                             <li>Ideas for what could be done next</li>
                         </ul>
                         <p class="marker-question"><strong>Ask yourself:</strong> What plan or pathway does this story suggest?</p>
+                        <button class="btn btn-small btn-deep-dive" data-deep-marker="plans">Deep Dive →</button>
                     </div>
                     <div class="card-expand-hint">Click to explore</div>
                 </div>
@@ -522,6 +525,7 @@
                             <li>Moments where someone moves from thinking to doing</li>
                         </ul>
                         <p class="marker-question"><strong>Ask yourself:</strong> Who is taking action, and what are they doing?</p>
+                        <button class="btn btn-small btn-deep-dive" data-deep-marker="agency">Deep Dive →</button>
                     </div>
                     <div class="card-expand-hint">Click to explore</div>
                 </div>
@@ -531,6 +535,59 @@
                     <span id="btn-activity-text">Try the Activity</span>
                     <span class="btn-arrow">&rarr;</span>
                 </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Marker Deep-Dive Screen ===== -->
+    <section id="marker-detail-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-marker-detail">&larr; Back</button>
+                <div class="step-indicator" id="marker-detail-indicator">Motivation</div>
+            </div>
+
+            <!-- Marker header -->
+            <div class="marker-deep-header" id="marker-deep-header">
+                <div class="marker-deep-icon" id="marker-deep-icon">🔥</div>
+                <div>
+                    <div class="marker-deep-letter" id="marker-deep-letter">H</div>
+                    <h2 class="marker-deep-title" id="marker-deep-title">Motivation for Change</h2>
+                </div>
+            </div>
+
+            <!-- Definition -->
+            <div class="marker-deep-section">
+                <h3 class="marker-deep-section-label">What it means</h3>
+                <p class="marker-deep-definition" id="marker-deep-definition"></p>
+            </div>
+
+            <!-- What to look for -->
+            <div class="marker-deep-section">
+                <h3 class="marker-deep-section-label">What to look for</h3>
+                <ul class="marker-deep-signals" id="marker-deep-signals"></ul>
+            </div>
+
+            <!-- Example -->
+            <div class="marker-deep-section">
+                <h3 class="marker-deep-section-label">Real example</h3>
+                <div class="marker-deep-example">
+                    <blockquote class="marker-deep-quote" id="marker-deep-quote"></blockquote>
+                    <p class="marker-deep-explanation" id="marker-deep-explanation"></p>
+                </div>
+            </div>
+
+            <!-- Reflection -->
+            <div class="marker-deep-section">
+                <h3 class="marker-deep-section-label">Think about it</h3>
+                <p class="marker-deep-reflection" id="marker-deep-reflection"></p>
+            </div>
+
+            <!-- Navigation between markers -->
+            <div class="marker-deep-nav">
+                <button class="btn btn-small btn-muted" id="btn-marker-prev">&larr; Previous</button>
+                <div class="marker-deep-dots" id="marker-deep-dots"></div>
+                <button class="btn btn-small btn-muted" id="btn-marker-next">Next &rarr;</button>
             </div>
         </div>
     </section>
