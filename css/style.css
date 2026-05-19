@@ -4251,6 +4251,18 @@ button.resource-card-action {
     }
 }
 
+/* --- VERSION LABEL --- */
+.app-version-label {
+    position: fixed;
+    bottom: 6px;
+    right: 10px;
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.2);
+    pointer-events: none;
+    z-index: 1;
+    letter-spacing: 0.5px;
+}
+
 
 /* ================================================
    REFLECTION

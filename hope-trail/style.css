@@ -332,6 +332,15 @@ canvas {
     font-weight: bold;
 }
 
+/* --- VERSION LABEL --- */
+.version-label {
+    text-align: center;
+    font-size: 7px;
+    color: #3a5a3a;
+    margin-top: 8px;
+    letter-spacing: 1px;
+}
+
 /* --- MAP SCREEN --- */
 #map-canvas {
     border: 2px solid var(--hope-green-dark);
