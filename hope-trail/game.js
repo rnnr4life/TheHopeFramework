@@ -29,6 +29,25 @@ const LANDMARKS = [
 
 const TOTAL_MILES = 2000;
 
+// --- REGIONS (background changes as you cross the country) ---
+const REGIONS = [
+    { name: 'Southeast',        startMile: 0,    skyTop: '#4488cc', skyBottom: '#66aadd', ground: '#44aa44', groundAccent: '#338833', trees: true,  mountains: false, prairie: false },
+    { name: 'Appalachian Mtns', startMile: 180,  skyTop: '#5588bb', skyBottom: '#88bbdd', ground: '#5a9a4a', groundAccent: '#3a7a3a', trees: true,  mountains: true,  prairie: false },
+    { name: 'Mid-South',        startMile: 500,  skyTop: '#5599cc', skyBottom: '#88ccee', ground: '#66aa55', groundAccent: '#448833', trees: true,  mountains: false, prairie: false },
+    { name: 'Great Plains',     startMile: 850,  skyTop: '#6baed6', skyBottom: '#c6dbef', ground: '#b5a642', groundAccent: '#9a8a32', trees: false, mountains: false, prairie: true  },
+    { name: 'Rocky Mountains',  startMile: 1250, skyTop: '#4a6fa5', skyBottom: '#7ba3cc', ground: '#6a8a4a', groundAccent: '#4a6a3a', trees: true,  mountains: true,  prairie: false },
+    { name: 'High Rockies',     startMile: 1450, skyTop: '#3a5f8a', skyBottom: '#6690b8', ground: '#7a9060', groundAccent: '#5a7040', trees: false, mountains: true,  prairie: false },
+    { name: 'Pacific Northwest', startMile: 1750, skyTop: '#556b7a', skyBottom: '#88aabb', ground: '#2d8a3e', groundAccent: '#1a6a2a', trees: true,  mountains: true,  prairie: false },
+];
+
+function getRegion(miles) {
+    let region = REGIONS[0];
+    for (const r of REGIONS) {
+        if (miles >= r.startMile) region = r;
+    }
+    return region;
+}
+
 const MONTH_NAMES = [
     'January','February','March','April','May','June',
     'July','August','September','October','November','December'
@@ -167,10 +186,11 @@ function sfx_win()     { playTone(523, 0.15, 'square', 0.12); setTimeout(() => p
 // =====================
 // PIXEL ART DRAWING
 // =====================
-function drawSky(ctx, w, h, skyH) {
-    ctx.fillStyle = '#4488cc';
+function drawSky(ctx, w, h, skyH, region) {
+    const r = region || REGIONS[0];
+    ctx.fillStyle = r.skyTop;
     ctx.fillRect(0, 0, w, skyH);
-    ctx.fillStyle = '#66aadd';
+    ctx.fillStyle = r.skyBottom;
     ctx.fillRect(0, skyH * 0.7, w, skyH * 0.3);
 }
 
@@ -191,10 +211,10 @@ function drawClouds(ctx, w, skyH, seed) {
     }
 }
 
-function drawGround(ctx, w, h, skyH, color) {
+function drawGround(ctx, w, h, skyH, color, accentColor) {
     ctx.fillStyle = color || '#44aa44';
     ctx.fillRect(0, skyH, w, h - skyH);
-    ctx.fillStyle = '#338833';
+    ctx.fillStyle = accentColor || '#338833';
     ctx.fillRect(0, skyH, w, 4);
 }
 
@@ -418,15 +438,28 @@ function drawTrailScene(canvas) {
     const ctx = canvas.getContext('2d');
     const w = canvas.width, h = canvas.height;
     const skyH = h * 0.45;
+    const region = getRegion(game.miles);
     ctx.clearRect(0, 0, w, h);
-    drawSky(ctx, w, h, skyH);
+    drawSky(ctx, w, h, skyH, region);
     drawClouds(ctx, w, skyH);
-    if (game.miles > 800) drawMountains(ctx, w, skyH);
-    drawGround(ctx, w, h, skyH);
+    if (region.mountains) drawMountains(ctx, w, skyH);
+    drawGround(ctx, w, h, skyH, region.ground, region.groundAccent);
+    if (region.prairie) {
+        // Wildflowers on prairie
+        const colors = ['#fbbf24','#ff6b6b','#a855f7','#fff'];
+        for (let i = 0; i < 20; i++) {
+            ctx.fillStyle = colors[i % colors.length];
+            ctx.beginPath();
+            ctx.arc(Math.random() * w, skyH + 10 + Math.random() * (h - skyH - 50), 2.5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
     drawRoad(ctx, w, h, skyH);
-    drawTree(ctx, w * 0.1, skyH + 10, 30);
-    drawTree(ctx, w * 0.85, skyH + 5, 35);
-    if (game.miles < 800) drawTree(ctx, w * 0.6, skyH + 15, 25);
+    if (region.trees) {
+        drawTree(ctx, w * 0.1, skyH + 10, 30);
+        drawTree(ctx, w * 0.85, skyH + 5, 35);
+        if (game.miles < 800) drawTree(ctx, w * 0.6, skyH + 15, 25);
+    }
     const progress = Math.min(game.miles / TOTAL_MILES, 1);
     const vx = w - 80 - progress * (w - 200);
     drawVan(ctx, vx, h * 0.62, 1.2);
@@ -526,7 +559,8 @@ function playTravelAnimation(milesGained, onComplete) {
     const startTime = performance.now();
 
     const scenery = [];
-    const hasMountains = game.miles > 800;
+    const region = getRegion(game.miles);
+    const hasMountains = region.mountains;
     for (let i = 0; i < 12; i++) {
         const kind = Math.random();
         scenery.push({
@@ -564,10 +598,10 @@ function playTravelAnimation(milesGained, onComplete) {
 
         ctx.clearRect(0, 0, w, h);
 
-        // Sky
-        ctx.fillStyle = '#4488cc';
+        // Sky (region-based)
+        ctx.fillStyle = region.skyTop;
         ctx.fillRect(0, 0, w, skyH);
-        ctx.fillStyle = '#66aadd';
+        ctx.fillStyle = region.skyBottom;
         ctx.fillRect(0, skyH * 0.7, w, skyH * 0.3);
 
         // Clouds
@@ -589,11 +623,22 @@ function playTravelAnimation(milesGained, onComplete) {
             }
         }
 
-        // Ground
-        ctx.fillStyle = '#44aa44';
+        // Ground (region-based)
+        ctx.fillStyle = region.ground;
         ctx.fillRect(0, skyH, w, h - skyH);
-        ctx.fillStyle = '#338833';
+        ctx.fillStyle = region.groundAccent;
         ctx.fillRect(0, skyH, w, 4);
+
+        // Prairie wildflowers
+        if (region.prairie) {
+            const prairieColors = ['#fbbf24','#ff6b6b','#a855f7','#fff'];
+            for (let i = 0; i < 15; i++) {
+                const fx = ((i * 47 + scroll * 0.3) % w + w) % w;
+                const fy = skyH + 8 + (i * 13) % (h - skyH - 45);
+                ctx.fillStyle = prairieColors[i % prairieColors.length];
+                ctx.beginPath(); ctx.arc(fx, fy, 2.5, 0, Math.PI * 2); ctx.fill();
+            }
+        }
 
         // Road
         const roadY = h * 0.74;
@@ -616,8 +661,12 @@ function playTravelAnimation(milesGained, onComplete) {
             const sy = s.side === 1 ? roadY + roadH + 5 + s.size * 0.2 : roadY - 5 - s.size * 0.2;
             if (sx < -50 || sx > w + 50) continue;
             ctx.globalAlpha = s.layer === 0 ? 0.6 : 1.0;
-            if (s.type === 'tree') {
+            if (s.type === 'tree' && region.trees) {
                 drawTree(ctx, sx, sy, s.size * (s.layer === 0 ? 0.6 : 1));
+            } else if (s.type === 'tree' && !region.trees) {
+                // Skip trees in treeless regions — show a bush instead
+                ctx.fillStyle = '#8a8a42';
+                ctx.beginPath(); ctx.ellipse(sx, sy, s.size * 0.25, s.size * 0.15, 0, 0, Math.PI * 2); ctx.fill();
             } else if (s.type === 'bush') {
                 ctx.fillStyle = '#2a7722';
                 ctx.beginPath(); ctx.ellipse(sx, sy, s.size * 0.4, s.size * 0.25, 0, 0, Math.PI * 2); ctx.fill();
@@ -939,6 +988,7 @@ function showGameMenu() {
             <li><span class="menu-option" onclick="doStatus()">Check supplies</span></li>
             <li><span class="menu-option" onclick="changePace()">Change pace (${game.pace})</span></li>
             <li><span class="menu-option" onclick="doRest()">Stop and rest</span></li>
+            <li><span class="menu-option" onclick="showMap()">View map</span></li>
         </ol>
         <p class="action-prompt">What is your choice? <span class="blink">_</span></p>
     `;
@@ -1420,4 +1470,205 @@ function loseGame() {
     document.getElementById('end-hope-summary').innerHTML =
         `<p>❤️ Motivation: ${hopeScore.h} &nbsp; 🌿 Belief: ${hopeScore.o} &nbsp; 🗺️ Plans: ${hopeScore.p} &nbsp; ⚡ Agency: ${hopeScore.e}</p>`;
     showScreen('end-screen');
+}
+
+// =====================
+// JOURNEY MAP
+// =====================
+// Approximate pixel positions for landmarks on a simplified US map
+// Canvas is 580 x 340
+const MAP_ROUTE = [
+    { name: 'Greenville, SC',              x: 460, y: 195 },
+    { name: 'Blue Ridge Parkway',           x: 445, y: 175 },
+    { name: 'Asheville Community Garden',   x: 430, y: 170 },
+    { name: 'Great Smoky Mountains',        x: 415, y: 175 },
+    { name: 'Nashville Green Hub',          x: 375, y: 175 },
+    { name: 'Mississippi River',            x: 340, y: 185 },
+    { name: 'Ozark Wilderness',             x: 310, y: 175 },
+    { name: 'Kansas Prairie Restoration',   x: 265, y: 155 },
+    { name: 'Colorado River Crossing',      x: 210, y: 150 },
+    { name: 'Rocky Mountain Refuge',        x: 185, y: 130 },
+    { name: 'Yellowstone Gateway',          x: 180, y: 100 },
+    { name: 'Pacific Northwest Trail',      x: 120, y: 85  },
+    { name: 'Hope Valley, OR',              x: 95,  y: 100 },
+];
+
+function drawMap(canvas) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    // Background — dark map style
+    ctx.fillStyle = '#0d1117';
+    ctx.fillRect(0, 0, w, h);
+
+    // Draw simplified US outline
+    ctx.strokeStyle = '#2a4a2a';
+    ctx.lineWidth = 2;
+    ctx.fillStyle = '#1a2a1a';
+    ctx.beginPath();
+    // Simplified continental US shape
+    ctx.moveTo(85, 60);    // WA
+    ctx.lineTo(80, 110);   // OR coast
+    ctx.lineTo(75, 170);   // CA coast
+    ctx.lineTo(90, 230);   // Southern CA
+    ctx.lineTo(130, 250);  // AZ border
+    ctx.lineTo(180, 260);  // NM
+    ctx.lineTo(230, 270);  // TX west
+    ctx.lineTo(280, 290);  // TX south
+    ctx.lineTo(310, 280);  // TX coast
+    ctx.lineTo(340, 260);  // LA
+    ctx.lineTo(370, 250);  // MS/AL coast
+    ctx.lineTo(430, 235);  // FL panhandle
+    ctx.lineTo(470, 270);  // FL
+    ctx.lineTo(490, 240);  // FL east
+    ctx.lineTo(495, 210);  // GA coast
+    ctx.lineTo(500, 180);  // SC coast
+    ctx.lineTo(505, 150);  // NC coast
+    ctx.lineTo(510, 120);  // VA coast
+    ctx.lineTo(520, 100);  // MD/DE
+    ctx.lineTo(515, 80);   // NJ
+    ctx.lineTo(500, 60);   // NY/CT
+    ctx.lineTo(510, 45);   // MA
+    ctx.lineTo(505, 35);   // ME start
+    ctx.lineTo(490, 20);   // ME top
+    ctx.lineTo(470, 30);   // VT/NH
+    ctx.lineTo(440, 50);   // NY
+    ctx.lineTo(380, 55);   // Great Lakes
+    ctx.lineTo(360, 45);   // MI
+    ctx.lineTo(330, 60);   // WI
+    ctx.lineTo(290, 50);   // MN
+    ctx.lineTo(240, 45);   // ND
+    ctx.lineTo(190, 40);   // MT
+    ctx.lineTo(120, 35);   // WA/ID
+    ctx.lineTo(85, 60);    // Back to WA
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Draw route line (full path, dimmed)
+    ctx.strokeStyle = '#2a5a2a';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(MAP_ROUTE[0].x, MAP_ROUTE[0].y);
+    for (let i = 1; i < MAP_ROUTE.length; i++) {
+        ctx.lineTo(MAP_ROUTE[i].x, MAP_ROUTE[i].y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Draw traveled route (bright)
+    const progress = Math.min(game.miles / TOTAL_MILES, 1);
+    ctx.strokeStyle = '#34d399';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(MAP_ROUTE[0].x, MAP_ROUTE[0].y);
+    // Walk through landmarks, drawing up to current progress
+    for (let i = 1; i < MAP_ROUTE.length; i++) {
+        const lmMile = LANDMARKS[i].mile;
+        if (game.miles >= lmMile) {
+            ctx.lineTo(MAP_ROUTE[i].x, MAP_ROUTE[i].y);
+        } else {
+            // Partial segment
+            const prevMile = LANDMARKS[i - 1].mile;
+            const segProgress = (game.miles - prevMile) / (lmMile - prevMile);
+            const px = MAP_ROUTE[i - 1].x + (MAP_ROUTE[i].x - MAP_ROUTE[i - 1].x) * segProgress;
+            const py = MAP_ROUTE[i - 1].y + (MAP_ROUTE[i].y - MAP_ROUTE[i - 1].y) * segProgress;
+            ctx.lineTo(px, py);
+            break;
+        }
+    }
+    ctx.stroke();
+
+    // Draw landmark dots
+    for (let i = 0; i < MAP_ROUTE.length; i++) {
+        const lm = MAP_ROUTE[i];
+        const visited = game.miles >= LANDMARKS[i].mile;
+
+        // Dot
+        ctx.beginPath();
+        ctx.arc(lm.x, lm.y, visited ? 5 : 3, 0, Math.PI * 2);
+        ctx.fillStyle = visited ? '#34d399' : '#555';
+        ctx.fill();
+        ctx.strokeStyle = visited ? '#6ee7b7' : '#333';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Label (only show a few to avoid clutter)
+        if (i === 0 || i === MAP_ROUTE.length - 1 || LANDMARKS[i].center || visited) {
+            ctx.fillStyle = visited ? '#d4e8d4' : '#666';
+            ctx.font = '7px "Press Start 2P", monospace';
+            ctx.textAlign = 'center';
+            // Short name
+            const shortName = lm.name.split(',')[0].split(' ').slice(0, 2).join(' ');
+            const labelY = lm.y < 100 ? lm.y + 14 : lm.y - 10;
+            ctx.fillText(shortName, lm.x, labelY);
+        }
+    }
+
+    // Draw car at current position
+    let carX, carY;
+    for (let i = 1; i < MAP_ROUTE.length; i++) {
+        if (game.miles < LANDMARKS[i].mile) {
+            const prevMile = LANDMARKS[i - 1].mile;
+            const segProgress = (game.miles - prevMile) / (LANDMARKS[i].mile - prevMile);
+            carX = MAP_ROUTE[i - 1].x + (MAP_ROUTE[i].x - MAP_ROUTE[i - 1].x) * segProgress;
+            carY = MAP_ROUTE[i - 1].y + (MAP_ROUTE[i].y - MAP_ROUTE[i - 1].y) * segProgress;
+            break;
+        }
+        if (i === MAP_ROUTE.length - 1) {
+            carX = MAP_ROUTE[i].x;
+            carY = MAP_ROUTE[i].y;
+        }
+    }
+    if (carX === undefined) { carX = MAP_ROUTE[0].x; carY = MAP_ROUTE[0].y; }
+
+    // Van icon on map
+    ctx.fillStyle = '#3388cc';
+    ctx.fillRect(carX - 8, carY - 5, 16, 10);
+    ctx.fillStyle = '#aaddff';
+    ctx.fillRect(carX - 6, carY - 4, 4, 4);
+    ctx.fillStyle = '#333';
+    ctx.beginPath(); ctx.arc(carX - 4, carY + 6, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(carX + 4, carY + 6, 3, 0, Math.PI * 2); ctx.fill();
+
+    // Pulsing glow around car
+    ctx.strokeStyle = '#34d399';
+    ctx.lineWidth = 2;
+    ctx.globalAlpha = 0.5 + 0.5 * Math.sin(Date.now() * 0.003);
+    ctx.beginPath(); ctx.arc(carX, carY, 12, 0, Math.PI * 2); ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // Region label
+    const region = getRegion(game.miles);
+    ctx.fillStyle = '#34d399';
+    ctx.font = '9px "Press Start 2P", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(region.name, 10, 20);
+
+    // Miles info
+    ctx.fillStyle = '#d4e8d4';
+    ctx.font = '8px "Press Start 2P", monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(`${Math.floor(game.miles)} / ${TOTAL_MILES} miles`, w - 10, 20);
+
+    // Map info panel
+    const mapInfo = document.getElementById('map-info');
+    const nextLm = LANDMARKS[game.nextLandmark];
+    const milesLeft = nextLm ? nextLm.mile - Math.floor(game.miles) : 0;
+    mapInfo.innerHTML = `<p>Next stop: <strong>${nextLm ? nextLm.name : 'Hope Valley!'}</strong> (${milesLeft} miles away)</p>`;
+}
+
+function showMap() {
+    sfx_select();
+    drawMap(document.getElementById('map-canvas'));
+    showScreen('map-screen');
+}
+
+function closeMap() {
+    sfx_select();
+    showScreen('game-screen');
+    updateUI();
+    showGameMenu();
 }

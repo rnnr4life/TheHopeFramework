@@ -291,3 +291,21 @@ canvas {
     color: #5a8a5a;
     margin: 4px 0;
 }
+
+/* --- MAP SCREEN --- */
+#map-canvas {
+    border: 2px solid var(--hope-green-dark);
+    background: #0d1117;
+}
+
+#map-info {
+    text-align: center;
+    padding: 6px 12px;
+    font-size: 9px;
+    color: var(--text);
+    line-height: 2;
+}
+
+#map-info strong {
+    color: var(--hope-green);
+}
