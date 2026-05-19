@@ -94,6 +94,46 @@ const PACE_CONFIG = {
     fast:     { milesMin: 45, milesMax: 70, foodMult: 1.3, stressChance: 0.20 },
 };
 
+// --- VEHICLE TYPES ---
+const VEHICLE_CONFIG = {
+    van: {
+        name: 'Gas Van',
+        icon: '🚐',
+        fuelName: 'Gas',
+        fuelUnit: 'tanks',
+        fuelCost: 50,
+        milesMult: 1.0,
+        fuelChance: 0.35,      // chance per turn to consume fuel
+        canChangePace: true,
+        hopeBonus: null,
+        description: 'Reliable and familiar, but burns fossil fuels.',
+    },
+    ev: {
+        name: 'Electric Vehicle',
+        icon: '⚡🚗',
+        fuelName: 'Charge',
+        fuelUnit: 'charges',
+        fuelCost: 30,
+        milesMult: 1.0,
+        fuelChance: 0.45,      // EVs need charging more often
+        canChangePace: true,
+        hopeBonus: { h: 1, o: 1 },  // Motivation + Belief
+        description: 'Zero emissions! But you need to find chargers.',
+    },
+    transit: {
+        name: 'Public Transit',
+        icon: '🚌',
+        fuelName: null,
+        fuelUnit: null,
+        fuelCost: 0,
+        milesMult: 0.65,       // slower travel
+        fuelChance: 0,         // no fuel needed
+        canChangePace: false,   // fixed pace
+        hopeBonus: { p: 1, e: 1 },  // Plans + Agency
+        description: 'Cheapest option but slower. Meet people along the way!',
+    },
+};
+
 // --- HOPE INFO ---
 const HOPE_INFO = `The HOPE Framework helps us find hope in stories about the environment.
 
@@ -345,6 +385,10 @@ function drawRoad(ctx, w, h, skyH) {
 
 function drawVan(ctx, x, y, scale) {
     const s = scale || 1;
+    // Draw the correct vehicle based on game state
+    if (game.vehicle === 'ev') { drawEV(ctx, x, y, s); return; }
+    if (game.vehicle === 'transit') { drawBus(ctx, x, y, s); return; }
+    // Default: gas van
     // Body
     ctx.fillStyle = '#3388cc';
     ctx.fillRect(x - 22 * s, y - 5 * s, 44 * s, 22 * s);
@@ -372,6 +416,66 @@ function drawVan(ctx, x, y, scale) {
     ctx.font = `${3 * s}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.fillText('HOPE', x + 18 * s, y + 9.5 * s);
+    // Mood
+    if (game.party) drawVanMood(ctx, x, y, s);
+}
+
+function drawEV(ctx, x, y, s) {
+    // Sleek electric car — lower profile, green accent
+    ctx.fillStyle = '#22aa66';
+    ctx.fillRect(x - 20 * s, y + 2 * s, 40 * s, 16 * s);
+    // Roof (lower, sleeker)
+    ctx.fillStyle = '#1a8855';
+    ctx.fillRect(x - 14 * s, y - 8 * s, 28 * s, 11 * s);
+    // Windshield
+    ctx.fillStyle = '#aaddff';
+    ctx.fillRect(x - 16 * s, y - 6 * s, 10 * s, 8 * s);
+    // Side window
+    ctx.fillStyle = '#aaddff';
+    ctx.fillRect(x - 2 * s, y - 6 * s, 12 * s, 8 * s);
+    // Lightning bolt on side
+    ctx.fillStyle = '#ffdd44';
+    ctx.font = `${8 * s}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('⚡', x + 14 * s, y + 12 * s);
+    // Wheels
+    ctx.fillStyle = '#333';
+    ctx.beginPath(); ctx.arc(x - 10 * s, y + 18 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 10 * s, y + 18 * s, 5 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#66cc66';
+    ctx.beginPath(); ctx.arc(x - 10 * s, y + 18 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 10 * s, y + 18 * s, 2 * s, 0, Math.PI * 2); ctx.fill();
+    // Mood
+    if (game.party) drawVanMood(ctx, x, y, s);
+}
+
+function drawBus(ctx, x, y, s) {
+    // Public transit bus — longer, yellow/orange
+    ctx.fillStyle = '#dd8833';
+    ctx.fillRect(x - 28 * s, y - 2 * s, 56 * s, 20 * s);
+    // Roof
+    ctx.fillStyle = '#cc7722';
+    ctx.fillRect(x - 26 * s, y - 12 * s, 52 * s, 11 * s);
+    // Windshield
+    ctx.fillStyle = '#aaddff';
+    ctx.fillRect(x - 26 * s, y - 10 * s, 10 * s, 8 * s);
+    // Passenger windows (multiple)
+    ctx.fillStyle = '#aaddff';
+    for (let i = 0; i < 4; i++) {
+        ctx.fillRect(x + (-12 + i * 10) * s, y - 10 * s, 7 * s, 7 * s);
+    }
+    // "BUS" sign
+    ctx.fillStyle = '#fff';
+    ctx.font = `${4 * s}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('BUS', x, y + 10 * s);
+    // Wheels
+    ctx.fillStyle = '#333';
+    ctx.beginPath(); ctx.arc(x - 16 * s, y + 18 * s, 6 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 16 * s, y + 18 * s, 6 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#888';
+    ctx.beginPath(); ctx.arc(x - 16 * s, y + 18 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 16 * s, y + 18 * s, 2.5 * s, 0, Math.PI * 2); ctx.fill();
     // Mood
     if (game.party) drawVanMood(ctx, x, y, s);
 }
@@ -1251,6 +1355,15 @@ function playTravelAnimation(milesGained, onComplete) {
 
 function drawAnimatedVan(ctx, x, y, scale, scroll, time) {
     const s = scale;
+    if (game.vehicle === 'ev') {
+        drawAnimatedEV(ctx, x, y, s, scroll);
+        return;
+    }
+    if (game.vehicle === 'transit') {
+        drawAnimatedBus(ctx, x, y, s, scroll);
+        return;
+    }
+    // Default: gas van
     // Body
     ctx.fillStyle = '#3388cc';
     ctx.fillRect(x - 22 * s, y - 5 * s, 44 * s, 22 * s);
@@ -1277,10 +1390,48 @@ function drawAnimatedVan(ctx, x, y, scale, scroll, time) {
     // Mood
     if (game.party) drawVanMood(ctx, x, y, s);
     // Wheels (spinning)
+    drawSpinningWheels(ctx, x, y, s, scroll, 12);
+}
+
+function drawAnimatedEV(ctx, x, y, s, scroll) {
+    ctx.fillStyle = '#22aa66';
+    ctx.fillRect(x - 20 * s, y + 2 * s, 40 * s, 16 * s);
+    ctx.fillStyle = '#1a8855';
+    ctx.fillRect(x - 14 * s, y - 8 * s, 28 * s, 11 * s);
+    ctx.fillStyle = '#aaddff';
+    ctx.fillRect(x - 16 * s, y - 6 * s, 10 * s, 8 * s);
+    ctx.fillRect(x - 2 * s, y - 6 * s, 12 * s, 8 * s);
+    ctx.fillStyle = '#ffdd44';
+    ctx.font = `${8 * s}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('⚡', x + 14 * s, y + 12 * s);
+    if (game.party) drawVanMood(ctx, x, y, s);
+    drawSpinningWheels(ctx, x, y, s, scroll, 10);
+}
+
+function drawAnimatedBus(ctx, x, y, s, scroll) {
+    ctx.fillStyle = '#dd8833';
+    ctx.fillRect(x - 28 * s, y - 2 * s, 56 * s, 20 * s);
+    ctx.fillStyle = '#cc7722';
+    ctx.fillRect(x - 26 * s, y - 12 * s, 52 * s, 11 * s);
+    ctx.fillStyle = '#aaddff';
+    ctx.fillRect(x - 26 * s, y - 10 * s, 10 * s, 8 * s);
+    for (let i = 0; i < 4; i++) {
+        ctx.fillRect(x + (-12 + i * 10) * s, y - 10 * s, 7 * s, 7 * s);
+    }
+    ctx.fillStyle = '#fff';
+    ctx.font = `${4 * s}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('BUS', x, y + 10 * s);
+    if (game.party) drawVanMood(ctx, x, y, s);
+    drawSpinningWheels(ctx, x, y, s, scroll, 16);
+}
+
+function drawSpinningWheels(ctx, x, y, s, scroll, offset) {
     const wheelAngle = scroll * 0.05;
     const wheels = [
-        { cx: x - 12 * s, cy: y + 17 * s, r: 6 * s },
-        { cx: x + 12 * s, cy: y + 17 * s, r: 6 * s },
+        { cx: x - offset * s, cy: y + 17 * s, r: 6 * s },
+        { cx: x + offset * s, cy: y + 17 * s, r: 6 * s },
     ];
     for (const wh of wheels) {
         ctx.fillStyle = '#333';
@@ -1389,7 +1540,7 @@ function updateStoreUI() {
 function leaveStore() {
     sfx_select();
     if (store.gas < 1) {
-        document.getElementById('store-msg').textContent = 'You need at least 1 tank of gas!';
+        document.getElementById('store-msg').textContent = 'You need at least 1 tank of gas! (or choose Public Transit later)';
         sfx_bad(); return;
     }
     if (store.food < 10) {
@@ -1420,6 +1571,7 @@ function setSeason(monthIndex) {
         gas: store.gas, supplies: store.supplies,
         pace: 'steady', nextLandmark: 1,
         gameOver: false, party: party, weather: 'clear',
+        vehicle: 'van',
     };
 
     hopeScore = { h: 0, o: 0, p: 0, e: 0 };
@@ -1444,6 +1596,33 @@ function setRoute(route) {
         REGIONS = REGIONS_SOUTH;
     }
 
+    showScreen('vehicle-screen');
+}
+
+function setVehicle(type) {
+    sfx_select();
+    game.vehicle = type;
+
+    const vc = VEHICLE_CONFIG[type];
+
+    // Transit doesn't need gas — refund any purchased gas and give money back
+    if (type === 'transit') {
+        game.money += game.gas * 50;
+        game.gas = 0;
+    }
+
+    // EV converts gas tanks to charges (same count, cheaper refills)
+    if (type === 'ev') {
+        // Relabel fuel — keep same count
+    }
+
+    // Apply initial HOPE bonus for eco-friendly choices
+    if (vc.hopeBonus) {
+        for (const [key, val] of Object.entries(vc.hopeBonus)) {
+            hopeScore[key] += val;
+        }
+    }
+
     drawTownScene(document.getElementById('town-canvas'));
     document.getElementById('town-label').textContent = 'Greenville';
     document.getElementById('town-date').textContent = `${MONTH_NAMES[game.month]} 1, 2026`;
@@ -1454,9 +1633,12 @@ function departTown() {
     sfx_select();
     showScreen('game-screen');
     updateUI();
+    const vc = VEHICLE_CONFIG[game.vehicle];
+    const travelWord = game.vehicle === 'transit' ? 'takes public transit' : 'drives';
     showEvent(
         'The journey begins!',
         `The ${game.party[0].name} family leaves Greenville heading for Hope Valley, Oregon. ` +
+        `${vc.icon} Traveling by ${vc.name}. ` +
         `The road is 2,000 miles long. Look for HOPE along the way!`
     );
     showGameMenu();
@@ -1475,6 +1657,17 @@ function updateUI() {
     document.getElementById('supplies').textContent = game.supplies;
     document.getElementById('weather').textContent = game.weather;
     document.getElementById('pace-label').textContent = game.pace;
+
+    // Vehicle indicator and fuel label
+    const vc = VEHICLE_CONFIG[game.vehicle];
+    document.getElementById('vehicle-indicator').textContent = `${vc.icon} ${vc.name}`;
+    const fuelDisplay = document.getElementById('fuel-display');
+    if (vc.fuelName) {
+        fuelDisplay.innerHTML = `${vc.fuelName}: <strong id="gas">${game.gas}</strong>`;
+        fuelDisplay.style.display = '';
+    } else {
+        fuelDisplay.style.display = 'none';
+    }
 
     const healthEl = document.getElementById('health');
     const level = getSpirits();
@@ -1550,12 +1743,17 @@ function appendEvent(text) {
 // =====================
 function showGameMenu() {
     if (game.gameOver) return;
+    const vc = VEHICLE_CONFIG[game.vehicle];
+    const travelLabel = game.vehicle === 'transit' ? 'Continue on the bus' : 'Continue driving';
+    const paceOption = vc.canChangePace
+        ? `<li><span class="menu-option" onclick="changePace()">Change pace (${game.pace})</span></li>`
+        : `<li style="color:#5a5a5a;">Pace is fixed on ${vc.name}</li>`;
     const container = document.getElementById('actions');
     container.innerHTML = `
         <ol class="menu-list">
-            <li><span class="menu-option" onclick="doTravel()">Continue driving</span></li>
+            <li><span class="menu-option" onclick="doTravel()">${travelLabel}</span></li>
             <li><span class="menu-option" onclick="doStatus()">Check supplies</span></li>
-            <li><span class="menu-option" onclick="changePace()">Change pace (${game.pace})</span></li>
+            ${paceOption}
             <li><span class="menu-option" onclick="doRest()">Stop and rest</span></li>
             <li><span class="menu-option" onclick="showMap()">View map</span></li>
         </ol>
@@ -1607,10 +1805,11 @@ function setPace(p) {
 function doTravel() {
     sfx_travel();
 
+    const vc = VEHICLE_CONFIG[game.vehicle];
     const pace = PACE_CONFIG[game.pace];
     const baseMiles = pace.milesMin + Math.floor(Math.random() * (pace.milesMax - pace.milesMin));
     const worried = game.party.filter(m => m.status === 'worried').length;
-    const milesGained = Math.max(10, baseMiles - worried * 5);
+    const milesGained = Math.max(10, Math.floor((baseMiles - worried * 5) * vc.milesMult));
 
     game.miles += milesGained;
 
@@ -1618,14 +1817,15 @@ function doTravel() {
     game.food -= alive * pace.foodMult;
     if (game.food < 0) game.food = 0;
 
-    // Gas consumption — roughly 1 tank every ~200 miles
-    if (Math.random() < milesGained / 200) {
+    // Fuel consumption (van and EV only — transit has no fuel)
+    if (vc.fuelChance > 0 && Math.random() < vc.fuelChance) {
         if (game.gas > 0) {
             game.gas--;
         } else {
-            // Out of gas — costs money or loses miles
-            if (game.money >= 60) {
-                game.money -= 60;
+            // Out of fuel — costs money or loses miles
+            const emergencyCost = game.vehicle === 'ev' ? 40 : 60;
+            if (game.money >= emergencyCost) {
+                game.money -= emergencyCost;
             } else {
                 game.miles -= milesGained * 0.5;
                 if (game.miles < 0) game.miles = 0;
@@ -1633,8 +1833,15 @@ function doTravel() {
         }
     }
 
-    // Fast pace stress
-    if (Math.random() < pace.stressChance) {
+    // Transit: random delay chance (replaces pace stress for transit)
+    if (game.vehicle === 'transit' && Math.random() < 0.2) {
+        const delayMiles = Math.floor(milesGained * 0.3);
+        game.miles -= delayMiles;
+        if (game.miles < 0) game.miles = 0;
+    }
+
+    // Fast pace stress (van and EV only)
+    if (vc.canChangePace && Math.random() < pace.stressChance) {
         const healthy = game.party.filter(m => m.status === 'healthy');
         if (healthy.length > 0) {
             const victim = healthy[Math.floor(Math.random() * healthy.length)];
@@ -1774,19 +1981,24 @@ function openCenter(name) {
     document.getElementById('center-msg').innerHTML = '&nbsp;';
 
     const hasWorried = game.party.some(m => m.status === 'worried');
+    const vc = VEHICLE_CONFIG[game.vehicle];
+    const fuelLabel = vc.fuelName ? `${vc.fuelName} ........... $${vc.fuelCost}` : null;
     document.getElementById('center-items').innerHTML = `
         <li><span class="menu-option" onclick="centerBuy('food')">Meals (5) ......... $10</span></li>
         <li><span class="menu-option" onclick="centerBuy('bigfood')">Meals (15) ........ $25</span></li>
         ${hasWorried ? '<li><span class="menu-option" onclick="centerBuy(\'counsel\')">Counseling ........ $15</span></li>' : ''}
-        <li><span class="menu-option" onclick="centerBuy('gas')">Gas tank .......... $50</span></li>
+        ${fuelLabel ? `<li><span class="menu-option" onclick="centerBuy('gas')">${fuelLabel}</span></li>` : ''}
         <li><span class="menu-option" onclick="centerBuy('supplies')">Supplies .......... $30</span></li>
+        <li><span class="menu-option" onclick="showVehicleSwitch()">Switch vehicle (${vc.icon} ${vc.name})</span></li>
         <li><span class="menu-option" onclick="leaveCenter()">Leave</span></li>
     `;
 }
 
 function centerBuy(item) {
     const msg = document.getElementById('center-msg');
-    const prices = { food: 10, bigfood: 25, counsel: 15, gas: 50, supplies: 30 };
+    const vc = VEHICLE_CONFIG[game.vehicle];
+    const gasCost = vc.fuelCost || 50;
+    const prices = { food: 10, bigfood: 25, counsel: 15, gas: gasCost, supplies: 30 };
     if (game.money < prices[item]) { msg.textContent = "Can't afford that!"; sfx_bad(); return; }
 
     sfx_coin();
@@ -1794,7 +2006,7 @@ function centerBuy(item) {
 
     if (item === 'food')      { game.food += 5;  msg.textContent = 'Got 5 meals.'; }
     if (item === 'bigfood')   { game.food += 15; msg.textContent = 'Got 15 meals.'; }
-    if (item === 'gas')       { game.gas += 1;   msg.textContent = 'Filled 1 gas tank.'; }
+    if (item === 'gas')       { game.gas += 1;   msg.textContent = `Got 1 ${vc.fuelName || 'fuel'}.`; }
     if (item === 'supplies')  { game.supplies += 1; msg.textContent = 'Got camping supplies.'; }
     if (item === 'counsel') {
         const worried = game.party.find(m => m.status === 'worried');
@@ -1815,6 +2027,66 @@ function leaveCenter() {
     updateUI();
     showEvent('Back on the road', 'Your family continues the journey.');
     showGameMenu();
+}
+
+function showVehicleSwitch() {
+    sfx_select();
+    const msg = document.getElementById('center-msg');
+    const currentVc = VEHICLE_CONFIG[game.vehicle];
+    msg.innerHTML = `Current: ${currentVc.icon} ${currentVc.name}`;
+
+    const options = Object.entries(VEHICLE_CONFIG)
+        .filter(([key]) => key !== game.vehicle)
+        .map(([key, vc]) => {
+            const note = key === 'transit' ? ' (no fuel needed)' :
+                         key === 'ev' ? ` (charges: $${vc.fuelCost})` :
+                         ` (gas: $${vc.fuelCost})`;
+            return `<li><span class="menu-option" onclick="switchVehicle('${key}')">${vc.icon} ${vc.name}${note}</span>
+                <p style="font-size:8px;color:#6a9a6a;margin:2px 0 4px 24px;">${vc.description}</p></li>`;
+        }).join('');
+
+    document.getElementById('center-items').innerHTML = `
+        ${options}
+        <li><span class="menu-option" onclick="openCenter(document.getElementById('center-title').textContent)">Back</span></li>
+    `;
+}
+
+function switchVehicle(type) {
+    sfx_select();
+    const oldVc = VEHICLE_CONFIG[game.vehicle];
+    const newVc = VEHICLE_CONFIG[type];
+
+    // Transit doesn't need fuel — refund remaining fuel value
+    if (type === 'transit' && game.gas > 0) {
+        const refund = Math.floor(game.gas * oldVc.fuelCost * 0.5);
+        game.money += refund;
+        game.gas = 0;
+        document.getElementById('center-msg').textContent =
+            `Switched to ${newVc.name}! Got $${refund} back for unused fuel.`;
+    } else if (game.vehicle === 'transit' && type !== 'transit') {
+        // Switching FROM transit to a fuel vehicle — start with 0 fuel
+        game.gas = 0;
+        document.getElementById('center-msg').textContent =
+            `Switched to ${newVc.name}! Buy some ${newVc.fuelName} before you go.`;
+    } else {
+        document.getElementById('center-msg').textContent =
+            `Switched to ${newVc.name}!`;
+    }
+
+    game.vehicle = type;
+
+    // HOPE bonus for switching to eco-friendly options
+    if (newVc.hopeBonus) {
+        for (const [key, val] of Object.entries(newVc.hopeBonus)) {
+            hopeScore[key] += val;
+        }
+        const bonusText = Object.entries(newVc.hopeBonus)
+            .map(([k, v]) => `+${v} ${k.toUpperCase()}`).join(', ');
+        document.getElementById('center-msg').textContent += ` (${bonusText})`;
+    }
+
+    // Refresh center with new vehicle
+    openCenter(document.getElementById('center-title').textContent);
 }
 
 // =====================
@@ -1886,12 +2158,21 @@ function afterChallenge() {
 // RANDOM EVENTS (eco-themed)
 // =====================
 function triggerRandomEvent() {
-    const events = [
-        eventFlatTire, eventBadWeather, eventBeautifulView,
+    const baseEvents = [
+        eventBadWeather, eventBeautifulView,
         eventPollutedArea, eventCommunityCleanup, eventWildlife,
-        eventFriendlyTravelers, eventGasShortage, eventFarmersMarket,
+        eventFriendlyTravelers, eventFarmersMarket,
         eventForestFire, eventRecyclingCenter, eventSchoolVisit,
     ];
+
+    // Vehicle-specific events
+    const vehicleEvents = {
+        van:     [eventFlatTire, eventGasShortage, eventGasPriceSpike],
+        ev:      [eventChargerNotFound, eventRangeAnxiety, eventFreeCharger, eventEVMeetup],
+        transit: [eventBusDelay, eventMissedConnection, eventBusFriend, eventScenicBusRoute],
+    };
+
+    const events = [...baseEvents, ...(vehicleEvents[game.vehicle] || [])];
     events[Math.floor(Math.random() * events.length)]();
 }
 
@@ -2000,6 +2281,88 @@ function eventSchoolVisit() {
     hopeScore.e += 1;
     showEvent('🏫 School visit', 'At a rest stop, you see a school group planting trees. The kids are laughing and covered in dirt. "We planted 50 today!" one shouts.');
     appendEvent('+1 Agency — kids taking real action!');
+    updateUI(); showGameMenu();
+}
+
+// --- VAN-SPECIFIC EVENTS ---
+function eventGasPriceSpike() {
+    sfx_bad();
+    showEvent('⛽ Gas price spike!', 'Gas prices jumped to $75 per tank in this area! Fossil fuels are unpredictable.');
+    if (game.money >= 75) {
+        game.money -= 75; game.gas++;
+        appendEvent('You paid the high price for 1 tank.');
+    } else {
+        appendEvent('You can\'t afford it. Keep driving carefully.');
+    }
+    updateUI(); checkGameOver(); if (!game.gameOver) showGameMenu();
+}
+
+// --- EV-SPECIFIC EVENTS ---
+function eventChargerNotFound() {
+    sfx_bad();
+    showEvent('🔌 No charger available!', 'You arrived at a charging station but all ports are in use. You have to wait and lose travel time.');
+    game.miles -= 20; if (game.miles < 0) game.miles = 0;
+    updateUI(); showGameMenu();
+}
+
+function eventRangeAnxiety() {
+    sfx_bad();
+    showEvent('🔋 Range anxiety!', 'The battery is lower than expected. Your family gets nervous about making it to the next charger.');
+    stressRandomMember();
+    updateUI(); checkGameOver(); if (!game.gameOver) showGameMenu();
+}
+
+function eventFreeCharger() {
+    sfx_good();
+    showEvent('⚡ Free charging station!', 'A solar-powered charging station offers free charges! Your family charges up while enjoying the sunshine.');
+    game.gas += 2;
+    hopeScore.o += 1;
+    appendEvent('+1 Belief — clean energy is real and growing!');
+    updateUI(); showGameMenu();
+}
+
+function eventEVMeetup() {
+    sfx_good();
+    showEvent('🚗 EV meetup!', 'You meet other EV drivers at a rest stop. They share tips about charger locations ahead and your family feels part of a community.');
+    hopeScore.h += 1;
+    appendEvent('+1 Motivation — you\'re not alone in making change!');
+    const worried = game.party.find(m => m.status === 'worried');
+    if (worried) { worried.status = 'healthy'; appendEvent(`${worried.name} feels inspired.`); }
+    updateUI(); showGameMenu();
+}
+
+// --- TRANSIT-SPECIFIC EVENTS ---
+function eventBusDelay() {
+    sfx_bad();
+    showEvent('🚌 Bus delayed!', 'The bus broke down and you have to wait for the next one. You lose travel time.');
+    game.miles -= 25; if (game.miles < 0) game.miles = 0;
+    updateUI(); showGameMenu();
+}
+
+function eventMissedConnection() {
+    sfx_bad();
+    showEvent('🕐 Missed connection!', 'You missed your connecting bus by 5 minutes. The next one isn\'t until tomorrow.');
+    advanceDay();
+    game.food -= 3; if (game.food < 0) game.food = 0;
+    updateUI(); checkGameOver(); if (!game.gameOver) showGameMenu();
+}
+
+function eventBusFriend() {
+    sfx_good();
+    showEvent('🤝 Bus friendship!', 'You sit next to an environmental scientist on the bus. They share fascinating stories about restoration projects.');
+    hopeScore.p += 1;
+    hopeScore.e += 1;
+    appendEvent('+1 Plans and +1 Agency — real experts with real solutions!');
+    const worried = game.party.find(m => m.status === 'worried');
+    if (worried) { worried.status = 'healthy'; appendEvent(`${worried.name} feels hopeful after the conversation.`); }
+    updateUI(); showGameMenu();
+}
+
+function eventScenicBusRoute() {
+    sfx_good();
+    showEvent('🪟 Scenic route!', 'The bus takes a scenic detour through beautiful countryside. Your family enjoys views you\'d never see from the highway.');
+    hopeScore.o += 1;
+    appendEvent('+1 Belief — seeing the beauty of nature renews hope.');
     updateUI(); showGameMenu();
 }
 

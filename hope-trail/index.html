@@ -116,6 +116,27 @@
             <div class="ornament">───────✿───────</div>
         </div>
 
+        <!-- CHOOSE VEHICLE -->
+        <div id="vehicle-screen" class="screen">
+            <h2>How will you travel?</h2>
+            <div class="ornament">───────✿───────</div>
+            <div class="text-body">
+                <p>Choose your ride to Hope Valley:</p>
+                <ol class="menu-list">
+                    <li><span class="menu-option" onclick="setVehicle('van')">🚐 Gas Van</span>
+                        <p class="vehicle-desc">Reliable and familiar, but burns fossil fuels.</p>
+                    </li>
+                    <li><span class="menu-option" onclick="setVehicle('ev')">⚡🚗 Electric Vehicle</span>
+                        <p class="vehicle-desc">Zero emissions! But you need to find chargers.</p>
+                    </li>
+                    <li><span class="menu-option" onclick="setVehicle('transit')">🚌 Public Transit</span>
+                        <p class="vehicle-desc">Cheapest option but slower. Meet people along the way!</p>
+                    </li>
+                </ol>
+            </div>
+            <div class="ornament">───────✿───────</div>
+        </div>
+
         <!-- TOWN SCENE -->
         <div id="town-screen" class="screen">
             <canvas id="town-canvas" width="580" height="280"></canvas>
@@ -175,8 +196,9 @@
             <div id="actions"></div>
 
             <div id="supply-party-bar">
+                <span id="vehicle-indicator">🚐 Van</span>
                 <span>$<strong id="money">0</strong></span>
-                <span>Gas: <strong id="gas">0</strong></span>
+                <span id="fuel-display">Gas: <strong id="gas">0</strong></span>
                 <span>Supplies: <strong id="supplies">0</strong></span>
                 <span>Pace: <span id="pace-label">steady</span></span>
                 <span id="party-list"></span>

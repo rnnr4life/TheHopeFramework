@@ -319,6 +319,18 @@ canvas {
     margin: 4px 0;
 }
 
+/* --- VEHICLE --- */
+.vehicle-desc {
+    font-size: 8px;
+    color: #6a9a6a;
+    margin: 2px 0 8px 24px;
+}
+
+#vehicle-indicator {
+    color: var(--hope-blue);
+    font-weight: bold;
+}
+
 /* --- MAP SCREEN --- */
 #map-canvas {
     border: 2px solid var(--hope-green-dark);
