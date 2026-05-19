@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hope Trail — A HOPE Framework Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+
+        <!-- MAIN MENU -->
+        <div id="menu-screen" class="screen active">
+            <h1 class="title">Hope Trail</h1>
+            <p class="subtitle">A HOPE Framework Adventure</p>
+            <div class="ornament">───────✿───────</div>
+            <div class="menu-body">
+                <p>You may:</p>
+                <ol class="menu-list">
+                    <li><span class="menu-option" data-choice="1" onclick="menuChoice(1)">Travel the Hope Trail</span></li>
+                    <li><span class="menu-option" data-choice="2" onclick="menuChoice(2)">Learn about HOPE</span></li>
+                    <li><span class="menu-option" data-choice="3" onclick="menuChoice(3)">Turn sound <span id="sound-toggle-label">off</span></span></li>
+                </ol>
+                <p class="prompt">What is your choice? <span class="blink">_</span></p>
+            </div>
+            <div class="ornament">───────✿───────</div>
+            <p class="hope-credit">Part of <strong>The HOPE Framework</strong><br>Healing Opportunities for Processing Eco-grief</p>
+        </div>
+
+        <!-- LEARN SCREEN -->
+        <div id="learn-screen" class="screen">
+            <h2>The HOPE Framework</h2>
+            <div class="ornament">───────✿───────</div>
+            <div class="text-body" id="learn-text"></div>
+            <div class="ornament">───────✿───────</div>
+            <p class="prompt"><span class="menu-option" onclick="showScreen('menu-screen')">Press ENTER to return</span></p>
+        </div>
+
+        <!-- NAME YOUR FAMILY -->
+        <div id="name-screen" class="screen">
+            <h2>Who's in your family?</h2>
+            <div class="ornament">───────✿───────</div>
+            <div class="text-body">
+                <p>What is the family leader's name?</p>
+                <div class="input-row"><span class="prompt-char">></span><input id="name-0" type="text" placeholder="(your name)" maxlength="12"></div>
+                <p>What is your partner's name?</p>
+                <div class="input-row"><span class="prompt-char">></span><input id="name-1" type="text" placeholder="(partner)" maxlength="12"></div>
+                <p>What is your child's name?</p>
+                <div class="input-row"><span class="prompt-char">></span><input id="name-2" type="text" placeholder="(child)" maxlength="12"></div>
+                <p>What is your pet's name?</p>
+                <div class="input-row"><span class="prompt-char">></span><input id="name-3" type="text" placeholder="(pet)" maxlength="12"></div>
+            </div>
+            <div class="ornament">───────✿───────</div>
+            <p class="prompt"><span class="menu-option" onclick="goToGuide()">Press ENTER to continue</span></p>
+        </div>
+
+        <!-- GUIDE INTRO -->
+        <div id="guide-screen" class="screen">
+            <canvas id="guide-canvas" width="580" height="240"></canvas>
+            <p class="prompt"><span class="menu-option" onclick="goToPack()">Press SPACE BAR to continue</span></p>
+        </div>
+
+        <!-- PACK SUPPLIES -->
+        <div id="supply-screen" class="screen">
+            <h2>Pack for the Journey</h2>
+            <p class="subtitle">Greenville Community Center</p>
+            <div class="ornament">───────✿───────</div>
+            <div class="text-body">
+                <p>Before you go, pack what your family needs.</p>
+                <p>You have <strong class="highlight" id="store-money">$500</strong> in savings.</p>
+                <br>
+                <ol class="menu-list">
+                    <li><span class="menu-option" onclick="buySupply('gas')">Gas for the van ... <span id="store-gas">0</span> tanks</span></li>
+                    <li><span class="menu-option" onclick="buySupply('food')">Groceries ......... <span id="store-food">0</span> meals</span></li>
+                    <li><span class="menu-option" onclick="buySupply('supplies')">Camping supplies .. <span id="store-supplies">0</span></span></li>
+                    <li><span class="menu-option" onclick="leaveStore()">Hit the road</span></li>
+                </ol>
+            </div>
+            <div class="ornament">───────✿───────</div>
+            <p class="prompt" id="store-msg">&nbsp;</p>
+        </div>
+
+        <!-- CHOOSE SEASON -->
+        <div id="depart-screen" class="screen">
+            <h2>When do you start your journey?</h2>
+            <div class="ornament">───────✿───────</div>
+            <div class="text-body">
+                <p>What season should your family begin?</p>
+                <ol class="menu-list">
+                    <li><span class="menu-option" onclick="setSeason(2)">Spring (March)</span></li>
+                    <li><span class="menu-option" onclick="setSeason(5)">Summer (June)</span></li>
+                    <li><span class="menu-option" onclick="setSeason(8)">Fall (September)</span></li>
+                </ol>
+                <p>Each season brings different weather and challenges.</p>
+            </div>
+            <div class="ornament">───────✿───────</div>
+        </div>
+
+        <!-- TOWN SCENE -->
+        <div id="town-screen" class="screen">
+            <canvas id="town-canvas" width="580" height="280"></canvas>
+            <div class="scene-label">
+                <p id="town-label">Greenville</p>
+                <p id="town-date">March 1, 2026</p>
+            </div>
+            <p class="prompt"><span class="menu-option" onclick="departTown()">Press SPACE BAR to continue</span></p>
+        </div>
+
+        <!-- LANDMARK SCENE -->
+        <div id="landmark-screen" class="screen">
+            <canvas id="landmark-canvas" width="580" height="280"></canvas>
+            <div class="scene-label">
+                <p id="landmark-name"></p>
+                <p id="landmark-date"></p>
+            </div>
+            <p class="prompt"><span class="menu-option" id="landmark-continue">Press SPACE BAR to continue</span></p>
+        </div>
+
+        <!-- HOPE CHALLENGE SCREEN -->
+        <div id="hope-challenge-screen" class="screen">
+            <h2 id="challenge-title">Hope Moment</h2>
+            <div class="ornament">───────✿───────</div>
+            <div class="text-body">
+                <p id="challenge-story"></p>
+                <p class="challenge-question" id="challenge-question">Which HOPE marker does this show?</p>
+                <ol class="menu-list" id="challenge-options"></ol>
+            </div>
+            <div class="ornament">───────✿───────</div>
+            <p class="prompt" id="challenge-feedback">&nbsp;</p>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="game-screen" class="screen">
+            <canvas id="scene-canvas" width="580" height="200"></canvas>
+
+            <div id="event-area">
+                <div id="event-text"></div>
+            </div>
+
+            <div id="status-panel">
+                <div class="status-row"><span class="status-label">Date:</span> <span id="date">March 1, 2026</span></div>
+                <div class="status-row"><span class="status-label">Weather:</span> <span id="weather">clear</span></div>
+                <div class="status-row"><span class="status-label">Spirits:</span> <strong id="health">Hopeful</strong></div>
+                <div class="status-row"><span class="status-label">Food:</span> <strong id="food">0</strong> meals</div>
+                <div class="status-row"><span class="status-label">Next stop:</span> <strong id="next-lm">0</strong> miles</div>
+                <div class="status-row"><span class="status-label">Miles traveled:</span> <strong id="miles">0</strong> miles</div>
+            </div>
+
+            <div id="actions"></div>
+
+            <div id="supply-party-bar">
+                <span>$<strong id="money">0</strong></span>
+                <span>Gas: <strong id="gas">0</strong></span>
+                <span>Supplies: <strong id="supplies">0</strong></span>
+                <span>Pace: <span id="pace-label">steady</span></span>
+                <span id="party-list"></span>
+            </div>
+
+            <!-- HOPE Score -->
+            <div id="hope-score-bar">
+                <span class="hope-marker h-marker" title="Motivation">❤️ <strong id="score-m">0</strong></span>
+                <span class="hope-marker o-marker" title="Belief">🌿 <strong id="score-o">0</strong></span>
+                <span class="hope-marker p-marker" title="Plans">🗺️ <strong id="score-p">0</strong></span>
+                <span class="hope-marker e-marker" title="Agency">⚡ <strong id="score-e">0</strong></span>
+            </div>
+        </div>
+
+        <!-- COMMUNITY CENTER (fort replacement) -->
+        <div id="center-screen" class="screen">
+            <h2 id="center-title">Community Center</h2>
+            <div class="ornament">───────✿───────</div>
+            <div class="text-body">
+                <p>Your family has <strong class="highlight" id="center-money">$0</strong>.</p>
+                <ol class="menu-list" id="center-items"></ol>
+            </div>
+            <div class="ornament">───────✿───────</div>
+            <p class="prompt" id="center-msg">&nbsp;</p>
+        </div>
+
+        <!-- END SCREEN -->
+        <div id="end-screen" class="screen">
+            <h1 class="title" id="end-title"></h1>
+            <div class="ornament">───────✿───────</div>
+            <div class="text-body" id="end-message"></div>
+            <div id="end-hope-summary"></div>
+            <div class="ornament">───────✿───────</div>
+            <p class="prompt"><span class="menu-option" onclick="location.reload()">Play Again</span></p>
+            <p class="prompt"><span class="menu-option" onclick="goBackToHOPE()">Back to HOPE Framework</span></p>
+        </div>
+
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

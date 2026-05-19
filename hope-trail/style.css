@@ -1,0 +1,293 @@
+/* =============================================
+   HOPE TRAIL — CSS
+   Nature-themed retro style
+   ============================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+    --hope-green: #34d399;
+    --hope-green-light: #6ee7b7;
+    --hope-green-dark: #059669;
+    --hope-blue: #38bdf8;
+    --hope-red: #ff6b6b;
+    --hope-purple: #a855f7;
+    --hope-yellow: #fbbf24;
+    --bg: #0a1a0a;
+    --text: #d4e8d4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Press Start 2P', monospace;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    font-size: 11px;
+    line-height: 2;
+    min-height: 100vh;
+}
+
+#game-container {
+    width: 620px;
+    max-width: 100%;
+}
+
+.screen { display: none; }
+.screen.active { display: block; }
+
+.title {
+    text-align: center;
+    font-size: 22px;
+    color: var(--hope-green);
+    margin: 16px 0 4px;
+    text-shadow: 0 0 12px rgba(52, 211, 153, 0.4);
+}
+
+.subtitle {
+    text-align: center;
+    font-size: 9px;
+    color: var(--hope-blue);
+    margin-bottom: 8px;
+}
+
+.hope-credit {
+    text-align: center;
+    font-size: 7px;
+    color: #5a8a5a;
+    margin-top: 12px;
+    line-height: 2.2;
+}
+
+.ornament {
+    text-align: center;
+    color: var(--hope-green-dark);
+    margin: 8px 0;
+    font-size: 10px;
+    letter-spacing: 2px;
+}
+
+h2 {
+    text-align: center;
+    font-size: 14px;
+    color: var(--hope-green);
+    margin: 12px 0 4px;
+}
+
+.text-body, .menu-body {
+    padding: 8px 12px;
+    font-size: 10px;
+    line-height: 2.2;
+}
+
+.menu-list {
+    list-style: decimal;
+    padding-left: 24px;
+    margin: 8px 0;
+}
+
+.menu-list li {
+    margin: 4px 0;
+    cursor: pointer;
+}
+
+.menu-option {
+    cursor: pointer;
+    color: var(--hope-green-light);
+    transition: color 0.15s;
+}
+
+.menu-option:hover {
+    color: #fff;
+    text-shadow: 0 0 8px var(--hope-green);
+}
+
+.prompt {
+    text-align: center;
+    font-size: 10px;
+    color: var(--hope-green-dark);
+    margin: 8px 0;
+}
+
+.action-prompt {
+    text-align: center;
+    font-size: 10px;
+    color: var(--hope-green-dark);
+    margin: 6px 0;
+}
+
+.highlight { color: var(--hope-yellow); }
+
+.blink { animation: blink 0.7s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* --- INPUT --- */
+.input-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 2px 0 10px;
+}
+
+.prompt-char {
+    color: var(--hope-green);
+    font-size: 12px;
+}
+
+input[type="text"] {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--hope-green-dark);
+    color: var(--text);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    padding: 4px 2px;
+    width: 140px;
+    outline: none;
+}
+
+input[type="text"]:focus {
+    border-bottom-color: var(--hope-green);
+}
+
+/* --- SCENE CANVASES --- */
+canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    border-radius: 4px;
+}
+
+.scene-label {
+    text-align: center;
+    margin: 8px 0;
+}
+
+.scene-label p:first-child {
+    font-size: 13px;
+    color: var(--hope-green);
+}
+
+.scene-label p:last-child {
+    font-size: 9px;
+    color: var(--hope-blue);
+}
+
+/* --- GAME SCREEN --- */
+#event-area {
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid var(--hope-green-dark);
+    padding: 8px 12px;
+    margin: 4px 0;
+    min-height: 50px;
+    font-size: 10px;
+    line-height: 2;
+    color: var(--text);
+}
+
+.event-title {
+    color: var(--hope-green);
+    font-size: 11px;
+    margin-bottom: 4px;
+}
+
+#status-panel {
+    background: #f0f8f0;
+    color: #1a3a1a;
+    padding: 6px 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 16px;
+    font-size: 9px;
+    line-height: 2;
+    border: 2px solid var(--hope-green-dark);
+}
+
+.status-label { color: #3a6a3a; }
+
+#actions {
+    padding: 4px 12px;
+}
+
+#actions .menu-list {
+    font-size: 10px;
+}
+
+#supply-party-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    padding: 4px 12px;
+    font-size: 8px;
+    color: #6a9a6a;
+    border-top: 1px solid #1a3a1a;
+}
+
+#party-list { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.party-member { font-size: 8px; white-space: nowrap; }
+.party-member.healthy { color: var(--hope-green); }
+.party-member.worried { color: var(--hope-yellow); }
+.party-member.struggling { color: var(--hope-red); }
+
+/* --- HOPE SCORE BAR --- */
+#hope-score-bar {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 6px 12px;
+    font-size: 9px;
+    background: rgba(52, 211, 153, 0.08);
+    border: 1px solid var(--hope-green-dark);
+    border-radius: 4px;
+    margin-top: 4px;
+}
+
+.hope-marker { white-space: nowrap; }
+.h-marker strong { color: var(--hope-red); }
+.o-marker strong { color: var(--hope-green); }
+.p-marker strong { color: var(--hope-blue); }
+.e-marker strong { color: var(--hope-purple); }
+
+/* --- HEALTH/SPIRITS COLORS --- */
+.health-good, .spirits-hopeful { color: var(--hope-green) !important; }
+.health-fair, .spirits-okay { color: var(--hope-yellow) !important; }
+.health-poor, .spirits-worried { color: var(--hope-red) !important; }
+.health-dire, .spirits-despairing { color: #ff4444 !important; }
+
+/* --- CHALLENGE SCREEN --- */
+.challenge-question {
+    color: var(--hope-blue);
+    margin: 12px 0 8px;
+    font-size: 10px;
+}
+
+#challenge-options li {
+    margin: 6px 0;
+}
+
+/* --- END SCREEN --- */
+#end-hope-summary {
+    text-align: center;
+    padding: 12px;
+    font-size: 9px;
+    line-height: 2.4;
+}
+
+#end-message {
+    text-align: center;
+    font-size: 10px;
+    line-height: 2.4;
+}
+
+.hint {
+    text-align: center;
+    font-size: 8px;
+    color: #5a8a5a;
+    margin: 4px 0;
+}
