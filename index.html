@@ -68,7 +68,7 @@
                     <button class="global-nav-dropdown-item" data-nav="detective-screen">🔍 Hope Detective</button>
                     <button class="global-nav-dropdown-item" data-nav="quest-screen" data-init="quest">🧭 Hope Quest</button>
                     <button class="global-nav-dropdown-item" data-nav="walk-screen">🌿 Hope Walk</button>
-                    <a class="global-nav-dropdown-item" href="hope-trail/index.html" style="text-decoration:none;color:inherit;">🚐 Hope Trail</a>
+                    <button class="global-nav-dropdown-item" data-nav="trail-screen" data-init="trail">🚐 Hope Trail</button>
                 </div>
                 <button class="global-nav-link" data-nav="tools" data-group="tools">
                     <span class="global-nav-link-icon">🛠️</span> Tools
@@ -1773,6 +1773,19 @@
                 <p id="walk-victory-msg"></p>
                 <button class="btn btn-primary btn-lg" id="btn-walk-restart">Walk Again</button>
                 <button class="btn btn-lg" id="btn-walk-to-home" aria-label="Return to main menu">← Back to Main Menu</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Hope Trail Game (embedded) ===== -->
+    <section id="trail-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-trail">&larr; Back</button>
+                <div class="step-indicator">🚐 Hope Trail</div>
+            </div>
+            <div class="trail-iframe-wrap">
+                <iframe id="trail-iframe" src="" title="Hope Trail Game" allowfullscreen></iframe>
             </div>
         </div>
     </section>

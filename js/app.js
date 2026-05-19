@@ -294,6 +294,7 @@ document.querySelectorAll('.global-nav-dropdown-item').forEach(item => {
         if (item.dataset.init === 'quest' && typeof initQuest === 'function') initQuest();
         if (item.dataset.init === 'resources' && typeof renderResources === 'function') renderResources();
         if (target === 'detective-screen' && typeof initDetective === 'function') initDetective();
+        if (item.dataset.init === 'trail') initTrail();
         showScreen(target);
     });
 });
@@ -4994,6 +4995,27 @@ document.getElementById('btn-walk').addEventListener('click', () => {
 });
 document.getElementById('btn-back-walk').addEventListener('click', () => {
     showScreen('welcome-screen');
+});
+
+// Hope Trail — embedded iframe
+function initTrail() {
+    const iframe = document.getElementById('trail-iframe');
+    // Reload game each time so it starts fresh
+    iframe.src = 'hope-trail/index.html';
+}
+
+document.getElementById('btn-back-trail').addEventListener('click', () => {
+    // Clear iframe to stop game audio/animation
+    document.getElementById('trail-iframe').src = '';
+    showScreen('welcome-screen');
+});
+
+// Listen for the game's "exit" message
+window.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'hope-trail-exit') {
+        document.getElementById('trail-iframe').src = '';
+        showScreen('welcome-screen');
+    }
 });
 document.getElementById('btn-walk-restart').addEventListener('click', () => {
     initWalk();
