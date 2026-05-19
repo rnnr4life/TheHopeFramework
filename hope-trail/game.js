@@ -163,6 +163,15 @@ your family's hope score!`;
 // --- HOPE CHALLENGES (at landmarks) ---
 const HOPE_CHALLENGES_SOUTH = [
     {
+        location: 'Asheville Community Garden',
+        story: 'At the Asheville Community Garden, you meet Karl — the friendly neighborhood technology guy. He looks worried. "I love technology," Karl says, "but AI data centers are using millions of gallons of water just to keep cool. Rivers near these facilities are drying up." He pauses, then smiles. "But there\'s hope. Engineers are designing closed-loop cooling systems that recycle 95% of the water. And some companies are building data centers powered entirely by renewable energy. I started a local group to push for water-responsible AI."',
+        question: 'Karl starting a local group to push for water-responsible AI shows:',
+        options: ['Motivation for Change', 'Belief that Change is Possible', 'Plans for a Path Forward', 'Agency to Take Action'],
+        correct: 3,
+        marker: 'e',
+        explanation: 'Karl didn\'t just feel sad — he organized a group and took action. That\'s Agency to Take Action.'
+    },
+    {
         location: 'Blue Ridge Parkway',
         story: 'Your family stops at an overlook. The mountains are hazy with pollution, and some trees are dying from acid rain. But a ranger explains that air quality has improved 70% since the Clean Air Act. "These forests are coming back," she says with a smile.',
         question: 'The ranger showing that air quality has improved 70% is an example of:',
@@ -228,6 +237,15 @@ const HOPE_CHALLENGES_SOUTH = [
 ];
 
 const HOPE_CHALLENGES_NORTH = [
+    {
+        location: 'Asheville Community Garden',
+        story: 'At the Asheville Community Garden, you meet Karl — the friendly neighborhood technology guy. He looks worried. "I love technology," Karl says, "but AI data centers are using millions of gallons of water just to keep cool. Rivers near these facilities are drying up." He pauses, then smiles. "But there\'s hope. Engineers are designing closed-loop cooling systems that recycle 95% of the water. And some companies are building data centers powered entirely by renewable energy. I started a local group to push for water-responsible AI."',
+        question: 'Karl starting a local group to push for water-responsible AI shows:',
+        options: ['Motivation for Change', 'Belief that Change is Possible', 'Plans for a Path Forward', 'Agency to Take Action'],
+        correct: 3,
+        marker: 'e',
+        explanation: 'Karl didn\'t just feel sad — he organized a group and took action. That\'s Agency to Take Action.'
+    },
     {
         location: 'Blue Ridge Parkway',
         story: 'Your family stops at an overlook. The mountains are hazy with pollution, and some trees are dying from acid rain. But a ranger explains that air quality has improved 70% since the Clean Air Act. "These forests are coming back," she says with a smile.',
