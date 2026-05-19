@@ -386,8 +386,6 @@ function drawTree(ctx, x, y, size) {
     ctx.beginPath(); ctx.arc(x + size * 0.15, y - size * 0.15, size * 0.32, 0, Math.PI * 2); ctx.fill();
 }
 
-function drawRiver(ctx, w, h, skyH) {
-
 // --- WEATHER OVERLAYS ---
 function getWeatherSkyTint(weather) {
     // Returns an overlay color and alpha for the sky
@@ -1620,6 +1618,21 @@ function doTravel() {
     game.food -= alive * pace.foodMult;
     if (game.food < 0) game.food = 0;
 
+    // Gas consumption — roughly 1 tank every ~200 miles
+    if (Math.random() < milesGained / 200) {
+        if (game.gas > 0) {
+            game.gas--;
+        } else {
+            // Out of gas — costs money or loses miles
+            if (game.money >= 60) {
+                game.money -= 60;
+            } else {
+                game.miles -= milesGained * 0.5;
+                if (game.miles < 0) game.miles = 0;
+            }
+        }
+    }
+
     // Fast pace stress
     if (Math.random() < pace.stressChance) {
         const healthy = game.party.filter(m => m.status === 'healthy');
@@ -1663,10 +1676,16 @@ function finishTravel(milesGained) {
         } else {
             continueBtn.textContent = 'Press SPACE BAR to continue';
             continueBtn.onclick = () => {
-                showScreen('game-screen');
-                updateUI();
-                showEvent(lm.name, `You've reached ${lm.name}. ${Math.floor(game.miles)} miles traveled.`);
-                showGameMenu();
+                // Check if another landmark was also passed
+                if (game.nextLandmark < LANDMARKS.length &&
+                    game.miles >= LANDMARKS[game.nextLandmark].mile) {
+                    finishTravel(0);
+                } else {
+                    showScreen('game-screen');
+                    updateUI();
+                    showEvent(lm.name, `You've reached ${lm.name}. ${Math.floor(game.miles)} miles traveled.`);
+                    showGameMenu();
+                }
             };
         }
         showScreen('landmark-screen');
@@ -1851,6 +1870,10 @@ function afterChallenge() {
     const landmark = game._currentLandmark;
     if (landmark && landmark.center) {
         openCenter(landmark.name);
+    } else if (game.nextLandmark < LANDMARKS.length &&
+               game.miles >= LANDMARKS[game.nextLandmark].mile) {
+        // Another landmark was passed — show it
+        finishTravel(0);
     } else {
         showScreen('game-screen');
         updateUI();
