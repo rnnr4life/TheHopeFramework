@@ -280,6 +280,7 @@ canvas {
 .o-marker strong { color: var(--hope-green); }
 .p-marker strong { color: var(--hope-blue); }
 .e-marker strong { color: var(--hope-purple); }
+.trust-marker strong { color: var(--hope-yellow); }
 
 /* --- HEALTH/SPIRITS COLORS --- */
 .health-good, .spirits-hopeful { color: var(--hope-green) !important; }

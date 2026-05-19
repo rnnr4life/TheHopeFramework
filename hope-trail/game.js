@@ -1473,6 +1473,7 @@ function drawSpinningWheels(ctx, x, y, s, scroll, offset) {
 let game = {};
 let store = { money: 500, gas: 0, food: 0, supplies: 0 };
 let hopeScore = { h: 0, o: 0, p: 0, e: 0 };
+let communityTrust = 3;  // 0-10 scale, start neutral
 let challengeIndex = 0;
 
 // =====================
@@ -1593,6 +1594,7 @@ function setSeason(monthIndex) {
     };
 
     hopeScore = { h: 0, o: 0, p: 0, e: 0 };
+    communityTrust = 3;
     challengeIndex = 0;
 
     showScreen('route-screen');
@@ -1720,6 +1722,7 @@ function updateUI() {
     document.getElementById('score-o').textContent = hopeScore.o;
     document.getElementById('score-p').textContent = hopeScore.p;
     document.getElementById('score-e').textContent = hopeScore.e;
+    document.getElementById('score-trust').textContent = communityTrust;
 
     // Location bar
     const prevLm = game.nextLandmark > 0 ? LANDMARKS[game.nextLandmark - 1] : LANDMARKS[0];
@@ -1918,8 +1921,11 @@ function finishTravel(milesGained) {
         return;
     }
 
-    // Random event
-    if (Math.random() < 0.4) { triggerRandomEvent(); return; }
+    // Random event — dilemmas, reciprocity, or standard
+    const roll = Math.random();
+    if (roll < 0.15) { triggerDilemmaEvent(); return; }
+    if (roll < 0.25) { eventTrustReciprocity(); return; }
+    if (roll < 0.50) { triggerRandomEvent(); return; }
 
     // Normal travel
     showEvent('Driving...',
@@ -1978,7 +1984,8 @@ function doStatus() {
     text += `Money: $${Math.floor(game.money)}<br>`;
     text += `Supplies: ${game.supplies}<br>`;
     text += `Spirits: ${getSpirits()}<br><br>`;
-    text += `HOPE Score: ❤️${hopeScore.h} 🌿${hopeScore.o} 🗺️${hopeScore.p} ⚡${hopeScore.e}<br><br>`;
+    text += `HOPE Score: ❤️${hopeScore.h} 🌿${hopeScore.o} 🗺️${hopeScore.p} ⚡${hopeScore.e}<br>`;
+    text += `Community Trust: 🤝 ${communityTrust}/10<br><br>`;
     text += 'Family: ';
     for (const m of game.party) {
         const icon = m.status === 'healthy' ? '♥' : m.status === 'worried' ? '▼' : '✝';
@@ -2000,13 +2007,26 @@ function openCenter(name) {
 
     const hasWorried = game.party.some(m => m.status === 'worried');
     const vc = VEHICLE_CONFIG[game.vehicle];
-    const fuelLabel = vc.fuelName ? `${vc.fuelName} ........... $${vc.fuelCost}` : null;
+
+    // Trust affects prices
+    const trustMult = communityTrust >= 7 ? 0.75 : communityTrust <= 2 ? 1.5 : 1.0;
+    const foodPrice = Math.round(10 * trustMult);
+    const bigFoodPrice = Math.round(25 * trustMult);
+    const counselPrice = Math.round(15 * trustMult);
+    const fuelPrice = Math.round((vc.fuelCost || 50) * trustMult);
+    const suppliesPrice = Math.round(30 * trustMult);
+
+    const trustNote = communityTrust >= 7 ? '<p style="font-size:8px;color:#34d399;margin:4px 0;">🤝 Your good reputation earns a 25% discount!</p>' :
+                      communityTrust <= 2 ? '<p style="font-size:8px;color:#ff6b6b;margin:4px 0;">😐 People here seem wary of you. Prices are 50% higher.</p>' : '';
+
+    const fuelLabel = vc.fuelName ? `${vc.fuelName} ........... $${fuelPrice}` : null;
     document.getElementById('center-items').innerHTML = `
-        <li><span class="menu-option" onclick="centerBuy('food')">Meals (5) ......... $10</span></li>
-        <li><span class="menu-option" onclick="centerBuy('bigfood')">Meals (15) ........ $25</span></li>
-        ${hasWorried ? '<li><span class="menu-option" onclick="centerBuy(\'counsel\')">Counseling ........ $15</span></li>' : ''}
+        ${trustNote}
+        <li><span class="menu-option" onclick="centerBuy('food')">Meals (5) ......... $${foodPrice}</span></li>
+        <li><span class="menu-option" onclick="centerBuy('bigfood')">Meals (15) ........ $${bigFoodPrice}</span></li>
+        ${hasWorried ? `<li><span class="menu-option" onclick="centerBuy('counsel')">Counseling ........ $${counselPrice}</span></li>` : ''}
         ${fuelLabel ? `<li><span class="menu-option" onclick="centerBuy('gas')">${fuelLabel}</span></li>` : ''}
-        <li><span class="menu-option" onclick="centerBuy('supplies')">Supplies .......... $30</span></li>
+        <li><span class="menu-option" onclick="centerBuy('supplies')">Supplies .......... $${suppliesPrice}</span></li>
         <li><span class="menu-option" onclick="showVehicleSwitch()">Switch vehicle (${vc.icon} ${vc.name})</span></li>
         <li><span class="menu-option" onclick="leaveCenter()">Leave</span></li>
     `;
@@ -2016,7 +2036,15 @@ function centerBuy(item) {
     const msg = document.getElementById('center-msg');
     const vc = VEHICLE_CONFIG[game.vehicle];
     const gasCost = vc.fuelCost || 50;
-    const prices = { food: 10, bigfood: 25, counsel: 15, gas: gasCost, supplies: 30 };
+
+    // Trust affects prices: high trust = discount, low trust = markup
+    const trustMult = communityTrust >= 7 ? 0.75 : communityTrust <= 2 ? 1.5 : 1.0;
+    const basePrices = { food: 10, bigfood: 25, counsel: 15, gas: gasCost, supplies: 30 };
+    const prices = {};
+    for (const [k, v] of Object.entries(basePrices)) {
+        prices[k] = Math.round(v * trustMult);
+    }
+
     if (game.money < prices[item]) { msg.textContent = "Can't afford that!"; sfx_bad(); return; }
 
     sfx_coin();
@@ -2385,6 +2413,279 @@ function eventScenicBusRoute() {
 }
 
 // =====================
+// DILEMMA EVENTS (Game Theory)
+// =====================
+function triggerDilemmaEvent() {
+    const dilemmas = [
+        dilemmaStrandedFamily, dilemmaSharedWell,
+        dilemmaCommunityGarden, dilemmaHitchhiker,
+        dilemmaFoodBank, dilemmaTrailCleanup,
+    ];
+    dilemmas[Math.floor(Math.random() * dilemmas.length)]();
+}
+
+function showDilemma(title, story, choices) {
+    showEvent(title, story);
+    const container = document.getElementById('actions');
+    let html = '<ol class="menu-list">';
+    for (const choice of choices) {
+        html += `<li><span class="menu-option" onclick="(${choice.action.toString()})()">${choice.label}</span></li>`;
+    }
+    html += '</ol><p class="action-prompt">What do you choose? <span class="blink">_</span></p>';
+    container.innerHTML = html;
+}
+
+function changeTrust(amount) {
+    communityTrust = Math.max(0, Math.min(10, communityTrust + amount));
+}
+
+function dilemmaStrandedFamily() {
+    showDilemma(
+        '🆘 Stranded family!',
+        'You see a family on the roadside with a broken-down car. They look exhausted and hungry. You could share some of your food and supplies — or keep driving.',
+        [
+            {
+                label: 'Share 5 meals and help (cooperative)',
+                action: function() {
+                    sfx_good();
+                    game.food -= 5; if (game.food < 0) game.food = 0;
+                    changeTrust(2);
+                    hopeScore.e += 1;
+                    showEvent('🤝 You helped!', 'You shared meals and helped fix their car. The family is deeply grateful. "We won\'t forget this," they say. Word of your kindness spreads.');
+                    appendEvent('+2 Community Trust, +1 Agency');
+                    updateUI(); checkGameOver(); if (!game.gameOver) showGameMenu();
+                }
+            },
+            {
+                label: 'Keep driving (self-interest)',
+                action: function() {
+                    sfx_select();
+                    changeTrust(-1);
+                    showEvent('Drove past...', 'You drove past the stranded family. Your supplies are safe, but your child looks back through the window with a sad face.');
+                    appendEvent('-1 Community Trust');
+                    stressRandomMember();
+                    updateUI(); checkGameOver(); if (!game.gameOver) showGameMenu();
+                }
+            }
+        ]
+    );
+}
+
+function dilemmaSharedWell() {
+    showDilemma(
+        '💧 Shared water well',
+        'You stop at a small town with a community well. There\'s a sign: "Please take only what you need — drought conditions." You could fill up extra containers, or take just enough.',
+        [
+            {
+                label: 'Take only what you need (commons)',
+                action: function() {
+                    sfx_good();
+                    changeTrust(1);
+                    hopeScore.p += 1;
+                    showEvent('🌊 Responsible choice', 'You take only what your family needs. A local farmer nods approvingly. "Thank you for thinking of the community."');
+                    appendEvent('+1 Community Trust, +1 Plans');
+                    updateUI(); showGameMenu();
+                }
+            },
+            {
+                label: 'Fill up extra containers (exploit)',
+                action: function() {
+                    sfx_select();
+                    game.food += 3;
+                    changeTrust(-2);
+                    showEvent('Took extra...', 'You filled extra containers. Other families arriving later find the well running low. A child cries because there\'s no water left for them.');
+                    appendEvent('+3 meals, but -2 Community Trust');
+                    updateUI(); showGameMenu();
+                }
+            }
+        ]
+    );
+}
+
+function dilemmaCommunityGarden() {
+    showDilemma(
+        '🌱 Community garden',
+        'You pass a community garden that\'s short on volunteers. They\'re asking travelers to help plant for an hour in exchange for fresh produce. It would cost you travel time.',
+        [
+            {
+                label: 'Stop and help plant (cooperate)',
+                action: function() {
+                    sfx_good();
+                    game.food += 8;
+                    changeTrust(2);
+                    hopeScore.h += 1;
+                    advanceDay();
+                    showEvent('🌻 Time well spent!', 'Your family spent an hour planting vegetables. The gardeners gave you fresh produce and seeds. Your child learned about growing food!');
+                    appendEvent('+8 meals, +2 Community Trust, +1 Motivation');
+                    updateUI(); showGameMenu();
+                }
+            },
+            {
+                label: 'No time, keep moving (self-interest)',
+                action: function() {
+                    sfx_select();
+                    showEvent('Kept driving', 'You drove past the garden. You saved time, but missed a chance to connect.');
+                    updateUI(); showGameMenu();
+                }
+            }
+        ]
+    );
+}
+
+function dilemmaHitchhiker() {
+    showDilemma(
+        '👋 Hitchhiker',
+        'A young environmental science student is hitchhiking to a conservation conference. They promise to share knowledge about local ecosystems if you give them a ride to the next stop.',
+        [
+            {
+                label: 'Give them a ride (cooperate)',
+                action: function() {
+                    sfx_good();
+                    changeTrust(1);
+                    hopeScore.o += 1;
+                    hopeScore.p += 1;
+                    showEvent('🎓 Great conversation!', 'The student shared stories about ecosystem restoration projects across the country. Your family learned about wetland recovery, urban forests, and coral reef rebuilding.');
+                    appendEvent('+1 Community Trust, +1 Belief, +1 Plans');
+                    const worried = game.party.find(m => m.status === 'worried');
+                    if (worried) { worried.status = 'healthy'; appendEvent(`${worried.name} feels inspired by the stories.`); }
+                    updateUI(); showGameMenu();
+                }
+            },
+            {
+                label: 'Drive on by (self-interest)',
+                action: function() {
+                    sfx_select();
+                    showEvent('Passed by', 'You kept driving. The student looked disappointed but waved anyway.');
+                    updateUI(); showGameMenu();
+                }
+            }
+        ]
+    );
+}
+
+function dilemmaFoodBank() {
+    showDilemma(
+        '🏦 Local food bank',
+        'You pass a food bank that\'s running low. A volunteer asks if you can spare any meals. "We have families who haven\'t eaten today," she says.',
+        [
+            {
+                label: 'Donate 8 meals (generous)',
+                action: function() {
+                    sfx_good();
+                    game.food -= 8; if (game.food < 0) game.food = 0;
+                    changeTrust(3);
+                    hopeScore.h += 1;
+                    hopeScore.e += 1;
+                    showEvent('💛 Generous gift!', 'The volunteer\'s eyes fill with tears. "You have no idea what this means." She gives you a card with food bank locations along your route in case you ever need help.');
+                    appendEvent('+3 Community Trust, +1 Motivation, +1 Agency');
+                    updateUI(); checkGameOver(); if (!game.gameOver) showGameMenu();
+                }
+            },
+            {
+                label: 'Donate 3 meals (small help)',
+                action: function() {
+                    sfx_select();
+                    game.food -= 3; if (game.food < 0) game.food = 0;
+                    changeTrust(1);
+                    showEvent('A small help', 'You shared what you could. The volunteer says "Every bit counts. Thank you."');
+                    appendEvent('+1 Community Trust');
+                    updateUI(); checkGameOver(); if (!game.gameOver) showGameMenu();
+                }
+            },
+            {
+                label: 'Sorry, we can\'t spare any (keep)',
+                action: function() {
+                    sfx_select();
+                    changeTrust(-1);
+                    showEvent('Kept supplies', 'You apologized and moved on. Your partner says quietly, "I wish we could have helped."');
+                    appendEvent('-1 Community Trust');
+                    updateUI(); showGameMenu();
+                }
+            }
+        ]
+    );
+}
+
+function dilemmaTrailCleanup() {
+    showDilemma(
+        '🗑️ Trail cleanup needed',
+        'A beautiful trail is covered in litter from recent storms. Park rangers are asking visitors to help collect trash for 30 minutes. It would delay your trip but help the ecosystem.',
+        [
+            {
+                label: 'Help clean up (cooperate)',
+                action: function() {
+                    sfx_good();
+                    changeTrust(2);
+                    hopeScore.e += 1;
+                    showEvent('🧹 Clean trail!', 'Your family filled 3 bags of trash. A ranger gave your child a Junior Ranger badge. "You made a real difference today," she said.');
+                    appendEvent('+2 Community Trust, +1 Agency');
+                    const worried = game.party.find(m => m.status === 'worried');
+                    if (worried) { worried.status = 'healthy'; appendEvent(`${worried.name} feels proud and hopeful.`); }
+                    updateUI(); showGameMenu();
+                }
+            },
+            {
+                label: 'No time, keep driving (self-interest)',
+                action: function() {
+                    sfx_select();
+                    showEvent('Drove past', 'You kept driving. The litter stays on the trail.');
+                    updateUI(); showGameMenu();
+                }
+            }
+        ]
+    );
+}
+
+// --- TRUST-DEPENDENT RECIPROCITY EVENTS ---
+function eventTrustReciprocity() {
+    if (communityTrust >= 7) {
+        // High trust — community helps you
+        sfx_good();
+        const helps = [
+            () => {
+                game.food += 10; game.gas += 1;
+                showEvent('🤝 Community payback!', 'A family you helped earlier tracked you down! They brought meals and fuel. "You helped us when we needed it — now it\'s our turn."');
+                appendEvent('+10 meals, +1 fuel. Kindness comes back around!');
+            },
+            () => {
+                game.money += 50;
+                showEvent('💌 Surprise gift!', 'You find a note on your windshield with $50 inside. "For the family who helped us in the mountains. Pay it forward." Word of your kindness reached here before you did.');
+                appendEvent('+$50. Your reputation precedes you!');
+            },
+            () => {
+                const worried = game.party.filter(m => m.status === 'worried');
+                worried.forEach(m => m.status = 'healthy');
+                hopeScore.h += 1;
+                showEvent('🌟 Community welcome!', 'A local community heard about your family\'s kindness. They organized a small welcome party with food, music, and stories. Everyone feels renewed.');
+                appendEvent('All family members feel hopeful! +1 Motivation');
+            },
+        ];
+        helps[Math.floor(Math.random() * helps.length)]();
+    } else if (communityTrust <= 2) {
+        // Low trust — community is cold
+        sfx_bad();
+        const colds = [
+            () => {
+                game.money -= 30; if (game.money < 0) game.money = 0;
+                showEvent('😐 Cold reception', 'At a rest stop, people seem to avoid your family. A mechanic charges you extra for a simple repair. "We heard you don\'t help others around here," he mutters.');
+                appendEvent('-$30. Your reputation works both ways.');
+            },
+            () => {
+                showEvent('🚪 Turned away', 'A community shelter turns your family away. "We save our resources for people who contribute to the community," the volunteer says, looking uncomfortable.');
+                stressRandomMember();
+                appendEvent('Someone in your family feels discouraged.');
+            },
+        ];
+        colds[Math.floor(Math.random() * colds.length)]();
+    } else {
+        // Neutral — small random event
+        sfx_select();
+        showEvent('Rest stop', 'You stop for a break. People are friendly but distant. Nobody knows you here — yet.');
+    }
+    updateUI(); checkGameOver(); if (!game.gameOver) showGameMenu();
+}
+
+// =====================
 // UTILITY
 // =====================
 function advanceDay() {
@@ -2415,21 +2716,30 @@ function winGame() {
     sfx_win();
     game.gameOver = true;
     const total = hopeScore.h + hopeScore.o + hopeScore.p + hopeScore.e;
+    const combined = total + communityTrust;
 
     let rating;
-    if (total >= 20) rating = '🌟 HOPE Champion!';
-    else if (total >= 14) rating = '🌿 Hope Builder';
-    else if (total >= 8) rating = '🌱 Hope Seeker';
+    if (combined >= 28) rating = '🌟 HOPE Champion!';
+    else if (combined >= 20) rating = '🌿 Hope Builder';
+    else if (combined >= 12) rating = '🌱 Hope Seeker';
     else rating = '💚 Hope Beginner';
+
+    let trustVerdict;
+    if (communityTrust >= 8) trustVerdict = 'Your kindness echoed across the country. Communities remember you.';
+    else if (communityTrust >= 5) trustVerdict = 'You balanced self-care with helping others.';
+    else if (communityTrust >= 3) trustVerdict = 'You kept to yourself mostly. Some missed connections along the way.';
+    else trustVerdict = 'Your family survived, but bridges were burned. Cooperation would have made the journey easier.';
 
     document.getElementById('end-title').textContent = '🎉 You made it!';
     document.getElementById('end-message').innerHTML =
         `The ${game.party[0].name} family arrived at Hope Valley, Oregon!<br><br>` +
         `Along the way, you found hope in stories of change, recovery, plans, and action.<br><br>` +
+        `${trustVerdict}<br><br>` +
         `Your HOPE rating: <strong>${rating}</strong>`;
     document.getElementById('end-hope-summary').innerHTML =
         `<p>❤️ Motivation: ${hopeScore.h} &nbsp; 🌿 Belief: ${hopeScore.o} &nbsp; 🗺️ Plans: ${hopeScore.p} &nbsp; ⚡ Agency: ${hopeScore.e}</p>` +
-        `<p>Total HOPE: ${total}</p>`;
+        `<p>🤝 Community Trust: ${communityTrust}/10</p>` +
+        `<p>Total HOPE + Trust: ${combined}</p>`;
     showScreen('end-screen');
 }
 
@@ -2437,13 +2747,19 @@ function loseGame() {
     game.gameOver = true;
     const total = hopeScore.h + hopeScore.o + hopeScore.p + hopeScore.e;
 
+    let trustNote = '';
+    if (communityTrust <= 2) {
+        trustNote = '<br>Low community trust made the journey harder. Cooperation could have helped.';
+    }
+
     document.getElementById('end-title').textContent = 'Journey paused...';
     document.getElementById('end-message').innerHTML =
         `The ${game.party[0].name} family ran out of resources at mile ${Math.floor(game.miles)}.<br><br>` +
-        `But every journey toward hope has setbacks. The markers you found still matter.<br><br>` +
+        `But every journey toward hope has setbacks. The markers you found still matter.${trustNote}<br><br>` +
         `You collected ${total} HOPE points. Try again and find even more!`;
     document.getElementById('end-hope-summary').innerHTML =
-        `<p>❤️ Motivation: ${hopeScore.h} &nbsp; 🌿 Belief: ${hopeScore.o} &nbsp; 🗺️ Plans: ${hopeScore.p} &nbsp; ⚡ Agency: ${hopeScore.e}</p>`;
+        `<p>❤️ Motivation: ${hopeScore.h} &nbsp; 🌿 Belief: ${hopeScore.o} &nbsp; 🗺️ Plans: ${hopeScore.p} &nbsp; ⚡ Agency: ${hopeScore.e}</p>` +
+        `<p>🤝 Community Trust: ${communityTrust}/10</p>`;
     showScreen('end-screen');
 }
 
