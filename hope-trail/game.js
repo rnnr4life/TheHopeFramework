@@ -372,6 +372,8 @@ function drawVan(ctx, x, y, scale) {
     ctx.font = `${3 * s}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.fillText('HOPE', x + 18 * s, y + 9.5 * s);
+    // Mood
+    if (game.party) drawVanMood(ctx, x, y, s);
 }
 
 function drawTree(ctx, x, y, size) {
@@ -382,6 +384,154 @@ function drawTree(ctx, x, y, size) {
     ctx.fillStyle = '#33aa33';
     ctx.beginPath(); ctx.arc(x - size * 0.15, y - size * 0.2, size * 0.3, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(x + size * 0.15, y - size * 0.15, size * 0.32, 0, Math.PI * 2); ctx.fill();
+}
+
+function drawRiver(ctx, w, h, skyH) {
+
+// --- WEATHER OVERLAYS ---
+function getWeatherSkyTint(weather) {
+    // Returns an overlay color and alpha for the sky
+    switch (weather) {
+        case 'rainy':  return { color: '#334455', alpha: 0.35 };
+        case 'foggy':  return { color: '#cccccc', alpha: 0.3 };
+        case 'cloudy': return { color: '#667788', alpha: 0.2 };
+        case 'windy':  return { color: '#556677', alpha: 0.1 };
+        case 'sunny':  return { color: '#ffdd44', alpha: 0.08 };
+        default:       return { color: '#000000', alpha: 0 };
+    }
+}
+
+function drawWeatherOverlay(ctx, w, h, skyH, weather, time) {
+    const t = time || Date.now();
+
+    // Sky tint
+    const tint = getWeatherSkyTint(weather);
+    if (tint.alpha > 0) {
+        ctx.fillStyle = tint.color;
+        ctx.globalAlpha = tint.alpha;
+        ctx.fillRect(0, 0, w, skyH);
+        ctx.globalAlpha = 1;
+    }
+
+    if (weather === 'rainy') {
+        // Rain drops
+        ctx.strokeStyle = '#88aacc';
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.6;
+        for (let i = 0; i < 60; i++) {
+            const rx = (i * 37 + t * 0.3) % w;
+            const ry = (i * 53 + t * 0.5) % h;
+            ctx.beginPath();
+            ctx.moveTo(rx, ry);
+            ctx.lineTo(rx - 2, ry + 8);
+            ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        // Puddles on road
+        ctx.fillStyle = '#5588aa';
+        ctx.globalAlpha = 0.3;
+        ctx.beginPath(); ctx.ellipse(w * 0.3, h * 0.78, 20, 4, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(w * 0.7, h * 0.79, 15, 3, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1;
+    }
+
+    if (weather === 'foggy') {
+        // Fog bands
+        ctx.fillStyle = '#ccc';
+        ctx.globalAlpha = 0.2;
+        for (let i = 0; i < 5; i++) {
+            const fy = skyH * 0.4 + i * (h * 0.15);
+            const fx = Math.sin(t * 0.0005 + i) * 30;
+            ctx.beginPath();
+            ctx.ellipse(w * 0.5 + fx, fy, w * 0.6, 15 + i * 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    if (weather === 'cloudy') {
+        // Extra dark clouds
+        ctx.fillStyle = '#778899';
+        ctx.globalAlpha = 0.4;
+        const cloudOffsets = [0.15, 0.4, 0.65, 0.85];
+        for (const cx of cloudOffsets) {
+            ctx.beginPath();
+            ctx.ellipse(w * cx, skyH * 0.25, 55, 18, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(w * cx + 20, skyH * 0.2, 40, 14, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    if (weather === 'sunny') {
+        // Sun glow
+        const sunX = w * 0.8, sunY = skyH * 0.2;
+        const grad = ctx.createRadialGradient(sunX, sunY, 8, sunX, sunY, 60);
+        grad.addColorStop(0, 'rgba(255, 220, 80, 0.6)');
+        grad.addColorStop(0.5, 'rgba(255, 200, 50, 0.15)');
+        grad.addColorStop(1, 'rgba(255, 200, 50, 0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, skyH);
+        // Sun disc
+        ctx.fillStyle = '#ffdd44';
+        ctx.beginPath(); ctx.arc(sunX, sunY, 12, 0, Math.PI * 2); ctx.fill();
+        // Rays
+        ctx.strokeStyle = '#ffee88';
+        ctx.lineWidth = 1.5;
+        ctx.globalAlpha = 0.4;
+        for (let r = 0; r < 8; r++) {
+            const angle = r * Math.PI / 4 + t * 0.0003;
+            ctx.beginPath();
+            ctx.moveTo(sunX + Math.cos(angle) * 16, sunY + Math.sin(angle) * 16);
+            ctx.lineTo(sunX + Math.cos(angle) * 28, sunY + Math.sin(angle) * 28);
+            ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    if (weather === 'windy') {
+        // Wind streaks
+        ctx.strokeStyle = '#aabbcc';
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.3;
+        for (let i = 0; i < 10; i++) {
+            const wy = skyH * 0.3 + i * (h * 0.06);
+            const wx = (t * 0.2 + i * 80) % (w + 100) - 50;
+            ctx.beginPath();
+            ctx.moveTo(wx, wy);
+            ctx.lineTo(wx + 40 + i * 5, wy - 2);
+            ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+    }
+}
+
+// --- VAN MOOD INDICATOR ---
+function drawVanMood(ctx, x, y, scale) {
+    const s = scale || 1;
+    const spirits = typeof getSpirits === 'function' && game.party ? getSpirits() : 'Okay';
+    let emoji, color;
+    switch (spirits) {
+        case 'Hopeful':    emoji = '😊'; color = '#34d399'; break;
+        case 'Okay':       emoji = '😐'; color = '#fbbf24'; break;
+        case 'Worried':    emoji = '😟'; color = '#ff6b6b'; break;
+        case 'Despairing': emoji = '😢'; color = '#ff4444'; break;
+        default:           emoji = '😐'; color = '#fbbf24'; break;
+    }
+    // Speech bubble
+    const bx = x - 2 * s, by = y - 28 * s;
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.beginPath();
+    ctx.ellipse(bx, by, 10 * s, 8 * s, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Emoji
+    ctx.font = `${10 * s}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(emoji, bx, by);
+    ctx.textBaseline = 'alphabetic';
 }
 
 function drawRiver(ctx, w, h, skyH) {
@@ -574,6 +724,8 @@ function drawTrailScene(canvas) {
     const progress = Math.min(game.miles / TOTAL_MILES, 1);
     const vx = w - 80 - progress * (w - 200);
     drawVan(ctx, vx, h * 0.62, 1.2);
+    // Weather effects
+    if (game.weather) drawWeatherOverlay(ctx, w, h, skyH, game.weather);
 }
 
 function drawTownScene(canvas) {
@@ -1076,6 +1228,9 @@ function playTravelAnimation(milesGained, onComplete) {
         const bounce = Math.sin(elapsed * 0.008) * 1;
         drawAnimatedVan(ctx, vanX, vanY + bounce, 1.3, scroll, elapsed);
 
+        // Weather effects during travel
+        if (game.weather) drawWeatherOverlay(ctx, w, h, skyH, game.weather, elapsed);
+
         // Miles counter
         milesShown = Math.floor((game.miles - milesGained) + milesGained * progress);
         ctx.fillStyle = 'rgba(0,0,0,0.6)';
@@ -1121,6 +1276,8 @@ function drawAnimatedVan(ctx, x, y, scale, scroll, time) {
     // Bumper sticker
     ctx.fillStyle = '#34d399';
     ctx.fillRect(x + 14 * s, y + 6 * s, 8 * s, 4 * s);
+    // Mood
+    if (game.party) drawVanMood(ctx, x, y, s);
     // Wheels (spinning)
     const wheelAngle = scroll * 0.05;
     const wheels = [
