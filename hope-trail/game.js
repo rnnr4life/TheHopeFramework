@@ -11,7 +11,8 @@
 // ============================================
 
 // --- LANDMARKS (real places, eco-themed) ---
-const LANDMARKS = [
+// Southern Route (original)
+const LANDMARKS_SOUTH = [
     { name: 'Greenville, SC', mile: 0, center: false, scene: 'town' },
     { name: 'Blue Ridge Parkway', mile: 90, center: false, scene: 'mountain' },
     { name: 'Asheville Community Garden', mile: 180, center: true, scene: 'garden' },
@@ -27,10 +28,31 @@ const LANDMARKS = [
     { name: 'Hope Valley, OR', mile: 2000, center: false, scene: 'town' },
 ];
 
+// Northern Route (through St. Paul, MN)
+const LANDMARKS_NORTH = [
+    { name: 'Greenville, SC', mile: 0, center: false, scene: 'town' },
+    { name: 'Blue Ridge Parkway', mile: 90, center: false, scene: 'mountain' },
+    { name: 'Asheville Community Garden', mile: 180, center: true, scene: 'garden' },
+    { name: 'Great Smoky Mountains', mile: 320, center: false, scene: 'mountain' },
+    { name: 'Nashville Green Hub', mile: 500, center: true, scene: 'town' },
+    { name: 'Mississippi River', mile: 680, center: false, scene: 'river' },
+    { name: 'St. Paul, Minnesota', mile: 880, center: true, scene: 'stpaul' },
+    { name: 'Minnesota State Fair', mile: 890, center: false, scene: 'statefair' },
+    { name: 'University of Minnesota', mile: 900, center: false, scene: 'university' },
+    { name: 'North Dakota Prairie', mile: 1100, center: false, scene: 'prairie' },
+    { name: 'Montana Wilderness', mile: 1350, center: true, scene: 'mountain' },
+    { name: 'Glacier National Park', mile: 1550, center: false, scene: 'mountain' },
+    { name: 'Pacific Northwest Trail', mile: 1800, center: false, scene: 'mountain' },
+    { name: 'Hope Valley, OR', mile: 2000, center: false, scene: 'town' },
+];
+
+// Active route (set when player chooses)
+let LANDMARKS = LANDMARKS_SOUTH;
+
 const TOTAL_MILES = 2000;
 
 // --- REGIONS (background changes as you cross the country) ---
-const REGIONS = [
+const REGIONS_SOUTH = [
     { name: 'Southeast',        startMile: 0,    skyTop: '#4488cc', skyBottom: '#66aadd', ground: '#44aa44', groundAccent: '#338833', trees: true,  mountains: false, prairie: false },
     { name: 'Appalachian Mtns', startMile: 180,  skyTop: '#5588bb', skyBottom: '#88bbdd', ground: '#5a9a4a', groundAccent: '#3a7a3a', trees: true,  mountains: true,  prairie: false },
     { name: 'Mid-South',        startMile: 500,  skyTop: '#5599cc', skyBottom: '#88ccee', ground: '#66aa55', groundAccent: '#448833', trees: true,  mountains: false, prairie: false },
@@ -39,6 +61,18 @@ const REGIONS = [
     { name: 'High Rockies',     startMile: 1450, skyTop: '#3a5f8a', skyBottom: '#6690b8', ground: '#7a9060', groundAccent: '#5a7040', trees: false, mountains: true,  prairie: false },
     { name: 'Pacific Northwest', startMile: 1750, skyTop: '#556b7a', skyBottom: '#88aabb', ground: '#2d8a3e', groundAccent: '#1a6a2a', trees: true,  mountains: true,  prairie: false },
 ];
+
+const REGIONS_NORTH = [
+    { name: 'Southeast',        startMile: 0,    skyTop: '#4488cc', skyBottom: '#66aadd', ground: '#44aa44', groundAccent: '#338833', trees: true,  mountains: false, prairie: false },
+    { name: 'Appalachian Mtns', startMile: 180,  skyTop: '#5588bb', skyBottom: '#88bbdd', ground: '#5a9a4a', groundAccent: '#3a7a3a', trees: true,  mountains: true,  prairie: false },
+    { name: 'Mid-South',        startMile: 500,  skyTop: '#5599cc', skyBottom: '#88ccee', ground: '#66aa55', groundAccent: '#448833', trees: true,  mountains: false, prairie: false },
+    { name: 'Minnesota',        startMile: 800,  skyTop: '#5588bb', skyBottom: '#99ccdd', ground: '#3a8a3a', groundAccent: '#2a6a2a', trees: true,  mountains: false, prairie: false },
+    { name: 'Northern Plains',  startMile: 1000, skyTop: '#6baed6', skyBottom: '#c6dbef', ground: '#b5a642', groundAccent: '#9a8a32', trees: false, mountains: false, prairie: true  },
+    { name: 'Montana Rockies',  startMile: 1350, skyTop: '#3a5f8a', skyBottom: '#6690b8', ground: '#7a9060', groundAccent: '#5a7040', trees: true,  mountains: true,  prairie: false },
+    { name: 'Pacific Northwest', startMile: 1700, skyTop: '#556b7a', skyBottom: '#88aabb', ground: '#2d8a3e', groundAccent: '#1a6a2a', trees: true,  mountains: true,  prairie: false },
+];
+
+let REGIONS = REGIONS_SOUTH;
 
 function getRegion(miles) {
     let region = REGIONS[0];
@@ -87,7 +121,7 @@ landmark. Identify the right markers to build
 your family's hope score!`;
 
 // --- HOPE CHALLENGES (at landmarks) ---
-const HOPE_CHALLENGES = [
+const HOPE_CHALLENGES_SOUTH = [
     {
         location: 'Blue Ridge Parkway',
         story: 'Your family stops at an overlook. The mountains are hazy with pollution, and some trees are dying from acid rain. But a ranger explains that air quality has improved 70% since the Clean Air Act. "These forests are coming back," she says with a smile.',
@@ -152,6 +186,83 @@ const HOPE_CHALLENGES = [
         explanation: 'A detailed, long-term strategy with specific ratios is Plans for a Path Forward.'
     },
 ];
+
+const HOPE_CHALLENGES_NORTH = [
+    {
+        location: 'Blue Ridge Parkway',
+        story: 'Your family stops at an overlook. The mountains are hazy with pollution, and some trees are dying from acid rain. But a ranger explains that air quality has improved 70% since the Clean Air Act. "These forests are coming back," she says with a smile.',
+        question: 'The ranger showing that air quality has improved 70% is an example of:',
+        options: ['Motivation for Change', 'Belief that Change is Possible', 'Plans for a Path Forward', 'Agency to Take Action'],
+        correct: 1,
+        marker: 'o',
+        explanation: 'Seeing measurable improvement (70% better air quality) shows that change IS possible — evidence that gives us hope.'
+    },
+    {
+        location: 'Great Smoky Mountains',
+        story: 'Hiking through the Smokies, your child notices trash along the trail. They feel upset. Then you meet a group of teenagers doing a trail cleanup — they\'ve removed 200 pounds of litter this week alone. "We do this every month," they say proudly.',
+        question: 'The teenagers cleaning 200 pounds of litter every month shows:',
+        options: ['Motivation for Change', 'Belief that Change is Possible', 'Plans for a Path Forward', 'Agency to Take Action'],
+        correct: 3,
+        marker: 'e',
+        explanation: 'The teens are DOING something — taking direct action regularly. That\'s Agency to Take Action.'
+    },
+    {
+        location: 'Mississippi River',
+        story: 'At the river, you see a sign about how industrial runoff once made the water unsafe. Your partner reads about a new watershed protection plan — 15 cities along the river have agreed to reduce pollution by 50% over the next decade.',
+        question: 'A plan for 15 cities to reduce pollution by 50% is an example of:',
+        options: ['Motivation for Change', 'Belief that Change is Possible', 'Plans for a Path Forward', 'Agency to Take Action'],
+        correct: 2,
+        marker: 'p',
+        explanation: 'A specific, measurable plan (50% reduction, 15 cities, 10 years) is Plans for a Path Forward.'
+    },
+    {
+        location: 'St. Paul, Minnesota',
+        story: 'At the Minnesota State Capitol, your family sees a rally for clean energy. A state legislator tells the crowd: "Minnesota now gets 30% of its power from wind and solar — and we have a plan to reach 100% by 2040." Your child asks, "Can we really do that?"',
+        question: 'Minnesota\'s plan to reach 100% clean energy by 2040 is:',
+        options: ['Motivation for Change', 'Belief that Change is Possible', 'Plans for a Path Forward', 'Agency to Take Action'],
+        correct: 2,
+        marker: 'p',
+        explanation: 'A concrete goal (100% clean energy) with a timeline (2040) and measurable progress (30% already) is Plans for a Path Forward.'
+    },
+    {
+        location: 'Minnesota State Fair',
+        story: 'At the Great Minnesota Get-Together, your family visits the Eco Experience building. A volunteer shows kids how to compost. "Last year, fairgoers composted 270 tons of waste instead of sending it to landfills," she says. Your child grabs a bucket and starts helping.',
+        question: 'Fairgoers composting 270 tons of waste shows:',
+        options: ['Motivation for Change', 'Belief that Change is Possible', 'Plans for a Path Forward', 'Agency to Take Action'],
+        correct: 3,
+        marker: 'e',
+        explanation: 'Hundreds of thousands of people actively choosing to compost is Agency to Take Action — people doing the work.'
+    },
+    {
+        location: 'University of Minnesota',
+        story: 'On the U of M campus, your family meets a professor studying climate-resilient crops. "We\'re developing wheat that can survive droughts and floods," she explains. "Farmers across the Midwest are already testing it. When I see my students dedicating their careers to this, I know we\'ll find answers."',
+        question: 'The professor saying her students\' dedication gives her confidence is:',
+        options: ['Motivation for Change', 'Belief that Change is Possible', 'Plans for a Path Forward', 'Agency to Take Action'],
+        correct: 0,
+        marker: 'h',
+        explanation: 'Seeing the next generation commit to solving the problem gives her the emotional drive — that\'s Motivation for Change.'
+    },
+    {
+        location: 'Glacier National Park',
+        story: 'At Glacier National Park, a ranger shows your family old photos. "We\'ve lost 80% of our glaciers," she says quietly. But then she points to a stream full of fish. "Since we started restoring these waterways, the trout population has doubled. The land is healing."',
+        question: 'Trout populations doubling after restoration shows:',
+        options: ['Motivation for Change', 'Belief that Change is Possible', 'Plans for a Path Forward', 'Agency to Take Action'],
+        correct: 1,
+        marker: 'o',
+        explanation: 'Seeing measurable recovery (trout doubling) provides evidence that Change is Possible.'
+    },
+    {
+        location: 'Pacific Northwest Trail',
+        story: 'In the Pacific Northwest, you meet a indigenous community leader. "We have a 100-year forest management plan," she explains. "Every tree we harvest, we plant three. We map every watershed. Our children will inherit a healthier forest."',
+        question: 'A 100-year plan to plant 3 trees for every 1 harvested is:',
+        options: ['Motivation for Change', 'Belief that Change is Possible', 'Plans for a Path Forward', 'Agency to Take Action'],
+        correct: 2,
+        marker: 'p',
+        explanation: 'A detailed, long-term strategy with specific ratios is Plans for a Path Forward.'
+    },
+];
+
+let HOPE_CHALLENGES = HOPE_CHALLENGES_SOUTH;
 
 // =====================
 // SOUND EFFECTS
@@ -513,10 +624,286 @@ function drawGardenScene(canvas) {
     drawGarden(ctx, w, h, skyH);
 }
 
+// --- ST. PAUL SCENES ---
+function drawStPaulScene(canvas) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    const skyH = h * 0.4;
+    ctx.clearRect(0, 0, w, h);
+
+    // Sky — Minnesota blue
+    ctx.fillStyle = '#5588bb';
+    ctx.fillRect(0, 0, w, skyH);
+    ctx.fillStyle = '#99ccdd';
+    ctx.fillRect(0, skyH * 0.7, w, skyH * 0.3);
+    drawClouds(ctx, w, skyH);
+
+    // Ground — city
+    ctx.fillStyle = '#8a8a7a';
+    ctx.fillRect(0, skyH, w, h - skyH);
+    ctx.fillStyle = '#6a6a5a';
+    ctx.fillRect(0, skyH, w, 4);
+
+    // State Capitol building (center)
+    const cx = w * 0.5, baseY = skyH + 10;
+    // Main building body
+    ctx.fillStyle = '#e8dcc8';
+    ctx.fillRect(cx - 80, baseY + 30, 160, 60);
+    // Wings
+    ctx.fillStyle = '#d8ccb8';
+    ctx.fillRect(cx - 110, baseY + 45, 35, 45);
+    ctx.fillRect(cx + 75, baseY + 45, 35, 45);
+    // Steps
+    ctx.fillStyle = '#ccc0a8';
+    ctx.fillRect(cx - 60, baseY + 88, 120, 8);
+    ctx.fillRect(cx - 70, baseY + 94, 140, 6);
+    // Columns
+    ctx.fillStyle = '#f0e8d8';
+    for (let i = 0; i < 6; i++) {
+        ctx.fillRect(cx - 50 + i * 20, baseY + 35, 4, 50);
+    }
+    // Dome base
+    ctx.fillStyle = '#d0c8b0';
+    ctx.fillRect(cx - 35, baseY + 5, 70, 28);
+    // Dome
+    ctx.fillStyle = '#c8c0a8';
+    ctx.beginPath();
+    ctx.ellipse(cx, baseY + 8, 30, 25, 0, Math.PI, 0);
+    ctx.fill();
+    // Dome cap (gold)
+    ctx.fillStyle = '#fbbf24';
+    ctx.beginPath();
+    ctx.ellipse(cx, baseY - 12, 12, 10, 0, Math.PI, 0);
+    ctx.fill();
+    // Lantern on top
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillRect(cx - 3, baseY - 28, 6, 16);
+    ctx.beginPath();
+    ctx.arc(cx, baseY - 30, 5, 0, Math.PI * 2);
+    ctx.fill();
+    // Windows
+    ctx.fillStyle = '#aaddff';
+    for (let i = 0; i < 5; i++) {
+        ctx.fillRect(cx - 55 + i * 25, baseY + 50, 8, 12);
+    }
+    // Flag
+    ctx.fillStyle = '#333';
+    ctx.fillRect(cx + 50, baseY + 20, 2, 30);
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(cx + 52, baseY + 20, 15, 10);
+
+    // Trees around capitol
+    drawTree(ctx, cx - 140, skyH + 35, 30);
+    drawTree(ctx, cx + 145, skyH + 30, 28);
+
+    // Road and van
+    drawRoad(ctx, w, h, skyH);
+    drawVan(ctx, w * 0.25, h * 0.62, 1.0);
+
+    // Label
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = '8px "Press Start 2P", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Minnesota State Capitol', cx, baseY + 108);
+}
+
+function drawStateFairScene(canvas) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    const skyH = h * 0.38;
+    ctx.clearRect(0, 0, w, h);
+
+    // Warm summer sky
+    ctx.fillStyle = '#5599cc';
+    ctx.fillRect(0, 0, w, skyH);
+    ctx.fillStyle = '#88ccee';
+    ctx.fillRect(0, skyH * 0.7, w, skyH * 0.3);
+    drawClouds(ctx, w, skyH);
+
+    // Fairground (dirt/grass)
+    ctx.fillStyle = '#c8b080';
+    ctx.fillRect(0, skyH, w, h - skyH);
+    ctx.fillStyle = '#b0a070';
+    ctx.fillRect(0, skyH, w, 4);
+
+    // Ferris wheel (left side)
+    const fwx = 100, fwy = skyH - 20, fwr = 55;
+    ctx.strokeStyle = '#cc4444';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(fwx, fwy, fwr, 0, Math.PI * 2);
+    ctx.stroke();
+    // Spokes
+    for (let a = 0; a < 8; a++) {
+        const angle = a * Math.PI / 4;
+        ctx.beginPath();
+        ctx.moveTo(fwx, fwy);
+        ctx.lineTo(fwx + Math.cos(angle) * fwr, fwy + Math.sin(angle) * fwr);
+        ctx.stroke();
+    }
+    // Gondolas
+    ctx.fillStyle = '#3388cc';
+    for (let a = 0; a < 8; a++) {
+        const angle = a * Math.PI / 4;
+        ctx.fillRect(fwx + Math.cos(angle) * fwr - 5, fwy + Math.sin(angle) * fwr - 4, 10, 8);
+    }
+    // Support
+    ctx.fillStyle = '#888';
+    ctx.beginPath();
+    ctx.moveTo(fwx - 15, skyH + (h - skyH) * 0.6);
+    ctx.lineTo(fwx, fwy + fwr);
+    ctx.lineTo(fwx + 15, skyH + (h - skyH) * 0.6);
+    ctx.closePath();
+    ctx.fill();
+
+    // Food stands (center)
+    const stands = [
+        { x: 220, color: '#cc4444', label: 'FOOD' },
+        { x: 310, color: '#44aa44', label: 'FAIR' },
+        { x: 400, color: '#cc8844', label: 'FUN' },
+    ];
+    for (const s of stands) {
+        ctx.fillStyle = s.color;
+        ctx.fillRect(s.x - 25, skyH + 15, 50, 35);
+        // Roof
+        ctx.beginPath();
+        ctx.moveTo(s.x - 30, skyH + 15);
+        ctx.lineTo(s.x, skyH - 5);
+        ctx.lineTo(s.x + 30, skyH + 15);
+        ctx.closePath();
+        ctx.fill();
+        // Sign
+        ctx.fillStyle = '#fff';
+        ctx.font = '7px "Press Start 2P", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(s.label, s.x, skyH + 38);
+        // Window
+        ctx.fillStyle = '#ffee88';
+        ctx.fillRect(s.x - 8, skyH + 25, 16, 10);
+    }
+
+    // Crowds (simple dots of people)
+    const crowdColors = ['#cc4444', '#3388cc', '#44aa44', '#fbbf24', '#a855f7', '#ff6b6b'];
+    for (let i = 0; i < 25; i++) {
+        const px = 160 + Math.random() * 340;
+        const py = skyH + 55 + Math.random() * 35;
+        ctx.fillStyle = crowdColors[i % crowdColors.length];
+        ctx.beginPath(); ctx.arc(px, py - 4, 3, 0, Math.PI * 2); ctx.fill(); // head
+        ctx.fillRect(px - 2, py, 4, 8); // body
+    }
+
+    // Banner
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = '9px "Press Start 2P", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('The Great Minnesota', w * 0.5, h - 30);
+    ctx.fillText('Get-Together', w * 0.5, h - 16);
+
+    drawVan(ctx, w * 0.85, h * 0.62, 0.8);
+}
+
+function drawUniversityScene(canvas) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    const skyH = h * 0.4;
+    ctx.clearRect(0, 0, w, h);
+
+    // Sky
+    ctx.fillStyle = '#5588bb';
+    ctx.fillRect(0, 0, w, skyH);
+    ctx.fillStyle = '#99ccdd';
+    ctx.fillRect(0, skyH * 0.7, w, skyH * 0.3);
+    drawClouds(ctx, w, skyH);
+
+    // Campus grounds (green lawn)
+    ctx.fillStyle = '#3a8a3a';
+    ctx.fillRect(0, skyH, w, h - skyH);
+    ctx.fillStyle = '#2a6a2a';
+    ctx.fillRect(0, skyH, w, 4);
+
+    // Northrop Mall / main building (center) — maroon brick
+    const bx = w * 0.5, baseY = skyH + 5;
+    // Main hall
+    ctx.fillStyle = '#7a2230';
+    ctx.fillRect(bx - 70, baseY + 20, 140, 65);
+    // Columns (Greek revival)
+    ctx.fillStyle = '#d8ccb8';
+    for (let i = 0; i < 6; i++) {
+        ctx.fillRect(bx - 55 + i * 22, baseY + 25, 5, 55);
+    }
+    // Pediment (triangular top)
+    ctx.fillStyle = '#7a2230';
+    ctx.beginPath();
+    ctx.moveTo(bx - 75, baseY + 22);
+    ctx.lineTo(bx, baseY);
+    ctx.lineTo(bx + 75, baseY + 22);
+    ctx.closePath();
+    ctx.fill();
+    // Steps
+    ctx.fillStyle = '#ccc0a8';
+    ctx.fillRect(bx - 50, baseY + 83, 100, 6);
+    ctx.fillRect(bx - 55, baseY + 88, 110, 5);
+    // Windows
+    ctx.fillStyle = '#aaddff';
+    for (let i = 0; i < 5; i++) {
+        ctx.fillRect(bx - 50 + i * 22, baseY + 35, 8, 14);
+        ctx.fillRect(bx - 50 + i * 22, baseY + 55, 8, 14);
+    }
+    // "U of M" sign
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = '10px "Press Start 2P", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('U of M', bx, baseY + 14);
+
+    // Side buildings
+    ctx.fillStyle = '#8a3040';
+    ctx.fillRect(bx - 160, baseY + 35, 60, 50);
+    ctx.fillStyle = '#aaddff';
+    ctx.fillRect(bx - 148, baseY + 42, 8, 10);
+    ctx.fillRect(bx - 130, baseY + 42, 8, 10);
+    ctx.fillRect(bx - 148, baseY + 58, 8, 10);
+    ctx.fillRect(bx - 130, baseY + 58, 8, 10);
+
+    ctx.fillStyle = '#8a3040';
+    ctx.fillRect(bx + 100, baseY + 35, 60, 50);
+    ctx.fillStyle = '#aaddff';
+    ctx.fillRect(bx + 112, baseY + 42, 8, 10);
+    ctx.fillRect(bx + 130, baseY + 42, 8, 10);
+    ctx.fillRect(bx + 112, baseY + 58, 8, 10);
+    ctx.fillRect(bx + 130, baseY + 58, 8, 10);
+
+    // Trees on campus
+    drawTree(ctx, bx - 200, skyH + 25, 35);
+    drawTree(ctx, bx + 195, skyH + 20, 30);
+    drawTree(ctx, bx - 90, skyH + 50, 25);
+    drawTree(ctx, bx + 90, skyH + 45, 28);
+
+    // Walking path
+    ctx.fillStyle = '#b0a080';
+    ctx.fillRect(bx - 20, baseY + 92, 40, h - baseY - 92);
+
+    // Students (simple pixel people)
+    const studentColors = ['#7a2230', '#3388cc', '#44aa44', '#fbbf24'];
+    for (let i = 0; i < 8; i++) {
+        const sx = bx - 100 + Math.random() * 200;
+        const sy = baseY + 95 + Math.random() * 20;
+        ctx.fillStyle = studentColors[i % studentColors.length];
+        ctx.beginPath(); ctx.arc(sx, sy - 4, 3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillRect(sx - 2, sy, 4, 7);
+    }
+
+    // Road and van
+    drawRoad(ctx, w, h, skyH);
+    drawVan(ctx, w * 0.15, h * 0.62, 1.0);
+}
+
 function drawLandmarkScene(canvas, landmark) {
     if (landmark.scene === 'river') drawRiverScene(canvas);
     else if (landmark.scene === 'mountain') drawMountainScene(canvas);
     else if (landmark.scene === 'garden') drawGardenScene(canvas);
+    else if (landmark.scene === 'stpaul') drawStPaulScene(canvas);
+    else if (landmark.scene === 'statefair') drawStateFairScene(canvas);
+    else if (landmark.scene === 'university') drawUniversityScene(canvas);
     else if (landmark.scene === 'prairie') {
         const ctx = canvas.getContext('2d');
         const w = canvas.width, h = canvas.height;
@@ -883,9 +1270,28 @@ function setSeason(monthIndex) {
     hopeScore = { h: 0, o: 0, p: 0, e: 0 };
     challengeIndex = 0;
 
+    showScreen('route-screen');
+}
+
+function setRoute(route) {
+    sfx_select();
+    game.route = route;
+
+    if (route === 'north') {
+        LANDMARKS = LANDMARKS_NORTH;
+        HOPE_CHALLENGES = HOPE_CHALLENGES_NORTH;
+        MAP_ROUTE = MAP_ROUTE_NORTH;
+        REGIONS = REGIONS_NORTH;
+    } else {
+        LANDMARKS = LANDMARKS_SOUTH;
+        HOPE_CHALLENGES = HOPE_CHALLENGES_SOUTH;
+        MAP_ROUTE = MAP_ROUTE_SOUTH;
+        REGIONS = REGIONS_SOUTH;
+    }
+
     drawTownScene(document.getElementById('town-canvas'));
     document.getElementById('town-label').textContent = 'Greenville';
-    document.getElementById('town-date').textContent = `${MONTH_NAMES[monthIndex]} 1, 2026`;
+    document.getElementById('town-date').textContent = `${MONTH_NAMES[game.month]} 1, 2026`;
     showScreen('town-screen');
 }
 
@@ -1477,7 +1883,7 @@ function loseGame() {
 // =====================
 // Approximate pixel positions for landmarks on a simplified US map
 // Canvas is 580 x 340
-const MAP_ROUTE = [
+const MAP_ROUTE_SOUTH = [
     { name: 'Greenville, SC',              x: 460, y: 195 },
     { name: 'Blue Ridge Parkway',           x: 445, y: 175 },
     { name: 'Asheville Community Garden',   x: 430, y: 170 },
@@ -1492,6 +1898,25 @@ const MAP_ROUTE = [
     { name: 'Pacific Northwest Trail',      x: 120, y: 85  },
     { name: 'Hope Valley, OR',              x: 95,  y: 100 },
 ];
+
+const MAP_ROUTE_NORTH = [
+    { name: 'Greenville, SC',              x: 460, y: 195 },
+    { name: 'Blue Ridge Parkway',           x: 445, y: 175 },
+    { name: 'Asheville Community Garden',   x: 430, y: 170 },
+    { name: 'Great Smoky Mountains',        x: 415, y: 175 },
+    { name: 'Nashville Green Hub',          x: 375, y: 175 },
+    { name: 'Mississippi River',            x: 340, y: 185 },
+    { name: 'St. Paul, Minnesota',          x: 320, y: 95  },
+    { name: 'Minnesota State Fair',         x: 318, y: 90  },
+    { name: 'University of Minnesota',      x: 315, y: 85  },
+    { name: 'North Dakota Prairie',         x: 255, y: 65  },
+    { name: 'Montana Wilderness',           x: 195, y: 55  },
+    { name: 'Glacier National Park',        x: 165, y: 50  },
+    { name: 'Pacific Northwest Trail',      x: 115, y: 70  },
+    { name: 'Hope Valley, OR',              x: 95,  y: 100 },
+];
+
+let MAP_ROUTE = MAP_ROUTE_SOUTH;
 
 function drawMap(canvas) {
     const ctx = canvas.getContext('2d');

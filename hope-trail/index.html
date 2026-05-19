@@ -98,6 +98,24 @@
             <div class="ornament">───────✿───────</div>
         </div>
 
+        <!-- CHOOSE ROUTE -->
+        <div id="route-screen" class="screen">
+            <h2>Which route will you take?</h2>
+            <div class="ornament">───────✿───────</div>
+            <div class="text-body">
+                <p>Your family has two ways to reach Hope Valley, Oregon:</p>
+                <ol class="menu-list">
+                    <li><span class="menu-option" onclick="setRoute('south')">Southern Route</span>
+                        <p style="font-size:8px;color:#6a9a6a;margin:2px 0 8px 24px;">Through the Ozarks, Kansas prairies, and Rocky Mountains</p>
+                    </li>
+                    <li><span class="menu-option" onclick="setRoute('north')">Northern Route</span>
+                        <p style="font-size:8px;color:#6a9a6a;margin:2px 0 8px 24px;">Through St. Paul, Minnesota and the Montana wilderness</p>
+                    </li>
+                </ol>
+            </div>
+            <div class="ornament">───────✿───────</div>
+        </div>
+
         <!-- TOWN SCENE -->
         <div id="town-screen" class="screen">
             <canvas id="town-canvas" width="580" height="280"></canvas>
