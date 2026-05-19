@@ -2294,11 +2294,18 @@ function eventGasShortage() {
 }
 
 function eventFarmersMarket() {
+    if (game.money < 15) {
+        sfx_select();
+        showEvent('🌽 Farmers market!', 'You stop at a local farmers market, but you can\'t afford anything. The farmer gives your child a free apple and tells them about sustainable farming.');
+        hopeScore.p += 1;
+        appendEvent('+1 Plans — sustainable farming is a path forward!');
+        updateUI(); showGameMenu();
+        return;
+    }
     sfx_coin();
     const meals = Math.floor(Math.random() * 5) + 5;
     game.food += meals;
     game.money -= 15;
-    if (game.money < 0) game.money = 0;
     showEvent('🌽 Farmers market!', `You stop at a local farmers market and buy ${meals} fresh meals for $15. The farmer tells you about sustainable agriculture.`);
     hopeScore.p += 1;
     appendEvent('+1 Plans — sustainable farming is a path forward!');
@@ -2389,7 +2396,16 @@ function eventMissedConnection() {
     sfx_bad();
     showEvent('🕐 Missed connection!', 'You missed your connecting bus by 5 minutes. The next one isn\'t until tomorrow.');
     advanceDay();
-    game.food -= 3; if (game.food < 0) game.food = 0;
+    if (game.food >= 3) {
+        game.food -= 3;
+        appendEvent('Waiting used 3 meals while your family waited.');
+    } else if (game.food > 0) {
+        appendEvent(`You only had ${Math.floor(game.food)} meals left — they\'re gone now.`);
+        game.food = 0;
+    } else {
+        appendEvent('You have no food! Your family is very hungry.');
+        stressRandomMember();
+    }
     updateUI(); checkGameOver(); if (!game.gameOver) showGameMenu();
 }
 
@@ -2424,12 +2440,18 @@ function triggerDilemmaEvent() {
     dilemmas[Math.floor(Math.random() * dilemmas.length)]();
 }
 
+// Dilemma choice handler registry (avoids fragile toString serialization)
+const _dilemmaChoices = {};
+let _dilemmaId = 0;
+
 function showDilemma(title, story, choices) {
     showEvent(title, story);
     const container = document.getElementById('actions');
     let html = '<ol class="menu-list">';
     for (const choice of choices) {
-        html += `<li><span class="menu-option" onclick="(${choice.action.toString()})()">${choice.label}</span></li>`;
+        const id = '_dc' + (++_dilemmaId);
+        _dilemmaChoices[id] = choice.action;
+        html += `<li><span class="menu-option" onclick="_dilemmaChoices['${id}']()">${choice.label}</span></li>`;
     }
     html += '</ol><p class="action-prompt">What do you choose? <span class="blink">_</span></p>';
     container.innerHTML = html;
@@ -2440,15 +2462,23 @@ function changeTrust(amount) {
 }
 
 function dilemmaStrandedFamily() {
+    const canShare = game.food >= 5;
     showDilemma(
         '🆘 Stranded family!',
         'You see a family on the roadside with a broken-down car. They look exhausted and hungry. You could share some of your food and supplies — or keep driving.',
         [
             {
-                label: 'Share 5 meals and help (cooperative)',
+                label: canShare ? 'Share 5 meals and help (cooperative)' : 'Share meals (not enough food!)',
                 action: function() {
+                    if (game.food < 5) {
+                        sfx_bad();
+                        showEvent('Not enough food', 'You want to help, but you only have ' + Math.floor(game.food) + ' meals — not enough to share. Your family needs to eat too.');
+                        appendEvent('Find more food and try to help next time.');
+                        updateUI(); showGameMenu();
+                        return;
+                    }
                     sfx_good();
-                    game.food -= 5; if (game.food < 0) game.food = 0;
+                    game.food -= 5;
                     changeTrust(2);
                     hopeScore.e += 1;
                     showEvent('🤝 You helped!', 'You shared meals and helped fix their car. The family is deeply grateful. "We won\'t forget this," they say. Word of your kindness spreads.');
@@ -2564,15 +2594,25 @@ function dilemmaHitchhiker() {
 }
 
 function dilemmaFoodBank() {
+    const can8 = game.food >= 8;
+    const can3 = game.food >= 3;
     showDilemma(
         '🏦 Local food bank',
-        'You pass a food bank that\'s running low. A volunteer asks if you can spare any meals. "We have families who haven\'t eaten today," she says.',
+        'You pass a food bank that\'s running low. A volunteer asks if you can spare any meals. "We have families who haven\'t eaten today," she says.' +
+        (game.food < 3 ? ' You check your supplies — you barely have enough for your own family.' : ''),
         [
             {
-                label: 'Donate 8 meals (generous)',
+                label: can8 ? 'Donate 8 meals (generous)' : 'Donate 8 meals (not enough!)',
                 action: function() {
+                    if (game.food < 8) {
+                        sfx_bad();
+                        showEvent('Not enough food', 'You want to give generously, but you only have ' + Math.floor(game.food) + ' meals. Your family would go hungry.');
+                        appendEvent('You need at least 8 meals to make a big donation.');
+                        updateUI(); showGameMenu();
+                        return;
+                    }
                     sfx_good();
-                    game.food -= 8; if (game.food < 0) game.food = 0;
+                    game.food -= 8;
                     changeTrust(3);
                     hopeScore.h += 1;
                     hopeScore.e += 1;
@@ -2582,10 +2622,17 @@ function dilemmaFoodBank() {
                 }
             },
             {
-                label: 'Donate 3 meals (small help)',
+                label: can3 ? 'Donate 3 meals (small help)' : 'Donate 3 meals (not enough!)',
                 action: function() {
+                    if (game.food < 3) {
+                        sfx_bad();
+                        showEvent('Not enough food', 'You barely have enough meals for your own family. You can\'t spare any right now.');
+                        appendEvent('Stock up on food when you can.');
+                        updateUI(); showGameMenu();
+                        return;
+                    }
                     sfx_select();
-                    game.food -= 3; if (game.food < 0) game.food = 0;
+                    game.food -= 3;
                     changeTrust(1);
                     showEvent('A small help', 'You shared what you could. The volunteer says "Every bit counts. Thank you."');
                     appendEvent('+1 Community Trust');
