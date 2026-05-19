@@ -179,6 +179,33 @@ canvas {
 }
 
 /* --- GAME SCREEN --- */
+#location-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 10px;
+    background: rgba(52, 211, 153, 0.1);
+    border: 1px solid var(--hope-green-dark);
+    border-radius: 3px;
+    margin: 4px 0 2px;
+    font-size: 8px;
+    line-height: 1.8;
+}
+
+.location-prev {
+    color: #5a8a5a;
+}
+
+.location-now {
+    color: var(--hope-green);
+    font-size: 9px;
+    font-weight: bold;
+}
+
+.location-next-stop {
+    color: var(--hope-blue);
+}
+
 #event-area {
     background: rgba(0, 0, 0, 0.85);
     border: 1px solid var(--hope-green-dark);

@@ -1355,6 +1355,14 @@ function updateUI() {
     document.getElementById('score-p').textContent = hopeScore.p;
     document.getElementById('score-e').textContent = hopeScore.e;
 
+    // Location bar
+    const prevLm = game.nextLandmark > 0 ? LANDMARKS[game.nextLandmark - 1] : LANDMARKS[0];
+    const nextLm2 = LANDMARKS[game.nextLandmark];
+    const region = getRegion(game.miles);
+    document.getElementById('location-last').textContent = '← ' + prevLm.name;
+    document.getElementById('location-current').textContent = '📍 ' + region.name;
+    document.getElementById('location-next').textContent = (nextLm2 ? nextLm2.name : 'Hope Valley!') + ' →';
+
     const sceneCanvas = document.getElementById('scene-canvas');
     if (sceneCanvas) drawTrailScene(sceneCanvas);
 }
