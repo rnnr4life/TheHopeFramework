@@ -1084,6 +1084,126 @@ tr[data-marker="agency"] .rubric-marker { color: var(--color-agency); }
    WELCOME — Journey Trail Layout
    ================================================ */
 
+/* Welcome Back Banner */
+.welcome-back-banner {
+    max-width: 640px;
+    margin: 0 auto 0.5rem;
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.08), rgba(56, 189, 248, 0.08));
+    border: 1px solid rgba(52, 211, 153, 0.2);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    animation: banner-slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes banner-slide-in {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.welcome-back-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.welcome-back-greeting {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.welcome-back-icon {
+    font-size: 1.5rem;
+}
+.welcome-back-title {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--color-text);
+}
+.welcome-back-stats {
+    font-size: 0.78rem;
+    color: var(--color-text-light);
+    margin: 0.15rem 0 0;
+}
+.welcome-back-suggestion {
+    flex-shrink: 0;
+}
+.welcome-back-btn {
+    background: rgba(52, 211, 153, 0.15);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+    color: var(--color-primary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+.welcome-back-btn:hover {
+    background: rgba(52, 211, 153, 0.25);
+    transform: translateY(-1px);
+}
+.welcome-back-suggestion-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+}
+.welcome-back-next-eval {
+    font-size: 0.65rem;
+    color: var(--color-text-light);
+    opacity: 0.6;
+}
+@media (max-width: 600px) {
+    .welcome-back-content { flex-direction: column; align-items: flex-start; }
+    .welcome-back-suggestion { width: 100%; }
+    .welcome-back-btn { width: 100%; text-align: center; }
+}
+
+/* Journey Step Badges */
+.journey-new-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: var(--color-motivation);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+    animation: badge-pulse 2s ease-in-out infinite;
+    z-index: 2;
+}
+@keyframes badge-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+.journey-done-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: var(--color-agency);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(52, 211, 153, 0.3);
+    z-index: 2;
+}
+.journey-step-card {
+    position: relative;
+}
+
 /* Hero */
 .journey-hero {
     text-align: center;
@@ -5513,6 +5633,60 @@ body { padding-top: 28px; }
     border-radius: 3px;
     display: inline-block;
 }
+
+/* Insights */
+.metrics-insights-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.metrics-insight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    transition: background 0.2s;
+}
+.metrics-insight-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+.metrics-insight-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+}
+.metrics-insight-body {
+    flex: 1;
+    min-width: 0;
+}
+.metrics-insight-title {
+    display: block;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--color-text);
+    margin-bottom: 0.15rem;
+}
+.metrics-insight-desc {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--color-text-light);
+    line-height: 1.5;
+}
+.metrics-insight-type {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    margin-top: 0.15rem;
+}
+
 .metrics-card-title {
     font-size: 1.1rem;
     font-weight: 700;

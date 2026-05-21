@@ -23,7 +23,13 @@ const HopeMetrics = (() => {
             featureUsage: { readAloud: 0, translate: 0, voicePicker: 0, sampleStory: 0, export: 0, joinClassroom: 0, teacherHub: 0 },
             errors: [],
             sessions: [],
-            monthlyUsage: {}
+            monthlyUsage: {},
+            lastGrade: null,
+            lastScreen: null,
+            visitedScreens: [],
+            suggestionsFollowed: 0,
+            lastSuggestionEval: 0,
+            cachedSuggestion: null
         };
     }
 
@@ -77,6 +83,10 @@ const HopeMetrics = (() => {
         store.screenViews[screenId] = (store.screenViews[screenId] || 0) + 1;
         currentScreen = screenId;
         screenEnterTime = Date.now();
+        // Track last screen and visited screens
+        store.lastScreen = screenId;
+        if (!store.visitedScreens) store.visitedScreens = [];
+        if (!store.visitedScreens.includes(screenId)) store.visitedScreens.push(screenId);
         // Track monthly screen views
         if (!store.monthlyUsage) store.monthlyUsage = {};
         const svMonthKey = new Date().toISOString().slice(0, 7);
@@ -111,6 +121,7 @@ const HopeMetrics = (() => {
     function trackAge(age) {
         const store = getStore();
         if (store.ageSelections[age] !== undefined) store.ageSelections[age]++;
+        store.lastGrade = age;
         saveStore(store);
     }
 
@@ -126,6 +137,12 @@ const HopeMetrics = (() => {
         const store = getStore();
         store.errors.push({ msg: String(msg).slice(0, 200), source: source || '', ts: new Date().toISOString() });
         if (store.errors.length > 100) store.errors = store.errors.slice(-100);
+        saveStore(store);
+    }
+
+    function trackSuggestionFollowed() {
+        const store = getStore();
+        store.suggestionsFollowed = (store.suggestionsFollowed || 0) + 1;
         saveStore(store);
     }
 
@@ -145,7 +162,7 @@ const HopeMetrics = (() => {
         trackError(e.message, e.filename ? e.filename.split('/').pop() + ':' + e.lineno : '');
     });
 
-    return { trackScreenView, trackCompletion, trackMarker, trackAge, trackFeature, trackError, getData, clearData };
+    return { trackScreenView, trackCompletion, trackMarker, trackAge, trackFeature, trackError, trackSuggestionFollowed, getData, clearData };
 })();
 
 
@@ -352,6 +369,170 @@ document.querySelectorAll('.age-btn').forEach(btn => {
     });
 });
 
+// ===== Adaptive UX Engine =====
+// (auto-select grade is deferred until after showScreen is defined)
+
+function updateAdaptiveWelcome() {
+    const d = HopeMetrics.getData();
+    const banner = document.getElementById('welcome-back-banner');
+    if (!banner) return;
+
+    // Only show for return visitors
+    if (d.totalSessions <= 1) {
+        banner.classList.add('hidden');
+        updateJourneyBadges(d);
+        return;
+    }
+
+    banner.classList.remove('hidden');
+
+    // Personalized stats
+    const statsEl = document.getElementById('welcome-back-stats');
+    const totalCompletions = Object.values(d.completions).reduce((a, b) => a + b, 0);
+    const visitCount = d.totalSessions;
+    const gradeLabels = { elementary: 'Elementary', middle: 'Middle School', high: 'High School' };
+    const grade = gradeLabels[d.lastGrade] || '';
+    statsEl.textContent = `Visit #${visitCount} · ${grade} · ${totalCompletions} activities completed`;
+
+    // Smart suggestion — only re-evaluate every 100 visits
+    const currentBucket = Math.floor(visitCount / 100);
+    const lastEvalBucket = Math.floor((d.lastSuggestionEval || 0) / 100);
+    let suggestion;
+    if (currentBucket > lastEvalBucket || !d.cachedSuggestion) {
+        // Crossed a 100-visit boundary (or first time) — recalculate
+        suggestion = generateSuggestion(d);
+        // Persist the new suggestion and eval point
+        const store = HopeMetrics.getData();
+        store.lastSuggestionEval = visitCount;
+        store.cachedSuggestion = suggestion;
+        localStorage.setItem('hope-metrics', JSON.stringify(store));
+    } else {
+        suggestion = d.cachedSuggestion;
+    }
+    const nextEval = (currentBucket + 1) * 100;
+    const suggEl = document.getElementById('welcome-back-suggestion');
+    if (suggestion) {
+        suggEl.innerHTML = `<div class="welcome-back-suggestion-wrap"><button class="welcome-back-btn" id="btn-suggestion" data-screen="${suggestion.screen}" data-init="${suggestion.init || ''}">${suggestion.icon} ${suggestion.text}</button><span class="welcome-back-next-eval">Next re-evaluation at visit ${nextEval}</span></div>`;
+        document.getElementById('btn-suggestion').addEventListener('click', () => {
+            HopeMetrics.trackSuggestionFollowed();
+            if (suggestion.init === 'quest' && typeof initQuest === 'function') initQuest();
+            if (suggestion.init === 'resources' && typeof renderResources === 'function') renderResources();
+            if (suggestion.screen === 'detective-screen' && typeof initDetective === 'function') initDetective();
+            if (suggestion.init === 'trail' && typeof initTrail === 'function') initTrail();
+            if (suggestion.init === 'match' && typeof initMatchActivity === 'function') initMatchActivity();
+            showScreen(suggestion.screen);
+        });
+    } else {
+        suggEl.innerHTML = '';
+    }
+
+    // Update journey step badges
+    updateJourneyBadges(d);
+}
+
+function generateSuggestion(d) {
+    const visited = d.visitedScreens || [];
+    const completions = d.completions;
+
+    // Priority 1: Haven't watched the guided example yet
+    if (!visited.includes('guided-screen')) {
+        return { icon: '🎬', text: 'Start with the Guided Example — see the HOPE markers in action', screen: 'guided-screen' };
+    }
+
+    // Priority 2: Haven't learned the markers
+    if (!visited.includes('learn-screen')) {
+        return { icon: '📖', text: 'Learn the four HOPE markers', screen: 'learn-screen' };
+    }
+
+    // Priority 3: Haven't tried the match activity
+    if (completions.match === 0) {
+        return { icon: '🎯', text: 'Practice matching markers to phrases', screen: 'match-screen', init: 'match' };
+    }
+
+    // Priority 4: Haven't done text analysis
+    if (completions.textAnalysis === 0) {
+        return { icon: '🔍', text: 'Try analyzing a story with the HOPE markers', screen: 'activity-screen' };
+    }
+
+    // Priority 5: Haven't tried any games
+    if (completions.detective === 0 && completions.quest === 0 && completions.walk === 0) {
+        return { icon: '🎮', text: 'Play Hope Detective — test your marker skills', screen: 'detective-screen' };
+    }
+
+    // Priority 6: Have done detective but not quest
+    if (completions.quest === 0) {
+        return { icon: '🧭', text: 'Try Hope Quest — a new kind of challenge', screen: 'quest-screen', init: 'quest' };
+    }
+
+    // Priority 7: Haven't explored resources
+    if (!visited.includes('resources-screen')) {
+        return { icon: '📚', text: 'Explore books, shows, and resources to keep learning', screen: 'resources-screen', init: 'resources' };
+    }
+
+    // Priority 8: Haven't tried Hope Walk
+    if (completions.walk === 0) {
+        return { icon: '🌿', text: 'Take a Hope Walk — an immersive story experience', screen: 'walk-screen' };
+    }
+
+    // Priority 9: Continue where you left off
+    if (d.lastScreen && d.lastScreen !== 'welcome-screen' && d.lastScreen !== 'age-screen' && d.lastScreen !== 'metrics-screen') {
+        const label = d.lastScreen.replace(/-screen$/, '').replace(/-/g, ' ');
+        return { icon: '↩️', text: `Continue where you left off: ${label}`, screen: d.lastScreen };
+    }
+
+    // All explored — encourage reflection
+    if (completions.reflect === 0) {
+        return { icon: '✍️', text: 'Reflect on what you\'ve learned so far', screen: 'reflect-screen' };
+    }
+
+    return null;
+}
+
+function updateJourneyBadges(d) {
+    const visited = d.visitedScreens || [];
+    const completions = d.completions;
+
+    // Only show badges for return visitors
+    if (d.totalSessions <= 1) return;
+
+    const badges = [
+        { step: 1, screens: ['guided-screen'], label: 'Try this!' },
+        { step: 2, screens: ['learn-screen'], label: 'Try this!' },
+        { step: 3, screens: ['worksheet-search-screen', 'worksheet-literature-screen'], label: 'Try this!' },
+        { step: 4, screens: ['detective-screen', 'quest-screen', 'walk-screen'], label: 'Try this!' },
+        { step: 5, screens: ['resources-screen'], label: 'Try this!' },
+    ];
+
+    badges.forEach(b => {
+        const stepEl = document.querySelector(`.journey-step[data-step="${b.step}"]`);
+        if (!stepEl) return;
+
+        // Remove any existing badge
+        const existing = stepEl.querySelector('.journey-new-badge');
+        if (existing) existing.remove();
+
+        const hasVisited = b.screens.some(s => visited.includes(s));
+        const cardEl = stepEl.querySelector('.journey-step-card');
+        if (!hasVisited && cardEl) {
+            const badge = document.createElement('span');
+            badge.className = 'journey-new-badge';
+            badge.textContent = b.label;
+            cardEl.prepend(badge);
+        }
+
+        // Add completed checkmark if they've been there
+        if (hasVisited && cardEl) {
+            const existingCheck = stepEl.querySelector('.journey-done-badge');
+            if (!existingCheck) {
+                const check = document.createElement('span');
+                check.className = 'journey-done-badge';
+                check.textContent = '✓';
+                cardEl.prepend(check);
+            }
+        }
+    });
+}
+
 
 // ===== Screen Navigation =====
 const screens = document.querySelectorAll('.screen');
@@ -368,6 +549,9 @@ function showScreen(id) {
 
     // Track screen view
     HopeMetrics.trackScreenView(id);
+
+    // Update adaptive welcome banner when welcome screen is shown
+    if (id === 'welcome-screen') updateAdaptiveWelcome();
 
     // Update global nav active state
     updateNavActive(id);
@@ -5419,7 +5603,16 @@ function renderMetricsDashboard() {
     document.getElementById('kpi-sessions').textContent = d.totalSessions;
     document.getElementById('kpi-screens').textContent = totalScreenViews;
     document.getElementById('kpi-completions').textContent = totalCompletions;
+    document.getElementById('kpi-suggestions').textContent = d.suggestionsFollowed || 0;
     document.getElementById('kpi-errors').textContent = d.errors.length;
+
+    // Average session duration
+    const completedSessions = (d.sessions || []).filter(s => s.duration > 0);
+    const avgMs = completedSessions.length > 0 ? completedSessions.reduce((a, s) => a + s.duration, 0) / completedSessions.length : 0;
+    document.getElementById('kpi-avg-duration').textContent = formatDuration(avgMs);
+
+    // Adaptive insights
+    renderInsights(d);
 
     // Usage over time chart
     renderUsageChart(d.monthlyUsage || {});
@@ -5463,6 +5656,136 @@ function renderMetricsDashboard() {
 
     // Event log
     renderEventLog(d.events);
+}
+
+function renderInsights(d) {
+    const container = document.getElementById('metrics-insights');
+    if (!container) return;
+
+    const insights = [];
+    const visited = d.visitedScreens || [];
+    const completions = d.completions;
+    const totalCompletions = Object.values(completions).reduce((a, b) => a + b, 0);
+    const allScreens = ['guided-screen', 'learn-screen', 'match-screen', 'activity-screen', 'detective-screen', 'quest-screen', 'walk-screen', 'resources-screen', 'reflect-screen'];
+    const exploredPct = Math.round(allScreens.filter(s => visited.includes(s)).length / allScreens.length * 100);
+
+    // Auto-grade insight
+    if (d.lastGrade) {
+        const gradeLabels = { elementary: 'Elementary', middle: 'Middle School', high: 'High School' };
+        insights.push({
+            icon: '🎓',
+            type: 'active',
+            title: 'Auto-selecting grade level',
+            desc: `The app remembers your last choice (${gradeLabels[d.lastGrade]}) and skips the grade picker on return visits.`
+        });
+    }
+
+    // Suggestion engine insight
+    const suggestion = d.cachedSuggestion || generateSuggestion(d);
+    if (suggestion && d.totalSessions > 1) {
+        const evalBucket = Math.floor(d.totalSessions / 100);
+        const nextEval = (evalBucket + 1) * 100;
+        insights.push({
+            icon: '💡',
+            type: 'active',
+            title: 'Personalized suggestion active',
+            desc: `Current: "${suggestion.text}" — Suggestions re-evaluate every 100 visits. Next re-evaluation at visit ${nextEval}.`
+        });
+    }
+
+    // Feature discovery insight
+    const unexplored = allScreens.filter(s => !visited.includes(s));
+    if (unexplored.length > 0 && d.totalSessions > 1) {
+        insights.push({
+            icon: '🏷️',
+            type: 'active',
+            title: `"Try this!" badges on ${unexplored.length} unexplored areas`,
+            desc: `Journey steps for areas you haven't visited yet show a badge to guide discovery.`
+        });
+    }
+
+    // Exploration progress
+    insights.push({
+        icon: exploredPct === 100 ? '🏆' : '🗺️',
+        type: exploredPct === 100 ? 'complete' : 'info',
+        title: `${exploredPct}% of the app explored`,
+        desc: `${allScreens.filter(s => visited.includes(s)).length} of ${allScreens.length} key areas visited.${exploredPct === 100 ? ' Amazing — you\'ve seen everything!' : ''}`
+    });
+
+    // Marker balance insight
+    const markerTotal = Object.values(d.markerUsage).reduce((a, b) => a + b, 0);
+    if (markerTotal > 3) {
+        const markerEntries = Object.entries(d.markerUsage).sort((a, b) => b[1] - a[1]);
+        const most = markerEntries[0];
+        const least = markerEntries[markerEntries.length - 1];
+        if (most[1] > least[1] * 3) {
+            insights.push({
+                icon: '⚖️',
+                type: 'suggestion',
+                title: `Marker usage is unbalanced`,
+                desc: `"${most[0]}" is tagged ${most[1]} times vs "${least[0]}" at ${least[1]}. Try looking for more "${least[0]}" markers in stories.`
+            });
+        }
+    }
+
+    // Session duration insight
+    const completedSessions = (d.sessions || []).filter(s => s.duration > 0);
+    if (completedSessions.length >= 3) {
+        const avgSec = Math.round(completedSessions.reduce((a, s) => a + s.duration, 0) / completedSessions.length / 1000);
+        if (avgSec < 60) {
+            insights.push({
+                icon: '⏱️',
+                type: 'suggestion',
+                title: 'Very short sessions detected',
+                desc: `Average session is ${avgSec}s. Users may not be finding what they need — consider simplifying the welcome flow.`
+            });
+        } else if (avgSec > 600) {
+            insights.push({
+                icon: '🔥',
+                type: 'info',
+                title: 'Strong engagement',
+                desc: `Average session is ${Math.round(avgSec / 60)} minutes — users are spending real time with the content.`
+            });
+        }
+    }
+
+    // Completion funnel insight
+    const welcomeViews = d.screenViews['welcome-screen'] || 0;
+    if (welcomeViews > 5 && totalCompletions === 0) {
+        insights.push({
+            icon: '🔄',
+            type: 'warning',
+            title: 'Users view but don\'t complete activities',
+            desc: `${welcomeViews} welcome views but 0 activities completed. The path from welcome to engagement may need work.`
+        });
+    }
+
+    // Suggestion effectiveness
+    if ((d.suggestionsFollowed || 0) > 0) {
+        insights.push({
+            icon: '✅',
+            type: 'info',
+            title: `${d.suggestionsFollowed} suggestion(s) followed`,
+            desc: 'Users are engaging with the personalized suggestions on the welcome screen.'
+        });
+    }
+
+    if (insights.length === 0) {
+        container.innerHTML = '<p class="metrics-empty">Not enough data yet — insights will appear as usage builds up</p>';
+        return;
+    }
+
+    const typeColors = { active: 'var(--color-agency)', suggestion: 'var(--color-motivation)', info: 'var(--color-plans)', warning: '#f59e0b', complete: 'var(--color-belief)' };
+    container.innerHTML = insights.map(i => `
+        <div class="metrics-insight-item">
+            <span class="metrics-insight-icon">${i.icon}</span>
+            <div class="metrics-insight-body">
+                <span class="metrics-insight-title">${escapeHtml(i.title)}</span>
+                <span class="metrics-insight-desc">${escapeHtml(i.desc)}</span>
+            </div>
+            <span class="metrics-insight-type" style="color:${typeColors[i.type] || 'var(--color-text-light)'}">${i.type}</span>
+        </div>
+    `).join('');
 }
 
 function renderBarChart(containerId, data, color, suffix) {
@@ -5742,14 +6065,6 @@ function formatDuration(ms) {
 // Refresh button
 document.getElementById('btn-metrics-refresh').addEventListener('click', renderMetricsDashboard);
 
-// Clear button
-document.getElementById('btn-metrics-clear').addEventListener('click', () => {
-    if (confirm('Clear all metrics data? This cannot be undone.')) {
-        HopeMetrics.clearData();
-        renderMetricsDashboard();
-    }
-});
-
 // Export button
 document.getElementById('btn-metrics-export').addEventListener('click', () => {
     const data = HopeMetrics.getData();
@@ -5775,3 +6090,13 @@ if (metricsScreen) {
     });
     metricsObserver.observe(metricsScreen, { attributes: true, attributeFilter: ['class'] });
 }
+
+// ===== Deferred Adaptive Init =====
+// Must run after all globals (screens, screenToGroup, etc.) are defined
+(function initAdaptiveUX() {
+    const d = HopeMetrics.getData();
+    if (d.lastGrade && d.totalSessions > 1) {
+        setAge(d.lastGrade);
+        showScreen('welcome-screen');
+    }
+})();

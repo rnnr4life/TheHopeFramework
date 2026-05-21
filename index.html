@@ -849,6 +849,20 @@
     <section id="welcome-screen" class="screen">
         <div class="container-wide">
 
+            <!-- Adaptive Welcome Banner (hidden by default, shown for return visitors) -->
+            <div class="welcome-back-banner hidden" id="welcome-back-banner">
+                <div class="welcome-back-content">
+                    <div class="welcome-back-greeting">
+                        <span class="welcome-back-icon">👋</span>
+                        <div>
+                            <h3 class="welcome-back-title" id="welcome-back-title">Welcome back!</h3>
+                            <p class="welcome-back-stats" id="welcome-back-stats"></p>
+                        </div>
+                    </div>
+                    <div class="welcome-back-suggestion" id="welcome-back-suggestion"></div>
+                </div>
+            </div>
+
             <!-- Compact Hero -->
             <div class="journey-hero">
                 <div class="journey-hero-text">
@@ -2286,7 +2300,6 @@
                 <p class="section-intro">How the HOPE Framework app is being used. All data is stored locally in this browser.</p>
                 <div class="metrics-header-actions">
                     <button class="btn btn-small" id="btn-metrics-refresh">🔄 Refresh</button>
-                    <button class="btn btn-small btn-danger" id="btn-metrics-clear">🗑️ Clear Data</button>
                     <button class="btn btn-small" id="btn-metrics-export">📥 Export JSON</button>
                 </div>
             </div>
@@ -2306,9 +2319,24 @@
                     <span class="metrics-kpi-label">Activities Completed</span>
                 </div>
                 <div class="metrics-kpi">
+                    <span class="metrics-kpi-value" id="kpi-suggestions">0</span>
+                    <span class="metrics-kpi-label">Suggestions Followed</span>
+                </div>
+                <div class="metrics-kpi">
+                    <span class="metrics-kpi-value" id="kpi-avg-duration">0s</span>
+                    <span class="metrics-kpi-label">Avg Session Duration</span>
+                </div>
+                <div class="metrics-kpi">
                     <span class="metrics-kpi-value" id="kpi-errors">0</span>
                     <span class="metrics-kpi-label">JS Errors</span>
                 </div>
+            </div>
+
+            <!-- Adaptive Insights -->
+            <div class="metrics-card metrics-card-full">
+                <h3 class="metrics-card-title">🧠 Adaptive Insights</h3>
+                <p class="metrics-card-subtitle">What the app has learned about usage patterns — and how it’s adapting</p>
+                <div class="metrics-insights-list" id="metrics-insights"></div>
             </div>
 
             <!-- Usage Over Time Chart -->
