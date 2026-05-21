@@ -4400,6 +4400,16 @@ button.resource-card-action {
     background: rgba(255, 255, 255, 0.05);
 }
 
+.metrics-source-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    margin-left: 0.5rem;
+}
+
 
 /* ================================================
    REFLECTION

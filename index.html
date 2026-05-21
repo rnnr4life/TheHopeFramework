@@ -2297,7 +2297,7 @@
 
             <div class="metrics-header">
                 <h2>📊 Usage Metrics Dashboard</h2>
-                <p class="section-intro">How the HOPE Framework app is being used. All data is stored locally in this browser.</p>
+                <p class="section-intro">Aggregate usage across all visitors. Data synced via Firebase. <span class="metrics-source-badge" id="metrics-source-badge">Loading...</span></p>
                 <div class="metrics-header-actions">
                     <button class="btn btn-small" id="btn-metrics-refresh">🔄 Refresh</button>
                     <button class="btn btn-small" id="btn-metrics-export">📥 Export JSON</button>
@@ -2306,6 +2306,10 @@
 
             <!-- KPI Row -->
             <div class="metrics-kpi-row" id="metrics-kpi-row">
+                <div class="metrics-kpi">
+                    <span class="metrics-kpi-value" id="kpi-visitors">0</span>
+                    <span class="metrics-kpi-label">Unique Visitors</span>
+                </div>
                 <div class="metrics-kpi">
                     <span class="metrics-kpi-value" id="kpi-sessions">0</span>
                     <span class="metrics-kpi-label">Total Sessions</span>
@@ -2323,12 +2327,8 @@
                     <span class="metrics-kpi-label">Suggestions Followed</span>
                 </div>
                 <div class="metrics-kpi">
-                    <span class="metrics-kpi-value" id="kpi-avg-duration">0s</span>
-                    <span class="metrics-kpi-label">Avg Session Duration</span>
-                </div>
-                <div class="metrics-kpi">
                     <span class="metrics-kpi-value" id="kpi-errors">0</span>
-                    <span class="metrics-kpi-label">JS Errors</span>
+                    <span class="metrics-kpi-label">Errors</span>
                 </div>
             </div>
 
@@ -2425,6 +2425,19 @@
     </section>
 
     <div id="app-version" class="app-version-label">v2.4.0 <button class="metrics-subtle-link" id="btn-open-metrics" aria-label="Usage metrics">📊</button></div>
+    <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore-compat.js"></script>
+    <script>
+        firebase.initializeApp({
+            apiKey: "AIzaSyBG5v80U10WjMNtDn1qcMCzZDdnz9qpmi8",
+            authDomain: "hope-framework-metrics.firebaseapp.com",
+            projectId: "hope-framework-metrics",
+            storageBucket: "hope-framework-metrics.firebasestorage.app",
+            messagingSenderId: "904103140768",
+            appId: "1:904103140768:web:c056d0bf2ac52c091ed8c5"
+        });
+        var hopeFirestore = firebase.firestore();
+    </script>
     <script src="js/app.js"></script>
 </body>
 </html>

@@ -153,16 +153,128 @@ const HopeMetrics = (() => {
         sessionStorage.removeItem(SESSION_KEY);
     }
 
+    // ===== Firebase Sync Layer =====
+    const VISITOR_KEY = 'hope-visitor-id';
+    function getVisitorId() {
+        let id = localStorage.getItem(VISITOR_KEY);
+        if (!id) {
+            id = 'v_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+            localStorage.setItem(VISITOR_KEY, id);
+        }
+        return id;
+    }
+
+    function getSyncableData(store) {
+        // Strip large arrays that don't need to be aggregated per-visitor
+        return {
+            visitorId: getVisitorId(),
+            firstVisit: store.firstVisit,
+            lastSync: new Date().toISOString(),
+            totalSessions: store.totalSessions,
+            screenViews: store.screenViews || {},
+            screenTime: store.screenTime || {},
+            completions: store.completions || {},
+            markerUsage: store.markerUsage || {},
+            ageSelections: store.ageSelections || {},
+            featureUsage: store.featureUsage || {},
+            monthlyUsage: store.monthlyUsage || {},
+            visitedScreens: store.visitedScreens || [],
+            suggestionsFollowed: store.suggestionsFollowed || 0,
+            errorCount: (store.errors || []).length
+        };
+    }
+
+    function syncToFirebase() {
+        if (typeof hopeFirestore === 'undefined') return;
+        try {
+            const store = getStore();
+            const data = getSyncableData(store);
+            hopeFirestore.collection('visitors').doc(getVisitorId()).set(data, { merge: true });
+        } catch (e) { /* silent fail — metrics sync is non-critical */ }
+    }
+
+    async function getAggregateData() {
+        if (typeof hopeFirestore === 'undefined') return null;
+        try {
+            // Race the Firestore read against a timeout
+            const fetchPromise = hopeFirestore.collection('visitors').get();
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
+            const snapshot = await Promise.race([fetchPromise, timeoutPromise]);
+            const visitors = [];
+            snapshot.forEach(doc => visitors.push(doc.data()));
+            if (visitors.length === 0) return null;
+
+            // Aggregate all visitor data
+            const agg = {
+                totalVisitors: visitors.length,
+                totalSessions: 0,
+                screenViews: {},
+                screenTime: {},
+                completions: { match: 0, detective: 0, quest: 0, walk: 0, trail: 0, reflect: 0, textAnalysis: 0 },
+                markerUsage: { motivation: 0, belief: 0, plans: 0, agency: 0 },
+                ageSelections: { elementary: 0, middle: 0, high: 0 },
+                featureUsage: { readAloud: 0, translate: 0, voicePicker: 0, sampleStory: 0, export: 0, joinClassroom: 0, teacherHub: 0 },
+                monthlyUsage: {},
+                suggestionsFollowed: 0,
+                errorCount: 0
+            };
+
+            visitors.forEach(v => {
+                agg.totalSessions += v.totalSessions || 0;
+                agg.suggestionsFollowed += v.suggestionsFollowed || 0;
+                agg.errorCount += v.errorCount || 0;
+
+                // Merge object counters
+                for (const [k, val] of Object.entries(v.screenViews || {})) {
+                    agg.screenViews[k] = (agg.screenViews[k] || 0) + val;
+                }
+                for (const [k, val] of Object.entries(v.screenTime || {})) {
+                    agg.screenTime[k] = (agg.screenTime[k] || 0) + val;
+                }
+                for (const [k, val] of Object.entries(v.completions || {})) {
+                    if (agg.completions[k] !== undefined) agg.completions[k] += val;
+                }
+                for (const [k, val] of Object.entries(v.markerUsage || {})) {
+                    if (agg.markerUsage[k] !== undefined) agg.markerUsage[k] += val;
+                }
+                for (const [k, val] of Object.entries(v.ageSelections || {})) {
+                    if (agg.ageSelections[k] !== undefined) agg.ageSelections[k] += val;
+                }
+                for (const [k, val] of Object.entries(v.featureUsage || {})) {
+                    if (agg.featureUsage[k] !== undefined) agg.featureUsage[k] += val;
+                }
+                // Merge monthly usage
+                for (const [month, mData] of Object.entries(v.monthlyUsage || {})) {
+                    if (!agg.monthlyUsage[month]) agg.monthlyUsage[month] = { sessions: 0, screenViews: 0, completions: 0 };
+                    agg.monthlyUsage[month].sessions += mData.sessions || 0;
+                    agg.monthlyUsage[month].screenViews += mData.screenViews || 0;
+                    agg.monthlyUsage[month].completions += mData.completions || 0;
+                }
+            });
+
+            return agg;
+        } catch (e) {
+            return null;
+        }
+    }
+
     // Auto-init session
     initSession();
-    // End session on page close
-    window.addEventListener('beforeunload', endSession);
+    // End session on page close — also sync to Firebase
+    window.addEventListener('beforeunload', () => {
+        endSession();
+        syncToFirebase();
+    });
+    // Sync to Firebase periodically (every 60s)
+    setInterval(syncToFirebase, 60000);
+    // Initial sync after short delay
+    setTimeout(syncToFirebase, 3000);
     // Catch JS errors
     window.addEventListener('error', (e) => {
         trackError(e.message, e.filename ? e.filename.split('/').pop() + ':' + e.lineno : '');
     });
 
-    return { trackScreenView, trackCompletion, trackMarker, trackAge, trackFeature, trackError, trackSuggestionFollowed, getData, clearData };
+    return { trackScreenView, trackCompletion, trackMarker, trackAge, trackFeature, trackError, trackSuggestionFollowed, getData, clearData, getAggregateData, syncToFirebase };
 })();
 
 
@@ -5594,35 +5706,69 @@ document.getElementById('btn-back-metrics').addEventListener('click', () => show
 // Subtle metrics link in version label
 document.getElementById('btn-open-metrics').addEventListener('click', () => showScreen('metrics-screen'));
 
-function renderMetricsDashboard() {
-    const d = HopeMetrics.getData();
+async function renderMetricsDashboard() {
+    const localData = HopeMetrics.getData();
+    const sourceBadge = document.getElementById('metrics-source-badge');
 
+    // Render local data immediately so the dashboard isn't empty
+    renderMetricsData(localData, false);
+    if (sourceBadge) {
+        sourceBadge.textContent = '🔄 Fetching aggregate data...';
+        sourceBadge.style.color = 'var(--color-plans)';
+    }
+
+    // Try to get aggregate data from Firebase in the background
+    try {
+        const agg = await HopeMetrics.getAggregateData();
+        if (agg) {
+            renderMetricsData(agg, true);
+            if (sourceBadge) {
+                sourceBadge.textContent = `✅ Live — ${agg.totalVisitors} visitor${agg.totalVisitors !== 1 ? 's' : ''} synced`;
+                sourceBadge.style.color = 'var(--color-agency)';
+            }
+        } else {
+            if (sourceBadge) {
+                sourceBadge.textContent = '📍 Local data only — no Firebase data yet';
+                sourceBadge.style.color = 'var(--color-text-light)';
+            }
+        }
+    } catch (e) {
+        if (sourceBadge) {
+            sourceBadge.textContent = '📍 Local data only — Firebase unavailable';
+            sourceBadge.style.color = 'var(--color-text-light)';
+        }
+    }
+
+    // Insights always use local data (personalization)
+    renderInsights(localData);
+
+    // Errors, sessions, event log — always local
+    renderErrorList(localData.errors || []);
+    renderSessionList(localData.sessions || []);
+    renderEventLog(localData.events || []);
+}
+
+function renderMetricsData(d, isAggregate) {
     // KPIs
-    const totalScreenViews = Object.values(d.screenViews).reduce((a, b) => a + b, 0);
-    const totalCompletions = Object.values(d.completions).reduce((a, b) => a + b, 0);
-    document.getElementById('kpi-sessions').textContent = d.totalSessions;
+    const totalScreenViews = Object.values(d.screenViews || {}).reduce((a, b) => a + b, 0);
+    const totalCompletions = Object.values(d.completions || {}).reduce((a, b) => a + b, 0);
+    const visitorsEl = document.getElementById('kpi-visitors');
+    if (visitorsEl) visitorsEl.textContent = isAggregate ? d.totalVisitors : 1;
+    document.getElementById('kpi-sessions').textContent = d.totalSessions || 0;
     document.getElementById('kpi-screens').textContent = totalScreenViews;
     document.getElementById('kpi-completions').textContent = totalCompletions;
     document.getElementById('kpi-suggestions').textContent = d.suggestionsFollowed || 0;
-    document.getElementById('kpi-errors').textContent = d.errors.length;
-
-    // Average session duration
-    const completedSessions = (d.sessions || []).filter(s => s.duration > 0);
-    const avgMs = completedSessions.length > 0 ? completedSessions.reduce((a, s) => a + s.duration, 0) / completedSessions.length : 0;
-    document.getElementById('kpi-avg-duration').textContent = formatDuration(avgMs);
-
-    // Adaptive insights
-    renderInsights(d);
+    document.getElementById('kpi-errors').textContent = isAggregate ? (d.errorCount || 0) : (d.errors || []).length;
 
     // Usage over time chart
     renderUsageChart(d.monthlyUsage || {});
 
     // Screen Views bar chart
-    renderBarChart('metrics-screen-views', d.screenViews, 'var(--color-plans)');
+    renderBarChart('metrics-screen-views', d.screenViews || {}, 'var(--color-plans)');
 
     // Time on Screen bar chart (convert ms to seconds)
     const timeInSecs = {};
-    for (const [k, v] of Object.entries(d.screenTime)) {
+    for (const [k, v] of Object.entries(d.screenTime || {})) {
         timeInSecs[k] = Math.round(v / 1000);
     }
     renderBarChart('metrics-screen-time', timeInSecs, 'var(--color-agency)', 's');
@@ -5631,31 +5777,22 @@ function renderMetricsDashboard() {
     renderFunnel(d);
 
     // Marker Usage
-    renderMarkerChart(d.markerUsage);
+    renderMarkerChart(d.markerUsage || {});
 
     // Completions
-    renderCompletionList('metrics-completions', d.completions, {
+    renderCompletionList('metrics-completions', d.completions || {}, {
         match: 'Marker Match', detective: 'Hope Detective', quest: 'Hope Quest',
         walk: 'Hope Walk', trail: 'Hope Trail', reflect: 'Reflection', textAnalysis: 'Text Analysis'
     });
 
     // Grade levels
-    renderGradeChart(d.ageSelections);
+    renderGradeChart(d.ageSelections || {});
 
     // Feature adoption
-    renderCompletionList('metrics-features', d.featureUsage, {
+    renderCompletionList('metrics-features', d.featureUsage || {}, {
         readAloud: 'Read Aloud', translate: 'Translate', voicePicker: 'Voice Picker',
         sampleStory: 'Sample Story', export: 'Export / Print', joinClassroom: 'Join Classroom', teacherHub: 'Teacher Hub'
     });
-
-    // Errors
-    renderErrorList(d.errors);
-
-    // Sessions
-    renderSessionList(d.sessions);
-
-    // Event log
-    renderEventLog(d.events);
 }
 
 function renderInsights(d) {
@@ -5912,15 +6049,17 @@ function renderUsageChart(monthlyData) {
 function renderFunnel(d) {
     const container = document.getElementById('metrics-funnel');
     if (!container) return;
+    const sv = d.screenViews || {};
+    const comp = d.completions || {};
     const steps = [
-        { label: 'Age Selected', value: Object.values(d.ageSelections).reduce((a, b) => a + b, 0) },
-        { label: 'Welcome Viewed', value: d.screenViews['welcome-screen'] || 0 },
-        { label: 'Learn Viewed', value: d.screenViews['learn-screen'] || 0 },
-        { label: 'Match Started', value: d.screenViews['match-screen'] || 0 },
-        { label: 'Match Completed', value: d.completions.match || 0 },
-        { label: 'Text Analysis', value: d.screenViews['activity-screen'] || 0 },
-        { label: 'Feedback Viewed', value: d.completions.textAnalysis || 0 },
-        { label: 'Reflection', value: d.screenViews['reflect-screen'] || 0 },
+        { label: 'Age Selected', value: Object.values(d.ageSelections || {}).reduce((a, b) => a + b, 0) },
+        { label: 'Welcome Viewed', value: sv['welcome-screen'] || 0 },
+        { label: 'Learn Viewed', value: sv['learn-screen'] || 0 },
+        { label: 'Match Started', value: sv['match-screen'] || 0 },
+        { label: 'Match Completed', value: comp.match || 0 },
+        { label: 'Text Analysis', value: sv['activity-screen'] || 0 },
+        { label: 'Feedback Viewed', value: comp.textAnalysis || 0 },
+        { label: 'Reflection', value: sv['reflect-screen'] || 0 },
     ];
     const max = Math.max(...steps.map(s => s.value), 1);
     container.innerHTML = steps.map((step, i) => {
