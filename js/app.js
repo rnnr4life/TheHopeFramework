@@ -1,3 +1,154 @@
+// ===== Analytics Tracking Engine =====
+const HopeMetrics = (() => {
+    const STORAGE_KEY = 'hope-metrics';
+    const SESSION_KEY = 'hope-session';
+
+    function getStore() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || createStore(); }
+        catch { return createStore(); }
+    }
+    function saveStore(store) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    }
+    function createStore() {
+        return {
+            firstVisit: new Date().toISOString(),
+            totalSessions: 0,
+            events: [],
+            screenViews: {},
+            screenTime: {},
+            completions: { match: 0, detective: 0, quest: 0, walk: 0, trail: 0, reflect: 0, textAnalysis: 0 },
+            markerUsage: { motivation: 0, belief: 0, plans: 0, agency: 0 },
+            ageSelections: { elementary: 0, middle: 0, high: 0 },
+            featureUsage: { readAloud: 0, translate: 0, voicePicker: 0, sampleStory: 0, export: 0, joinClassroom: 0, teacherHub: 0 },
+            errors: [],
+            sessions: [],
+            monthlyUsage: {}
+        };
+    }
+
+    // Session tracking
+    let sessionStart = Date.now();
+    let currentScreen = null;
+    let screenEnterTime = null;
+
+    function initSession() {
+        const store = getStore();
+        store.totalSessions++;
+        // Track monthly usage
+        if (!store.monthlyUsage) store.monthlyUsage = {};
+        const monthKey = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+        if (!store.monthlyUsage[monthKey]) store.monthlyUsage[monthKey] = { sessions: 0, screenViews: 0, completions: 0 };
+        store.monthlyUsage[monthKey].sessions++;
+        const session = {
+            id: store.totalSessions,
+            start: new Date().toISOString(),
+            end: null,
+            screens: [],
+            duration: 0
+        };
+        store.sessions.push(session);
+        // Keep last 100 sessions
+        if (store.sessions.length > 100) store.sessions = store.sessions.slice(-100);
+        saveStore(store);
+        sessionStart = Date.now();
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify({ id: store.totalSessions, start: sessionStart }));
+    }
+
+    function endSession() {
+        const store = getStore();
+        const sess = sessionStorage.getItem(SESSION_KEY);
+        if (sess && store.sessions.length) {
+            const last = store.sessions[store.sessions.length - 1];
+            last.end = new Date().toISOString();
+            last.duration = Date.now() - sessionStart;
+            saveStore(store);
+        }
+    }
+
+    function trackScreenView(screenId) {
+        const store = getStore();
+        // Record time on previous screen
+        if (currentScreen && screenEnterTime) {
+            const elapsed = Date.now() - screenEnterTime;
+            store.screenTime[currentScreen] = (store.screenTime[currentScreen] || 0) + elapsed;
+        }
+        // Count screen view
+        store.screenViews[screenId] = (store.screenViews[screenId] || 0) + 1;
+        currentScreen = screenId;
+        screenEnterTime = Date.now();
+        // Track monthly screen views
+        if (!store.monthlyUsage) store.monthlyUsage = {};
+        const svMonthKey = new Date().toISOString().slice(0, 7);
+        if (!store.monthlyUsage[svMonthKey]) store.monthlyUsage[svMonthKey] = { sessions: 0, screenViews: 0, completions: 0 };
+        store.monthlyUsage[svMonthKey].screenViews++;
+        // Add to event log (keep last 500)
+        store.events.push({ type: 'screen', id: screenId, ts: new Date().toISOString() });
+        if (store.events.length > 500) store.events = store.events.slice(-500);
+        saveStore(store);
+    }
+
+    function trackCompletion(activity) {
+        const store = getStore();
+        if (store.completions[activity] !== undefined) store.completions[activity]++;
+        // Track monthly completions
+        if (!store.monthlyUsage) store.monthlyUsage = {};
+        const cMonthKey = new Date().toISOString().slice(0, 7);
+        if (!store.monthlyUsage[cMonthKey]) store.monthlyUsage[cMonthKey] = { sessions: 0, screenViews: 0, completions: 0 };
+        store.monthlyUsage[cMonthKey].completions++;
+        store.events.push({ type: 'completion', id: activity, ts: new Date().toISOString() });
+        if (store.events.length > 500) store.events = store.events.slice(-500);
+        saveStore(store);
+    }
+
+    function trackMarker(marker) {
+        const store = getStore();
+        const key = marker.toLowerCase();
+        if (store.markerUsage[key] !== undefined) store.markerUsage[key]++;
+        saveStore(store);
+    }
+
+    function trackAge(age) {
+        const store = getStore();
+        if (store.ageSelections[age] !== undefined) store.ageSelections[age]++;
+        saveStore(store);
+    }
+
+    function trackFeature(feature) {
+        const store = getStore();
+        if (store.featureUsage[feature] !== undefined) store.featureUsage[feature]++;
+        store.events.push({ type: 'feature', id: feature, ts: new Date().toISOString() });
+        if (store.events.length > 500) store.events = store.events.slice(-500);
+        saveStore(store);
+    }
+
+    function trackError(msg, source) {
+        const store = getStore();
+        store.errors.push({ msg: String(msg).slice(0, 200), source: source || '', ts: new Date().toISOString() });
+        if (store.errors.length > 100) store.errors = store.errors.slice(-100);
+        saveStore(store);
+    }
+
+    function getData() { return getStore(); }
+
+    function clearData() {
+        localStorage.removeItem(STORAGE_KEY);
+        sessionStorage.removeItem(SESSION_KEY);
+    }
+
+    // Auto-init session
+    initSession();
+    // End session on page close
+    window.addEventListener('beforeunload', endSession);
+    // Catch JS errors
+    window.addEventListener('error', (e) => {
+        trackError(e.message, e.filename ? e.filename.split('/').pop() + ':' + e.lineno : '');
+    });
+
+    return { trackScreenView, trackCompletion, trackMarker, trackAge, trackFeature, trackError, getData, clearData };
+})();
+
+
 // ===== Age Group System =====
 let currentAge = 'middle'; // default
 
@@ -143,6 +294,7 @@ function rotateHopeQuote() {
 function setAge(age) {
     currentAge = age;
     document.body.className = `age-${age}`;
+    HopeMetrics.trackAge(age);
 
     // Show global nav and update grade label
     const nav = document.getElementById('global-nav');
@@ -213,6 +365,9 @@ function showScreen(id) {
     screens.forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     window.scrollTo(0, 0);
+
+    // Track screen view
+    HopeMetrics.trackScreenView(id);
 
     // Update global nav active state
     updateNavActive(id);
@@ -1415,6 +1570,7 @@ document.querySelectorAll('.marker-btn').forEach(btn => {
                 text: selectedText
             });
 
+            HopeMetrics.trackMarker(marker);
             updateFindings();
             selection.removeAllRanges();
         } catch (e) {
@@ -1854,6 +2010,9 @@ function generateFeedback() {
 
     if (findings.length === 0) return;
 
+    HopeMetrics.trackCompletion('textAnalysis');
+    HopeMetrics.trackFeature('export');
+
     let html = '';
 
     const markersUsed = new Set(findings.map(f => f.marker));
@@ -2135,6 +2294,8 @@ function completeMatchActivity() {
 
     // Fill progress bar
     document.getElementById('match-progress-fill').style.width = '100%';
+
+    HopeMetrics.trackCompletion('match');
 
     // Celebration
     triggerCelebration();
@@ -5237,3 +5398,380 @@ document.getElementById('btn-apply-teacher').addEventListener('click', () => {
         showScreen('welcome-screen');
     }
 });
+
+
+// ===== Metrics Dashboard =====
+// Add metrics-screen to nav group mapping
+screenToGroup['metrics-screen'] = 'metrics';
+
+// Back button
+document.getElementById('btn-back-metrics').addEventListener('click', () => showScreen('welcome-screen'));
+
+// Subtle metrics link in version label
+document.getElementById('btn-open-metrics').addEventListener('click', () => showScreen('metrics-screen'));
+
+function renderMetricsDashboard() {
+    const d = HopeMetrics.getData();
+
+    // KPIs
+    const totalScreenViews = Object.values(d.screenViews).reduce((a, b) => a + b, 0);
+    const totalCompletions = Object.values(d.completions).reduce((a, b) => a + b, 0);
+    document.getElementById('kpi-sessions').textContent = d.totalSessions;
+    document.getElementById('kpi-screens').textContent = totalScreenViews;
+    document.getElementById('kpi-completions').textContent = totalCompletions;
+    document.getElementById('kpi-errors').textContent = d.errors.length;
+
+    // Usage over time chart
+    renderUsageChart(d.monthlyUsage || {});
+
+    // Screen Views bar chart
+    renderBarChart('metrics-screen-views', d.screenViews, 'var(--color-plans)');
+
+    // Time on Screen bar chart (convert ms to seconds)
+    const timeInSecs = {};
+    for (const [k, v] of Object.entries(d.screenTime)) {
+        timeInSecs[k] = Math.round(v / 1000);
+    }
+    renderBarChart('metrics-screen-time', timeInSecs, 'var(--color-agency)', 's');
+
+    // Engagement Funnel
+    renderFunnel(d);
+
+    // Marker Usage
+    renderMarkerChart(d.markerUsage);
+
+    // Completions
+    renderCompletionList('metrics-completions', d.completions, {
+        match: 'Marker Match', detective: 'Hope Detective', quest: 'Hope Quest',
+        walk: 'Hope Walk', trail: 'Hope Trail', reflect: 'Reflection', textAnalysis: 'Text Analysis'
+    });
+
+    // Grade levels
+    renderGradeChart(d.ageSelections);
+
+    // Feature adoption
+    renderCompletionList('metrics-features', d.featureUsage, {
+        readAloud: 'Read Aloud', translate: 'Translate', voicePicker: 'Voice Picker',
+        sampleStory: 'Sample Story', export: 'Export / Print', joinClassroom: 'Join Classroom', teacherHub: 'Teacher Hub'
+    });
+
+    // Errors
+    renderErrorList(d.errors);
+
+    // Sessions
+    renderSessionList(d.sessions);
+
+    // Event log
+    renderEventLog(d.events);
+}
+
+function renderBarChart(containerId, data, color, suffix) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const entries = Object.entries(data).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+    if (entries.length === 0) {
+        container.innerHTML = '<p class="metrics-empty">No data yet</p>';
+        return;
+    }
+    const max = Math.max(...entries.map(e => e[1]));
+    const sfx = suffix || '';
+    container.innerHTML = entries.map(([label, val]) => {
+        const pct = max > 0 ? (val / max * 100) : 0;
+        const displayLabel = label.replace(/-screen$/, '').replace(/-/g, ' ');
+        return `<div class="metrics-bar-row">
+            <span class="metrics-bar-label">${escapeHtml(displayLabel)}</span>
+            <div class="metrics-bar-track">
+                <div class="metrics-bar-fill" style="width:${pct}%;background:${color}"></div>
+            </div>
+            <span class="metrics-bar-value">${val}${sfx}</span>
+        </div>`;
+    }).join('');
+}
+
+function renderUsageChart(monthlyData) {
+    const chartEl = document.getElementById('metrics-usage-chart');
+    const legendEl = document.getElementById('metrics-chart-legend');
+    if (!chartEl) return;
+
+    // Build month keys: fill gaps from first to last month
+    const keys = Object.keys(monthlyData).sort();
+    if (keys.length === 0) {
+        chartEl.innerHTML = '<p class="metrics-empty">No monthly data yet — check back after using the app over time</p>';
+        if (legendEl) legendEl.innerHTML = '';
+        return;
+    }
+
+    // Fill in missing months between first and last
+    const allMonths = [];
+    const start = new Date(keys[0] + '-01');
+    const end = new Date(keys[keys.length - 1] + '-01');
+    const cursor = new Date(start);
+    while (cursor <= end) {
+        allMonths.push(cursor.toISOString().slice(0, 7));
+        cursor.setMonth(cursor.getMonth() + 1);
+    }
+    // Ensure at least current month is shown
+    const now = new Date().toISOString().slice(0, 7);
+    if (!allMonths.includes(now)) allMonths.push(now);
+
+    const series = [
+        { key: 'sessions', label: 'Sessions', color: '#38bdf8' },
+        { key: 'screenViews', label: 'Screen Views', color: '#a855f7' },
+        { key: 'completions', label: 'Completions', color: '#34d399' }
+    ];
+
+    // Extract values
+    const seriesData = series.map(s => ({
+        ...s,
+        values: allMonths.map(m => (monthlyData[m] && monthlyData[m][s.key]) || 0)
+    }));
+
+    const allValues = seriesData.flatMap(s => s.values);
+    const maxVal = Math.max(...allValues, 1);
+
+    // Chart dimensions
+    const W = 800, H = 260, padL = 50, padR = 20, padT = 20, padB = 50;
+    const chartW = W - padL - padR;
+    const chartH = H - padT - padB;
+
+    // Y-axis ticks
+    const yTicks = 5;
+    const yStep = Math.ceil(maxVal / yTicks) || 1;
+    const yMax = yStep * yTicks;
+
+    let svg = `<svg viewBox="0 0 ${W} ${H}" class="metrics-svg-chart" aria-label="Usage over time chart">`;
+
+    // Grid lines and y-axis labels
+    for (let i = 0; i <= yTicks; i++) {
+        const y = padT + chartH - (i / yTicks) * chartH;
+        const val = i * yStep;
+        svg += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>`;
+        svg += `<text x="${padL - 8}" y="${y + 4}" text-anchor="end" fill="rgba(255,255,255,0.4)" font-size="11">${val}</text>`;
+    }
+
+    // X-axis labels
+    const barGroupW = chartW / allMonths.length;
+    allMonths.forEach((m, i) => {
+        const x = padL + i * barGroupW + barGroupW / 2;
+        const parts = m.split('-');
+        const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const label = monthNames[parseInt(parts[1]) - 1] + (allMonths.length > 12 || i === 0 || parts[1] === '01' ? ' ' + parts[0].slice(2) : '');
+        svg += `<text x="${x}" y="${H - 8}" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="11">${label}</text>`;
+    });
+
+    // Bars — grouped per month
+    const barW = Math.max(Math.min(barGroupW / (series.length + 1), 20), 4);
+    const barGap = 2;
+    seriesData.forEach((s, si) => {
+        s.values.forEach((val, mi) => {
+            const barH = yMax > 0 ? (val / yMax) * chartH : 0;
+            const x = padL + mi * barGroupW + (barGroupW - series.length * (barW + barGap)) / 2 + si * (barW + barGap);
+            const y = padT + chartH - barH;
+            if (val > 0) {
+                svg += `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="2" fill="${s.color}" opacity="0.85">
+                    <title>${s.label}: ${val} (${allMonths[mi]})</title>
+                </rect>`;
+            }
+        });
+    });
+
+    svg += '</svg>';
+    chartEl.innerHTML = svg;
+
+    // Legend
+    if (legendEl) {
+        legendEl.innerHTML = series.map(s =>
+            `<span class="metrics-legend-item"><span class="metrics-legend-dot" style="background:${s.color}"></span>${s.label}</span>`
+        ).join('');
+    }
+}
+
+function renderFunnel(d) {
+    const container = document.getElementById('metrics-funnel');
+    if (!container) return;
+    const steps = [
+        { label: 'Age Selected', value: Object.values(d.ageSelections).reduce((a, b) => a + b, 0) },
+        { label: 'Welcome Viewed', value: d.screenViews['welcome-screen'] || 0 },
+        { label: 'Learn Viewed', value: d.screenViews['learn-screen'] || 0 },
+        { label: 'Match Started', value: d.screenViews['match-screen'] || 0 },
+        { label: 'Match Completed', value: d.completions.match || 0 },
+        { label: 'Text Analysis', value: d.screenViews['activity-screen'] || 0 },
+        { label: 'Feedback Viewed', value: d.completions.textAnalysis || 0 },
+        { label: 'Reflection', value: d.screenViews['reflect-screen'] || 0 },
+    ];
+    const max = Math.max(...steps.map(s => s.value), 1);
+    container.innerHTML = steps.map((step, i) => {
+        const pct = Math.max((step.value / max * 100), 4);
+        const opacity = 1 - (i * 0.08);
+        return `<div class="metrics-funnel-step">
+            <span class="metrics-funnel-label">${step.label}</span>
+            <div class="metrics-funnel-bar-track">
+                <div class="metrics-funnel-bar" style="width:${pct}%;opacity:${opacity}"></div>
+            </div>
+            <span class="metrics-funnel-value">${step.value}</span>
+        </div>`;
+    }).join('');
+}
+
+function renderMarkerChart(markers) {
+    const container = document.getElementById('metrics-markers');
+    if (!container) return;
+    const colors = {
+        motivation: 'var(--color-motivation)',
+        belief: 'var(--color-belief)',
+        plans: 'var(--color-plans)',
+        agency: 'var(--color-agency)'
+    };
+    const icons = { motivation: '❤️', belief: '✨', plans: '🗺️', agency: '⚡' };
+    const total = Object.values(markers).reduce((a, b) => a + b, 0);
+    container.innerHTML = Object.entries(markers).map(([key, val]) => {
+        const pct = total > 0 ? Math.round(val / total * 100) : 0;
+        return `<div class="metrics-marker-row">
+            <span class="metrics-marker-icon">${icons[key] || ''}</span>
+            <span class="metrics-marker-name">${key.charAt(0).toUpperCase() + key.slice(1)}</span>
+            <div class="metrics-bar-track">
+                <div class="metrics-bar-fill" style="width:${pct}%;background:${colors[key]}"></div>
+            </div>
+            <span class="metrics-bar-value">${val} (${pct}%)</span>
+        </div>`;
+    }).join('');
+}
+
+function renderGradeChart(grades) {
+    const container = document.getElementById('metrics-grades');
+    if (!container) return;
+    const icons = { elementary: '🌱', middle: '🌿', high: '🌳' };
+    const labels = { elementary: 'Elementary', middle: 'Middle', high: 'High School' };
+    const total = Object.values(grades).reduce((a, b) => a + b, 0);
+    container.innerHTML = Object.entries(grades).map(([key, val]) => {
+        const pct = total > 0 ? Math.round(val / total * 100) : 0;
+        return `<div class="metrics-marker-row">
+            <span class="metrics-marker-icon">${icons[key] || ''}</span>
+            <span class="metrics-marker-name">${labels[key] || key}</span>
+            <div class="metrics-bar-track">
+                <div class="metrics-bar-fill" style="width:${pct}%;background:var(--color-primary)"></div>
+            </div>
+            <span class="metrics-bar-value">${val} (${pct}%)</span>
+        </div>`;
+    }).join('');
+}
+
+function renderCompletionList(containerId, data, labels) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = Object.entries(data).map(([key, val]) => {
+        const label = labels[key] || key;
+        return `<div class="metrics-list-item">
+            <span class="metrics-list-label">${escapeHtml(label)}</span>
+            <span class="metrics-list-value ${val > 0 ? 'active' : ''}">${val}</span>
+        </div>`;
+    }).join('');
+}
+
+function renderErrorList(errors) {
+    const container = document.getElementById('metrics-errors');
+    if (!container) return;
+    if (errors.length === 0) {
+        container.innerHTML = '<p class="metrics-empty">No errors captured \u2014 nice! \u2705</p>';
+        return;
+    }
+    const recent = errors.slice(-20).reverse();
+    container.innerHTML = recent.map(e => {
+        const time = new Date(e.ts).toLocaleString();
+        return `<div class="metrics-error-item">
+            <span class="metrics-error-time">${escapeHtml(time)}</span>
+            <span class="metrics-error-msg">${escapeHtml(e.msg)}</span>
+            <span class="metrics-error-source">${escapeHtml(e.source)}</span>
+        </div>`;
+    }).join('');
+}
+
+function renderSessionList(sessions) {
+    const container = document.getElementById('metrics-sessions');
+    if (!container) return;
+    if (sessions.length === 0) {
+        container.innerHTML = '<p class="metrics-empty">No sessions recorded yet</p>';
+        return;
+    }
+    const recent = sessions.slice(-20).reverse();
+    container.innerHTML = `<div class="metrics-session-header">
+        <span>Session</span><span>Started</span><span>Duration</span>
+    </div>` + recent.map(s => {
+        const start = new Date(s.start).toLocaleString();
+        const dur = s.duration ? formatDuration(s.duration) : 'Active';
+        return `<div class="metrics-session-row">
+            <span>#${s.id}</span>
+            <span>${escapeHtml(start)}</span>
+            <span>${dur}</span>
+        </div>`;
+    }).join('');
+}
+
+function renderEventLog(events) {
+    const container = document.getElementById('metrics-event-log');
+    if (!container) return;
+    if (events.length === 0) {
+        container.innerHTML = '<p class="metrics-empty">No events tracked yet</p>';
+        return;
+    }
+    const recent = events.slice(-50).reverse();
+    container.innerHTML = recent.map(e => {
+        const time = new Date(e.ts).toLocaleTimeString();
+        const typeColors = { screen: 'var(--color-plans)', completion: 'var(--color-agency)', feature: 'var(--color-belief)' };
+        const color = typeColors[e.type] || 'var(--color-text-light)';
+        const label = e.id.replace(/-screen$/, '').replace(/-/g, ' ');
+        return `<div class="metrics-event-row">
+            <span class="metrics-event-time">${time}</span>
+            <span class="metrics-event-type" style="color:${color}">${e.type}</span>
+            <span class="metrics-event-id">${escapeHtml(label)}</span>
+        </div>`;
+    }).join('');
+}
+
+function formatDuration(ms) {
+    const secs = Math.floor(ms / 1000);
+    if (secs < 60) return secs + 's';
+    const mins = Math.floor(secs / 60);
+    const remSecs = secs % 60;
+    if (mins < 60) return mins + 'm ' + remSecs + 's';
+    const hrs = Math.floor(mins / 60);
+    const remMins = mins % 60;
+    return hrs + 'h ' + remMins + 'm';
+}
+
+// Refresh button
+document.getElementById('btn-metrics-refresh').addEventListener('click', renderMetricsDashboard);
+
+// Clear button
+document.getElementById('btn-metrics-clear').addEventListener('click', () => {
+    if (confirm('Clear all metrics data? This cannot be undone.')) {
+        HopeMetrics.clearData();
+        renderMetricsDashboard();
+    }
+});
+
+// Export button
+document.getElementById('btn-metrics-export').addEventListener('click', () => {
+    const data = HopeMetrics.getData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'hope-metrics-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+});
+
+// Render on nav to metrics screen — hook into showScreen
+const _origShowScreen = showScreen;
+// We can't reassign showScreen since it's used as a function declaration,
+// so instead we use a MutationObserver on the metrics screen
+const metricsScreen = document.getElementById('metrics-screen');
+if (metricsScreen) {
+    const metricsObserver = new MutationObserver(() => {
+        if (metricsScreen.classList.contains('active')) {
+            renderMetricsDashboard();
+        }
+    });
+    metricsObserver.observe(metricsScreen, { attributes: true, attributeFilter: ['class'] });
+}

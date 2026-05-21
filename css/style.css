@@ -4263,6 +4263,23 @@ button.resource-card-action {
     letter-spacing: 0.5px;
 }
 
+.metrics-subtle-link {
+    pointer-events: auto;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 2px 4px;
+    margin-left: 2px;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+}
+.metrics-subtle-link:hover {
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.05);
+}
+
 
 /* ================================================
    REFLECTION
@@ -5374,4 +5391,306 @@ body { padding-top: 28px; }
     .btn, .marker-btn, .match-choice, .age-btn, .finding-remove,
     .btn-back, .marker-card { min-height: 44px; }
     .finding-remove { min-width: 44px; display: flex; align-items: center; justify-content: center; }
+}
+
+
+/* ===== Metrics Dashboard ===== */
+.metrics-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.metrics-header h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+.metrics-header-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+.btn-danger {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #f87171 !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+}
+.btn-danger:hover {
+    background: rgba(239, 68, 68, 0.25) !important;
+}
+
+/* KPI Row */
+.metrics-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+.metrics-kpi {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1rem;
+    text-align: center;
+    backdrop-filter: var(--glass);
+}
+.metrics-kpi-value {
+    display: block;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    line-height: 1.2;
+}
+.metrics-kpi-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+}
+.metrics-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    backdrop-filter: var(--glass);
+}
+.metrics-card-wide {
+    grid-column: 1 / -1;
+}
+.metrics-card-full {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    backdrop-filter: var(--glass);
+    margin-bottom: 1.25rem;
+}
+.metrics-card-full .metrics-card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+.metrics-card-full .metrics-card-subtitle {
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    margin-bottom: 0.75rem;
+}
+.metrics-chart-container {
+    width: 100%;
+    overflow-x: auto;
+}
+.metrics-svg-chart {
+    width: 100%;
+    min-width: 400px;
+    height: auto;
+    display: block;
+}
+.metrics-chart-legend {
+    display: flex;
+    gap: 1.25rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+.metrics-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+}
+.metrics-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    display: inline-block;
+}
+.metrics-card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+.metrics-card-subtitle {
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    margin-bottom: 1rem;
+}
+
+/* Bar Charts */
+.metrics-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+.metrics-bar-label {
+    flex: 0 0 140px;
+    font-size: 0.8rem;
+    text-align: right;
+    color: var(--color-text-light);
+    text-transform: capitalize;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.metrics-bar-track {
+    flex: 1;
+    height: 20px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.metrics-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    min-width: 2px;
+}
+.metrics-bar-value {
+    flex: 0 0 60px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-align: right;
+}
+
+/* Funnel */
+.metrics-funnel-step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+}
+.metrics-funnel-label {
+    flex: 0 0 120px;
+    font-size: 0.8rem;
+    text-align: right;
+    color: var(--color-text-light);
+}
+.metrics-funnel-bar-track {
+    flex: 1;
+    height: 22px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 11px;
+    overflow: hidden;
+}
+.metrics-funnel-bar {
+    height: 100%;
+    border-radius: 11px;
+    background: linear-gradient(90deg, var(--color-motivation), var(--color-belief), var(--color-plans), var(--color-agency));
+    transition: width 0.5s ease;
+}
+.metrics-funnel-value {
+    flex: 0 0 40px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-align: right;
+}
+
+/* Marker chart */
+.metrics-marker-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+}
+.metrics-marker-icon {
+    flex: 0 0 24px;
+    font-size: 1.1rem;
+    text-align: center;
+}
+.metrics-marker-name {
+    flex: 0 0 90px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Completion / feature list */
+.metrics-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-border);
+}
+.metrics-list-item:last-child { border-bottom: none; }
+.metrics-list-label { font-size: 0.9rem; }
+.metrics-list-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-text-light);
+    min-width: 32px;
+    text-align: right;
+}
+.metrics-list-value.active { color: var(--color-primary); }
+
+/* Error list */
+.metrics-error-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.8rem;
+}
+.metrics-error-item:last-child { border-bottom: none; }
+.metrics-error-time { color: var(--color-text-light); white-space: nowrap; }
+.metrics-error-msg { color: #f87171; word-break: break-word; }
+.metrics-error-source { color: var(--color-text-light); font-family: monospace; font-size: 0.75rem; }
+
+/* Session list */
+.metrics-session-header,
+.metrics-session-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 100px;
+    gap: 1rem;
+    padding: 0.4rem 0;
+    font-size: 0.85rem;
+}
+.metrics-session-header {
+    font-weight: 700;
+    color: var(--color-text-light);
+    border-bottom: 1px solid var(--color-border);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+.metrics-session-row { border-bottom: 1px solid rgba(255,255,255,0.04); }
+
+/* Event log */
+.metrics-event-row {
+    display: grid;
+    grid-template-columns: 70px 80px 1fr;
+    gap: 0.75rem;
+    padding: 0.3rem 0;
+    font-size: 0.8rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.metrics-event-time { color: var(--color-text-light); font-family: monospace; }
+.metrics-event-type { font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px; }
+.metrics-event-id { text-transform: capitalize; }
+
+/* Empty state */
+.metrics-empty {
+    color: var(--color-text-light);
+    font-style: italic;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .metrics-kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .metrics-grid { grid-template-columns: 1fr; }
+    .metrics-card-wide { grid-column: 1; }
+    .metrics-bar-label { flex: 0 0 80px; font-size: 0.7rem; }
+    .metrics-funnel-label { flex: 0 0 80px; font-size: 0.7rem; }
+    .metrics-session-header, .metrics-session-row { grid-template-columns: 60px 1fr 80px; }
 }

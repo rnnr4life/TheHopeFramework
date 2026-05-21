@@ -2273,7 +2273,130 @@
         </div>
     </div>
 
-    <div id="app-version" class="app-version-label">v2.4.0</div>
+    <!-- ===== Metrics Dashboard Screen ===== -->
+    <section id="metrics-screen" class="screen">
+        <div class="container-wide">
+            <div class="screen-nav">
+                <button class="btn-back" id="btn-back-metrics">&larr; Back</button>
+                <div class="step-indicator">📊 Usage Metrics</div>
+            </div>
+
+            <div class="metrics-header">
+                <h2>📊 Usage Metrics Dashboard</h2>
+                <p class="section-intro">How the HOPE Framework app is being used. All data is stored locally in this browser.</p>
+                <div class="metrics-header-actions">
+                    <button class="btn btn-small" id="btn-metrics-refresh">🔄 Refresh</button>
+                    <button class="btn btn-small btn-danger" id="btn-metrics-clear">🗑️ Clear Data</button>
+                    <button class="btn btn-small" id="btn-metrics-export">📥 Export JSON</button>
+                </div>
+            </div>
+
+            <!-- KPI Row -->
+            <div class="metrics-kpi-row" id="metrics-kpi-row">
+                <div class="metrics-kpi">
+                    <span class="metrics-kpi-value" id="kpi-sessions">0</span>
+                    <span class="metrics-kpi-label">Total Sessions</span>
+                </div>
+                <div class="metrics-kpi">
+                    <span class="metrics-kpi-value" id="kpi-screens">0</span>
+                    <span class="metrics-kpi-label">Screen Views</span>
+                </div>
+                <div class="metrics-kpi">
+                    <span class="metrics-kpi-value" id="kpi-completions">0</span>
+                    <span class="metrics-kpi-label">Activities Completed</span>
+                </div>
+                <div class="metrics-kpi">
+                    <span class="metrics-kpi-value" id="kpi-errors">0</span>
+                    <span class="metrics-kpi-label">JS Errors</span>
+                </div>
+            </div>
+
+            <!-- Usage Over Time Chart -->
+            <div class="metrics-card metrics-card-full">
+                <h3 class="metrics-card-title">📈 Usage Over Time</h3>
+                <p class="metrics-card-subtitle">Sessions, screen views, and activity completions by month</p>
+                <div class="metrics-chart-legend" id="metrics-chart-legend"></div>
+                <div class="metrics-chart-container" id="metrics-usage-chart"></div>
+            </div>
+
+            <!-- Grid -->
+            <div class="metrics-grid">
+
+                <!-- Screen Views -->
+                <div class="metrics-card metrics-card-wide">
+                    <h3 class="metrics-card-title">🖥️ Screen Views</h3>
+                    <p class="metrics-card-subtitle">Which screens are visited most</p>
+                    <div class="metrics-bar-chart" id="metrics-screen-views"></div>
+                </div>
+
+                <!-- Time on Screen -->
+                <div class="metrics-card metrics-card-wide">
+                    <h3 class="metrics-card-title">⏱️ Time on Screen</h3>
+                    <p class="metrics-card-subtitle">Total seconds spent per screen</p>
+                    <div class="metrics-bar-chart" id="metrics-screen-time"></div>
+                </div>
+
+                <!-- Engagement Funnel -->
+                <div class="metrics-card">
+                    <h3 class="metrics-card-title">🔄 Engagement Funnel</h3>
+                    <p class="metrics-card-subtitle">How far users progress through the core flow</p>
+                    <div class="metrics-funnel" id="metrics-funnel"></div>
+                </div>
+
+                <!-- HOPE Marker Usage -->
+                <div class="metrics-card">
+                    <h3 class="metrics-card-title">🏷️ HOPE Marker Usage</h3>
+                    <p class="metrics-card-subtitle">Which markers are applied during text analysis</p>
+                    <div class="metrics-marker-chart" id="metrics-markers"></div>
+                </div>
+
+                <!-- Activity Completions -->
+                <div class="metrics-card">
+                    <h3 class="metrics-card-title">✅ Activity Completions</h3>
+                    <p class="metrics-card-subtitle">How many times each activity was completed</p>
+                    <div class="metrics-completion-list" id="metrics-completions"></div>
+                </div>
+
+                <!-- Grade Level Distribution -->
+                <div class="metrics-card">
+                    <h3 class="metrics-card-title">🎓 Grade Level Selection</h3>
+                    <p class="metrics-card-subtitle">Which age groups are being selected</p>
+                    <div class="metrics-marker-chart" id="metrics-grades"></div>
+                </div>
+
+                <!-- Feature Adoption -->
+                <div class="metrics-card">
+                    <h3 class="metrics-card-title">🛠️ Feature Adoption</h3>
+                    <p class="metrics-card-subtitle">Which features are being used</p>
+                    <div class="metrics-completion-list" id="metrics-features"></div>
+                </div>
+
+                <!-- Recent Errors -->
+                <div class="metrics-card">
+                    <h3 class="metrics-card-title">🐛 Recent Errors</h3>
+                    <p class="metrics-card-subtitle">JavaScript errors captured during usage</p>
+                    <div class="metrics-error-list" id="metrics-errors"></div>
+                </div>
+
+                <!-- Session History -->
+                <div class="metrics-card metrics-card-wide">
+                    <h3 class="metrics-card-title">📅 Recent Sessions</h3>
+                    <p class="metrics-card-subtitle">Last 20 sessions with duration</p>
+                    <div class="metrics-session-list" id="metrics-sessions"></div>
+                </div>
+
+                <!-- Event Log -->
+                <div class="metrics-card metrics-card-wide">
+                    <h3 class="metrics-card-title">📜 Event Log</h3>
+                    <p class="metrics-card-subtitle">Last 50 tracked events</p>
+                    <div class="metrics-event-log" id="metrics-event-log"></div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <div id="app-version" class="app-version-label">v2.4.0 <button class="metrics-subtle-link" id="btn-open-metrics" aria-label="Usage metrics">📊</button></div>
     <script src="js/app.js"></script>
 </body>
 </html>
