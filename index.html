@@ -2424,6 +2424,41 @@
         </div>
     </section>
 
+    <!-- ===== Collaborator Feedback Widget ===== -->
+    <div id="collab-widget" class="feedback-widget">
+        <button class="feedback-fab" id="collab-fab" aria-label="Send feedback">
+            💬
+        </button>
+        <div class="collab-panel hidden" id="collab-panel">
+            <div class="feedback-panel-header">
+                <h3>Send Feedback</h3>
+                <button class="feedback-panel-close" id="collab-panel-close">&times;</button>
+            </div>
+            <div class="feedback-panel-body">
+                <label class="feedback-label" for="collab-type">Type</label>
+                <select id="collab-type" class="feedback-select">
+                    <option value="idea">💡 Idea / Suggestion</option>
+                    <option value="bug">🐛 Bug Report</option>
+                    <option value="content">📝 Content Feedback</option>
+                    <option value="design">🎨 Design / UX</option>
+                    <option value="question">❓ Question</option>
+                </select>
+
+                <label class="feedback-label" for="collab-page">Page</label>
+                <input type="text" id="collab-page" class="feedback-input" readonly />
+
+                <label class="feedback-label" for="collab-title">Title</label>
+                <input type="text" id="collab-title" class="feedback-input" placeholder="Brief summary" maxlength="100" />
+
+                <label class="feedback-label" for="collab-detail">Details</label>
+                <textarea id="collab-detail" class="feedback-textarea" rows="4" placeholder="Describe what you'd like changed, fixed, or added..."></textarea>
+
+                <button class="btn btn-primary feedback-submit" id="collab-submit">Submit on GitHub →</button>
+                <p class="feedback-note">Opens a pre-filled GitHub Issue. Requires a free <a href="https://github.com/signup" target="_blank" rel="noopener">GitHub account</a>.</p>
+            </div>
+        </div>
+    </div>
+
     <div id="app-version" class="app-version-label">v2.4.0 <button class="metrics-subtle-link" id="btn-open-metrics" aria-label="Usage metrics">📊</button></div>
     <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore-compat.js"></script>

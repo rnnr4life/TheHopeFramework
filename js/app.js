@@ -6239,3 +6239,71 @@ if (metricsScreen) {
         showScreen('welcome-screen');
     }
 })();
+
+// ===== Feedback Widget =====
+(function initFeedbackWidget() {
+    const fab = document.getElementById('collab-fab');
+    const panel = document.getElementById('collab-panel');
+    const closeBtn = document.getElementById('collab-panel-close');
+    const submitBtn = document.getElementById('collab-submit');
+    const pageInput = document.getElementById('collab-page');
+
+    if (!fab || !panel) return;
+
+    function getCurrentPageName() {
+        const active = document.querySelector('.screen.active');
+        if (active) {
+            const heading = active.querySelector('h1, h2, h3');
+            if (heading) return heading.textContent.trim();
+            return active.id || 'Unknown';
+        }
+        return 'Home';
+    }
+
+    fab.addEventListener('click', () => {
+        const isHidden = panel.classList.contains('hidden');
+        panel.classList.toggle('hidden');
+        if (isHidden && pageInput) {
+            pageInput.value = getCurrentPageName();
+        }
+    });
+
+    closeBtn.addEventListener('click', () => panel.classList.add('hidden'));
+
+    submitBtn.addEventListener('click', () => {
+        const type = document.getElementById('collab-type').value;
+        const title = document.getElementById('collab-title').value.trim();
+        const detail = document.getElementById('collab-detail').value.trim();
+        const page = pageInput.value;
+
+        if (!title) {
+            document.getElementById('feedback-title').focus();
+            return;
+        }
+
+        const labels = { idea: 'enhancement', bug: 'bug', content: 'content', design: 'design', question: 'question' };
+        const emoji = { idea: '💡', bug: '🐛', content: '📝', design: '🎨', question: '❓' };
+
+        const issueTitle = encodeURIComponent((emoji[type] || '') + ' ' + title);
+        const body = encodeURIComponent(
+            '## Feedback\n\n' +
+            (detail || '_No additional details provided._') +
+            '\n\n---\n' +
+            '**Type:** ' + type + '\n' +
+            '**Page:** ' + page + '\n' +
+            '**Grade Level:** ' + (document.body.className.match(/age-(\w+)/)?.[1] || 'not set') + '\n' +
+            '**Browser:** ' + navigator.userAgent.split(' ').slice(-2).join(' ') + '\n'
+        );
+        const label = labels[type] || 'feedback';
+
+        window.open(
+            'https://github.com/rnnr4life/TheHopeFramework/issues/new?title=' + issueTitle + '&body=' + body + '&labels=' + label,
+            '_blank'
+        );
+
+        // Reset form
+        document.getElementById('collab-title').value = '';
+        document.getElementById('collab-detail').value = '';
+        panel.classList.add('hidden');
+    });
+})();
