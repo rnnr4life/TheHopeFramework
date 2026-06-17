@@ -2,6 +2,12 @@
 const HopeMetrics = (() => {
     const STORAGE_KEY = 'hope-metrics';
     const SESSION_KEY = 'hope-session';
+    let lastFirebaseError = '';
+
+    function canUseFirebase() {
+        const protocol = window.location.protocol;
+        return typeof hopeFirestore !== 'undefined' && (protocol === 'https:' || protocol === 'http:');
+    }
 
     function getStore() {
         try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || createStore(); }
@@ -185,16 +191,19 @@ const HopeMetrics = (() => {
     }
 
     function syncToFirebase() {
-        if (typeof hopeFirestore === 'undefined') return;
+        if (!canUseFirebase()) return;
         try {
             const store = getStore();
             const data = getSyncableData(store);
             hopeFirestore.collection('visitors').doc(getVisitorId()).set(data, { merge: true });
-        } catch (e) { /* silent fail — metrics sync is non-critical */ }
+            lastFirebaseError = '';
+        } catch (e) {
+            lastFirebaseError = String((e && (e.code || e.message)) || 'firebase-sync-failed');
+        }
     }
 
     async function getAggregateData() {
-        if (typeof hopeFirestore === 'undefined') return null;
+        if (!canUseFirebase()) return null;
         try {
             // Race the Firestore read against a timeout
             const fetchPromise = hopeFirestore.collection('visitors').get();
@@ -254,6 +263,7 @@ const HopeMetrics = (() => {
 
             return agg;
         } catch (e) {
+            lastFirebaseError = String((e && (e.code || e.message)) || 'firebase-fetch-failed');
             return null;
         }
     }
@@ -274,7 +284,11 @@ const HopeMetrics = (() => {
         trackError(e.message, e.filename ? e.filename.split('/').pop() + ':' + e.lineno : '');
     });
 
-    return { trackScreenView, trackCompletion, trackMarker, trackAge, trackFeature, trackError, trackSuggestionFollowed, getData, clearData, getAggregateData, syncToFirebase };
+    function getLastFirebaseError() {
+        return lastFirebaseError;
+    }
+
+    return { trackScreenView, trackCompletion, trackMarker, trackAge, trackFeature, trackError, trackSuggestionFollowed, getData, clearData, getAggregateData, syncToFirebase, getLastFirebaseError };
 })();
 
 
@@ -5728,7 +5742,12 @@ async function renderMetricsDashboard() {
             }
         } else {
             if (sourceBadge) {
-                sourceBadge.textContent = '📍 Local data only — no Firebase data yet';
+                const fbError = HopeMetrics.getLastFirebaseError();
+                if (fbError && /permission|denied|unauth/i.test(fbError)) {
+                    sourceBadge.textContent = '🔒 Local data only — Firestore permission denied';
+                } else {
+                    sourceBadge.textContent = '📍 Local data only — no Firebase data yet';
+                }
                 sourceBadge.style.color = 'var(--color-text-light)';
             }
         }
