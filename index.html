@@ -2463,6 +2463,8 @@
     <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore-compat.js"></script>
     <script>
+        var hopeFirestore;
+        if (typeof firebase !== 'undefined' && typeof firebase.firestore === 'function') {
         firebase.initializeApp({
             apiKey: "AIzaSyBG5v80U10WjMNtDn1qcMCzZDdnz9qpmi8",
             authDomain: "hope-framework-metrics.firebaseapp.com",
@@ -2471,7 +2473,10 @@
             messagingSenderId: "904103140768",
             appId: "1:904103140768:web:c056d0bf2ac52c091ed8c5"
         });
-        var hopeFirestore = firebase.firestore();
+        hopeFirestore = firebase.firestore();
+        } else {
+            console.error('Firebase SDK unavailable. Metrics will remain on this device.');
+        }
     </script>
     <script src="js/app.js"></script>
 </body>

@@ -43,3 +43,35 @@ In Google Cloud Console and Firebase Console, verify:
 
 - Running from `file://` is treated as local preview and Firebase sync may be unavailable.
 - For external use, open via deployed `https://` URL.
+- Classrooms, submissions, and teacher feedback are stored only in the current
+  browser. Classroom codes do not share work across devices; Firebase currently
+  syncs metrics only.
+- If the Firebase SDK cannot load, learning activities remain available with
+  local metrics. Failed metrics writes are logged to the browser console and
+  exposed through `HopeMetrics.getLastFirebaseError()`.
+- The public `visitors` rules are prototype-only: anyone can read or alter these
+  metrics. Review access controls and data retention before a classroom pilot.
+
+## Local checks
+
+From the project folder:
+
+```powershell
+node --test tests\app.test.cjs
+node --check js\app.js
+node --check hope-trail\game.js
+```
+
+The regression tests use Node's built-in test runner, local storage fixtures,
+controlled timers, and a mocked Firestore client. They require no packages and
+do not contact Firebase. They cover gallery filtering, matching-game answer and
+restart races, grade changes after loading text, text escaping, and metrics
+write failures and SDK availability. Browser and live deployment checks are
+separate.
+
+The text-escaping helper was benchmarked in Chromium with 20,000 short paragraph
+strings containing ampersands, angle brackets, quotes, nonbreaking spaces, and
+Unicode, over nine paired rounds in the same page. Before/after medians were
+17.0 ms and 9.5 ms, with identical output checksums. Output equivalence was also
+checked against DOM serialization across all UTF-16 code units. This is a
+helper-throughput measurement, not an end-to-end page-load improvement.

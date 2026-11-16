@@ -190,15 +190,16 @@ const HopeMetrics = (() => {
         };
     }
 
-    function syncToFirebase() {
+    async function syncToFirebase() {
         if (!canUseFirebase()) return;
         try {
             const store = getStore();
             const data = getSyncableData(store);
-            hopeFirestore.collection('visitors').doc(getVisitorId()).set(data, { merge: true });
+            await hopeFirestore.collection('visitors').doc(getVisitorId()).set(data, { merge: true });
             lastFirebaseError = '';
         } catch (e) {
             lastFirebaseError = String((e && (e.code || e.message)) || 'firebase-sync-failed');
+            console.error('Metrics sync failed:', e);
         }
     }
 
@@ -467,7 +468,8 @@ function setAge(age) {
     document.getElementById('activity-title').textContent = c.activityTitle;
     document.getElementById('activity-intro').textContent = c.activityIntro;
     document.getElementById('toolbar-label').textContent = c.toolbarLabel;
-    document.getElementById('placeholder-msg').textContent = c.placeholder;
+    const placeholder = document.getElementById('placeholder-msg');
+    if (placeholder) placeholder.textContent = c.placeholder;
     document.getElementById('btn-get-feedback').innerHTML =
         `<span class="btn-icon">💬</span> ${c.feedbackBtn}`;
     document.getElementById('resources-title').textContent = c.resourcesTitle;
@@ -1314,6 +1316,7 @@ function renderGallery(filter) {
             ${scoringHtml}
         </div>`;
     }).join('');
+    cardsEl.appendChild(emptyEl);
 
     // Pre-fill existing scores for teacher
     if (isTeacher) {
@@ -1765,9 +1768,11 @@ function loadText(text) {
 }
 
 function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    return String(text == null ? '' : text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\u00a0/g, '&nbsp;');
 }
 
 // ===== Clear Highlights =====
@@ -2500,8 +2505,11 @@ const matchFeedbackMessages = {
 let matchQueue = [];
 let matchIndex = 0;
 let matchAttempts = 0;
+let matchTimer = null;
 
 function initMatchActivity() {
+    clearTimeout(matchTimer);
+    matchTimer = null;
     // Shuffle phrases for the current age group
     matchQueue = [...matchPhrases[currentAge]];
     shuffleArray(matchQueue);
@@ -2535,6 +2543,7 @@ function showMatchPhrase() {
         return;
     }
 
+    document.querySelectorAll('.match-choice').forEach(btn => { btn.disabled = false; });
     const phrase = matchQueue[matchIndex];
     const phraseEl = document.getElementById('match-phrase');
     const textEl = document.getElementById('match-phrase-text');
@@ -2551,6 +2560,7 @@ function showMatchPhrase() {
 
 function handleMatchChoice(chosenMarker) {
     const phrase = matchQueue[matchIndex];
+    if (!phrase || matchTimer !== null) return;
     const phraseEl = document.getElementById('match-phrase');
     const feedbackEl = document.getElementById('match-feedback-msg');
     const msgs = matchFeedbackMessages[currentAge];
@@ -2579,7 +2589,11 @@ function handleMatchChoice(chosenMarker) {
 
         // Move to next after delay
         matchIndex++;
-        setTimeout(() => showMatchPhrase(), 2500);
+        document.querySelectorAll('.match-choice').forEach(btn => { btn.disabled = true; });
+        matchTimer = setTimeout(() => {
+            matchTimer = null;
+            showMatchPhrase();
+        }, 2500);
     } else {
         // Incorrect — give hint
         phraseEl.classList.add('incorrect');
