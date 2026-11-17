@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="880" viewBox="0 0 1000 880" role="img" aria-labelledby="title description">
+  <title id="title">HOPE icon concepts for owner review</title>
+  <desc id="description">Three unapproved vector directions shown at 16, 32, 48, 180 and 192 pixels. Existing app branding is unchanged.</desc>
+  <defs>
+    <symbol id="hope-ring" viewBox="0 0 16 16">
+      <path d="M8 1.5 A6.5 6.5 0 0 1 14.5 8" fill="none" stroke="#ff6b6b" stroke-width="1.5"/>
+      <path d="M14.5 8 A6.5 6.5 0 0 1 8 14.5" fill="none" stroke="#34d399" stroke-width="1.5"/>
+      <path d="M8 14.5 A6.5 6.5 0 0 1 1.5 8" fill="none" stroke="#38bdf8" stroke-width="1.5"/>
+      <path d="M1.5 8 A6.5 6.5 0 0 1 8 1.5" fill="none" stroke="#a855f7" stroke-width="1.5"/>
+      <path d="M5.5 5 V11 M5.5 8 H10.5 M10.5 5 V11" fill="none" stroke="white" stroke-width="1.8"/>
+    </symbol>
+    <symbol id="hope-sprout" viewBox="0 0 16 16">
+      <path d="M3 12 A6 6 0 1 1 13 12" fill="none" stroke="#34d399" stroke-width="1.5"/>
+      <path d="M8 13 V8 M8 10 C4 10 4 7 4 7 C7 7 8 8 8 10 M8 8 C8 5 11 5 11 5 C11 8 10 8 8 8" fill="none" stroke="white" stroke-width="1.4" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="hope-nodes" viewBox="0 0 16 16">
+      <circle cx="8" cy="2" r="1.5" fill="#ff6b6b"/>
+      <circle cx="14" cy="8" r="1.5" fill="#34d399"/>
+      <circle cx="8" cy="14" r="1.5" fill="#38bdf8"/>
+      <circle cx="2" cy="8" r="1.5" fill="#a855f7"/>
+      <path d="M5.5 5 V11 M5.5 8 H10.5 M10.5 5 V11" fill="none" stroke="white" stroke-width="1.8"/>
+    </symbol>
+  </defs>
+  <rect width="1000" height="880" fill="#0f1f2e"/>
+  <g font-family="Segoe UI, sans-serif" fill="white">
+    <text x="32" y="38" font-size="24">HOPE: small-size icon directions</text>
+    <text x="32" y="64" font-size="14">Owner-review concepts only. No logo replacement, legal clearance or raster-export approval implied.</text>
+    <text x="32" y="106" font-size="18">1. H + four-part ring (recommended: closest to current identity)</text>
+    <use href="#hope-ring" x="44" y="202" width="16" height="16"/>
+    <use href="#hope-ring" x="116" y="194" width="32" height="32"/>
+    <use href="#hope-ring" x="212" y="186" width="48" height="48"/>
+    <use href="#hope-ring" x="340" y="120" width="180" height="180"/>
+    <use href="#hope-ring" x="588" y="114" width="192" height="192"/>
+    <text x="40" y="328" font-size="14">16 px</text><text x="112" y="328" font-size="14">32 px</text><text x="208" y="328" font-size="14">48 px</text><text x="396" y="328" font-size="14">180 px</text><text x="650" y="328" font-size="14">192 px</text>
+    <text x="32" y="366" font-size="18">2. Sprout + open circle (simple growth metaphor; less distinctive)</text>
+    <use href="#hope-sprout" x="44" y="462" width="16" height="16"/>
+    <use href="#hope-sprout" x="116" y="454" width="32" height="32"/>
+    <use href="#hope-sprout" x="212" y="446" width="48" height="48"/>
+    <use href="#hope-sprout" x="340" y="380" width="180" height="180"/>
+    <use href="#hope-sprout" x="588" y="374" width="192" height="192"/>
+    <text x="40" y="588" font-size="14">16 px</text><text x="112" y="588" font-size="14">32 px</text><text x="208" y="588" font-size="14">48 px</text><text x="396" y="588" font-size="14">180 px</text><text x="650" y="588" font-size="14">192 px</text>
+    <text x="32" y="626" font-size="18">3. H + four nodes (marker continuity; test edge clarity at favicon scale)</text>
+    <use href="#hope-nodes" x="44" y="722" width="16" height="16"/>
+    <use href="#hope-nodes" x="116" y="714" width="32" height="32"/>
+    <use href="#hope-nodes" x="212" y="706" width="48" height="48"/>
+    <use href="#hope-nodes" x="340" y="640" width="180" height="180"/>
+    <use href="#hope-nodes" x="588" y="634" width="192" height="192"/>
+    <text x="40" y="848" font-size="14">16 px</text><text x="112" y="848" font-size="14">32 px</text><text x="208" y="848" font-size="14">48 px</text><text x="396" y="848" font-size="14">180 px</text><text x="650" y="848" font-size="14">192 px</text>
+  </g>
+</svg>

@@ -2,13 +2,6 @@
 const HopeMetrics = (() => {
     const STORAGE_KEY = 'hope-metrics';
     const SESSION_KEY = 'hope-session';
-    let lastFirebaseError = '';
-
-    function canUseFirebase() {
-        const protocol = window.location.protocol;
-        return typeof hopeFirestore !== 'undefined' && (protocol === 'https:' || protocol === 'http:');
-    }
-
     function getStore() {
         try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || createStore(); }
         catch { return createStore(); }
@@ -157,139 +150,21 @@ const HopeMetrics = (() => {
     function clearData() {
         localStorage.removeItem(STORAGE_KEY);
         sessionStorage.removeItem(SESSION_KEY);
-    }
-
-    // ===== Firebase Sync Layer =====
-    const VISITOR_KEY = 'hope-visitor-id';
-    function getVisitorId() {
-        let id = localStorage.getItem(VISITOR_KEY);
-        if (!id) {
-            id = 'v_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
-            localStorage.setItem(VISITOR_KEY, id);
-        }
-        return id;
-    }
-
-    function getSyncableData(store) {
-        // Strip large arrays that don't need to be aggregated per-visitor
-        return {
-            visitorId: getVisitorId(),
-            firstVisit: store.firstVisit,
-            lastSync: new Date().toISOString(),
-            totalSessions: store.totalSessions,
-            screenViews: store.screenViews || {},
-            screenTime: store.screenTime || {},
-            completions: store.completions || {},
-            markerUsage: store.markerUsage || {},
-            ageSelections: store.ageSelections || {},
-            featureUsage: store.featureUsage || {},
-            monthlyUsage: store.monthlyUsage || {},
-            visitedScreens: store.visitedScreens || [],
-            suggestionsFollowed: store.suggestionsFollowed || 0,
-            errorCount: (store.errors || []).length
-        };
-    }
-
-    async function syncToFirebase() {
-        if (!canUseFirebase()) return;
-        try {
-            const store = getStore();
-            const data = getSyncableData(store);
-            await hopeFirestore.collection('visitors').doc(getVisitorId()).set(data, { merge: true });
-            lastFirebaseError = '';
-        } catch (e) {
-            lastFirebaseError = String((e && (e.code || e.message)) || 'firebase-sync-failed');
-            console.error('Metrics sync failed:', e);
-        }
-    }
-
-    async function getAggregateData() {
-        if (!canUseFirebase()) return null;
-        try {
-            // Race the Firestore read against a timeout
-            const fetchPromise = hopeFirestore.collection('visitors').get();
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
-            const snapshot = await Promise.race([fetchPromise, timeoutPromise]);
-            const visitors = [];
-            snapshot.forEach(doc => visitors.push(doc.data()));
-            if (visitors.length === 0) return null;
-
-            // Aggregate all visitor data
-            const agg = {
-                totalVisitors: visitors.length,
-                totalSessions: 0,
-                screenViews: {},
-                screenTime: {},
-                completions: { match: 0, detective: 0, quest: 0, walk: 0, trail: 0, reflect: 0, textAnalysis: 0 },
-                markerUsage: { motivation: 0, belief: 0, plans: 0, agency: 0 },
-                ageSelections: { elementary: 0, middle: 0, high: 0 },
-                featureUsage: { readAloud: 0, translate: 0, voicePicker: 0, sampleStory: 0, export: 0, joinClassroom: 0, teacherHub: 0 },
-                monthlyUsage: {},
-                suggestionsFollowed: 0,
-                errorCount: 0
-            };
-
-            visitors.forEach(v => {
-                agg.totalSessions += v.totalSessions || 0;
-                agg.suggestionsFollowed += v.suggestionsFollowed || 0;
-                agg.errorCount += v.errorCount || 0;
-
-                // Merge object counters
-                for (const [k, val] of Object.entries(v.screenViews || {})) {
-                    agg.screenViews[k] = (agg.screenViews[k] || 0) + val;
-                }
-                for (const [k, val] of Object.entries(v.screenTime || {})) {
-                    agg.screenTime[k] = (agg.screenTime[k] || 0) + val;
-                }
-                for (const [k, val] of Object.entries(v.completions || {})) {
-                    if (agg.completions[k] !== undefined) agg.completions[k] += val;
-                }
-                for (const [k, val] of Object.entries(v.markerUsage || {})) {
-                    if (agg.markerUsage[k] !== undefined) agg.markerUsage[k] += val;
-                }
-                for (const [k, val] of Object.entries(v.ageSelections || {})) {
-                    if (agg.ageSelections[k] !== undefined) agg.ageSelections[k] += val;
-                }
-                for (const [k, val] of Object.entries(v.featureUsage || {})) {
-                    if (agg.featureUsage[k] !== undefined) agg.featureUsage[k] += val;
-                }
-                // Merge monthly usage
-                for (const [month, mData] of Object.entries(v.monthlyUsage || {})) {
-                    if (!agg.monthlyUsage[month]) agg.monthlyUsage[month] = { sessions: 0, screenViews: 0, completions: 0 };
-                    agg.monthlyUsage[month].sessions += mData.sessions || 0;
-                    agg.monthlyUsage[month].screenViews += mData.screenViews || 0;
-                    agg.monthlyUsage[month].completions += mData.completions || 0;
-                }
-            });
-
-            return agg;
-        } catch (e) {
-            lastFirebaseError = String((e && (e.code || e.message)) || 'firebase-fetch-failed');
-            return null;
-        }
+        localStorage.removeItem('hope-visitor-id');
+        currentScreen = null;
+        screenEnterTime = null;
+        sessionStart = Date.now();
     }
 
     // Auto-init session
     initSession();
-    // End session on page close — also sync to Firebase
-    window.addEventListener('beforeunload', () => {
-        endSession();
-        syncToFirebase();
-    });
-    // Sync to Firebase periodically (every 60s)
-    setInterval(syncToFirebase, 60000);
-    // Initial sync after short delay
-    setTimeout(syncToFirebase, 3000);
+    window.addEventListener('beforeunload', endSession);
     // Catch JS errors
     window.addEventListener('error', (e) => {
         trackError(e.message, e.filename ? e.filename.split('/').pop() + ':' + e.lineno : '');
     });
 
-    function getLastFirebaseError() {
-        return lastFirebaseError;
-    }
-
-    return { trackScreenView, trackCompletion, trackMarker, trackAge, trackFeature, trackError, trackSuggestionFollowed, getData, clearData, getAggregateData, syncToFirebase, getLastFirebaseError };
+    return { trackScreenView, trackCompletion, trackMarker, trackAge, trackFeature, trackError, trackSuggestionFollowed, getData, clearData };
 })();
 
 
@@ -326,7 +201,7 @@ const ageContent = {
         reflectBtn: 'Think About It',
         exportBtn: 'Print My Work',
         welcomeHint: 'Learn the Hope Powers → Practice matching → Read a story!',
-        welcomeMessage: 'Hey there! 🌟 Have you ever felt sad about something happening to the Earth — like animals losing their homes, or too much trash in the ocean? That\'s actually a superpower. It means you care! Today you\'re going to learn four special Hope Powers that help you find hope in the stories you read. You\'ll watch an example, practice spotting the powers, and then try it yourself. Ready?',
+        welcomeMessage: '🌟 Have you ever felt sad about something happening to the Earth — like animals losing their homes, or too much trash in the ocean? That\'s actually a superpower. It means you care! Today you\'re going to learn four special Hope Powers that help you find hope in the stories you read. You\'ll watch an example, practice spotting the powers, and then try it yourself. Ready?',
     },
     middle: {
         welcomeTitle: 'The HOPE Framework',
@@ -543,11 +418,6 @@ function updateAdaptiveWelcome() {
         suggEl.innerHTML = `<div class="welcome-back-suggestion-wrap"><button class="welcome-back-btn" id="btn-suggestion" data-screen="${suggestion.screen}" data-init="${suggestion.init || ''}">${suggestion.icon} ${suggestion.text}</button><span class="welcome-back-next-eval">Next re-evaluation at visit ${nextEval}</span></div>`;
         document.getElementById('btn-suggestion').addEventListener('click', () => {
             HopeMetrics.trackSuggestionFollowed();
-            if (suggestion.init === 'quest' && typeof initQuest === 'function') initQuest();
-            if (suggestion.init === 'resources' && typeof renderResources === 'function') renderResources();
-            if (suggestion.screen === 'detective-screen' && typeof initDetective === 'function') initDetective();
-            if (suggestion.init === 'trail' && typeof initTrail === 'function') initTrail();
-            if (suggestion.init === 'match' && typeof initMatchActivity === 'function') initMatchActivity();
             showScreen(suggestion.screen);
         });
     } else {
@@ -664,15 +534,102 @@ function updateJourneyBadges(d) {
 
 // ===== Screen Navigation =====
 const screens = document.querySelectorAll('.screen');
+const initializedScreens = new Map();
+const navigationSession = Date.now().toString(36);
+let navigationIndex = 0;
+let navigationReady = false;
+let navigationPending = false;
 
-function showScreen(id) {
-    // Stop any playing audio/guided narration on screen change
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-    try { clearTimeout(guidedTimer); } catch(e) {}
-    try { guidedPlaying = false; } catch(e) {}
+function goBack() {
+    if (navigationPending) return;
+    if (navigationReady && navigationIndex > 0) {
+        navigationPending = true;
+        window.history.back();
+    } else {
+        showScreen('welcome-screen');
+    }
+}
+
+function initNavigation() {
+    const requested = window.location.hash.slice(1);
+    if (requested === 'marker-detail-screen') {
+        const index = markerOrder.indexOf(window.history.state?.hopeMarker);
+        currentMarkerIdx = index < 0 ? 0 : index;
+    }
+    if ([...screens].some(screen => screen.id === requested)) showScreen(requested, { record: false });
+    const active = document.querySelector('.screen.active');
+    window.history.replaceState({ hopeScreen: active.id, hopeSession: navigationSession, hopeIndex: 0,
+        hopeMarker: active.id === 'marker-detail-screen' ? markerOrder[currentMarkerIdx] : null }, '');
+    navigationReady = true;
+    window.addEventListener('popstate', event => {
+        const id = event.state?.hopeScreen || window.location.hash.slice(1);
+        navigationPending = false;
+        if (![...screens].some(screen => screen.id === id)) return;
+        navigationIndex = event.state?.hopeSession === navigationSession ? event.state.hopeIndex : 0;
+        if (id === 'marker-detail-screen') {
+            const index = markerOrder.indexOf(event.state?.hopeMarker);
+            currentMarkerIdx = index < 0 ? 0 : index;
+        }
+        showScreen(id, { record: false });
+        if (event.state?.hopeSession !== navigationSession) {
+            window.history.replaceState({ hopeScreen: id, hopeSession: navigationSession, hopeIndex: 0,
+                hopeMarker: id === 'marker-detail-screen' ? markerOrder[currentMarkerIdx] : null }, '');
+        }
+    });
+}
+
+function prepareScreen(id) {
+    if (id === 'marker-detail-screen') {
+        renderMarkerDetail(markerOrder[currentMarkerIdx]);
+        return;
+    }
+    const grade = id === 'trail-screen' ? 'all' : currentAge;
+    if (initializedScreens.get(id) === grade) return;
+    const initializers = {
+        'walk-screen': initWalk,
+        'guided-screen': initGuided,
+        'detective-screen': initDetective,
+        'quest-screen': initQuest,
+        'match-screen': initMatchActivity,
+        'resources-screen': renderResources,
+        'trail-screen': initTrail
+    };
+    if (initializers[id]) {
+        initializers[id]();
+        initializedScreens.set(id, grade);
+    }
+}
+
+function showScreen(id, options = {}) {
+    const target = document.getElementById(id);
+    if (!target || !target.classList.contains('screen')) {
+        console.error('Unknown HOPE screen:', id);
+        showToast('That page is not available.');
+        return;
+    }
+    const previous = document.querySelector('.screen.active');
+    prepareScreen(id);
+    if (previous === target) {
+        if (id === 'marker-detail-screen' && navigationReady) {
+            window.history.replaceState({ ...window.history.state, hopeMarker: markerOrder[currentMarkerIdx] }, '');
+        }
+        return;
+    }
+    if (previous?.id === 'walk-screen') stopWalkEffects(true);
+    if (navigationReady && options.record !== false) {
+        navigationIndex++;
+        window.history.pushState({ hopeScreen: id, hopeSession: navigationSession, hopeIndex: navigationIndex,
+            hopeMarker: id === 'marker-detail-screen' ? markerOrder[currentMarkerIdx] : null }, '', '#' + id);
+    }
+    const iframe = document.getElementById('trail-iframe');
+    if (iframe.contentWindow && (previous?.id === 'trail-screen' || id === 'trail-screen')) {
+        iframe.contentWindow.postMessage({ type: 'hope-trail-visibility', active: id === 'trail-screen' },
+            window.location.origin === 'null' ? '*' : window.location.origin);
+    }
+    pauseGuided();
 
     screens.forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+    target.classList.add('active');
     window.scrollTo(0, 0);
 
     // Track screen view
@@ -683,16 +640,20 @@ function showScreen(id) {
 
     // Update global nav active state
     updateNavActive(id);
+    const heading = target.querySelector('h1, h2, h3');
+    if (heading) {
+        heading.tabIndex = -1;
+        heading.focus({ preventScroll: true });
+    }
 }
 
 document.getElementById('btn-start').addEventListener('click', () => showScreen('learn-screen'));
 document.getElementById('btn-to-activity').addEventListener('click', () => {
-    initMatchActivity();
     showScreen('match-screen');
 });
-document.getElementById('btn-back-learn').addEventListener('click', () => showScreen('welcome-screen'));
-document.getElementById('btn-back-match').addEventListener('click', () => showScreen('learn-screen'));
-document.getElementById('btn-back-activity').addEventListener('click', () => showScreen('match-screen'));
+document.getElementById('btn-back-learn').addEventListener('click', goBack);
+document.getElementById('btn-back-match').addEventListener('click', goBack);
+document.getElementById('btn-back-activity').addEventListener('click', goBack);
 document.getElementById('btn-to-find-hope').addEventListener('click', () => {
     showScreen('activity-screen');
     if (window._teacherText) {
@@ -703,14 +664,14 @@ document.getElementById('btn-to-find-hope').addEventListener('click', () => {
 });
 // btn-change-age removed — global nav handles grade changes
 document.getElementById('btn-reflect').addEventListener('click', () => showScreen('reflect-screen'));
-document.getElementById('btn-back-reflect').addEventListener('click', () => showScreen('activity-screen'));
+document.getElementById('btn-back-reflect').addEventListener('click', goBack);
 
 
 // ===== Global Navigation =====
 const screenToGroup = {
     'welcome-screen': 'home',
     'learn-screen': 'learn', 'match-screen': 'learn', 'activity-screen': 'learn', 'reflect-screen': 'learn', 'marker-detail-screen': 'learn',
-    'detective-screen': 'games', 'quest-screen': 'games', 'walk-screen': 'games',
+    'detective-screen': 'games', 'quest-screen': 'games', 'walk-screen': 'games', 'trail-screen': 'games',
     'guided-screen': 'tools', 'resources-screen': 'tools', 'my-hope-screen': 'tools', 'creative-write-screen': 'tools', 'gallery-screen': 'tools',
     'teacher-hub-screen': 'teacher',
     'worksheet-teacher-screen': 'teacher', 'worksheet-conversations-screen': 'teacher',
@@ -757,11 +718,6 @@ document.querySelectorAll('.global-nav-dropdown-item').forEach(item => {
         const target = item.dataset.nav;
         closeNavDropdowns();
         closeNavMobile();
-        // Init functions for certain screens
-        if (item.dataset.init === 'quest' && typeof initQuest === 'function') initQuest();
-        if (item.dataset.init === 'resources' && typeof renderResources === 'function') renderResources();
-        if (target === 'detective-screen' && typeof initDetective === 'function') initDetective();
-        if (item.dataset.init === 'trail') initTrail();
         showScreen(target);
     });
 });
@@ -834,10 +790,16 @@ document.querySelectorAll('.marker-card').forEach(card => {
 const markerOrder = ['motivation', 'belief', 'plans', 'agency'];
 let currentMarkerIdx = 0;
 
+document.querySelectorAll('[data-wheel-marker]').forEach(link => {
+    link.addEventListener('click', event => {
+        event.preventDefault();
+        openMarkerDetail(link.dataset.wheelMarker);
+    });
+});
+
 function openMarkerDetail(markerKey) {
     currentMarkerIdx = markerOrder.indexOf(markerKey);
     if (currentMarkerIdx === -1) currentMarkerIdx = 0;
-    renderMarkerDetail(markerKey);
     showScreen('marker-detail-screen');
 }
 
@@ -898,20 +860,20 @@ document.querySelectorAll('.btn-deep-dive').forEach(btn => {
 });
 
 // Back button
-document.getElementById('btn-back-marker-detail').addEventListener('click', () => showScreen('learn-screen'));
+document.getElementById('btn-back-marker-detail').addEventListener('click', goBack);
 
 // Prev/Next
 document.getElementById('btn-marker-prev').addEventListener('click', () => {
     if (currentMarkerIdx > 0) {
         currentMarkerIdx--;
-        renderMarkerDetail(markerOrder[currentMarkerIdx]);
+        openMarkerDetail(markerOrder[currentMarkerIdx]);
         window.scrollTo(0, 0);
     }
 });
 document.getElementById('btn-marker-next').addEventListener('click', () => {
     if (currentMarkerIdx < markerOrder.length - 1) {
         currentMarkerIdx++;
-        renderMarkerDetail(markerOrder[currentMarkerIdx]);
+        openMarkerDetail(markerOrder[currentMarkerIdx]);
         window.scrollTo(0, 0);
     }
 });
@@ -921,7 +883,7 @@ document.getElementById('marker-deep-dots').addEventListener('click', (e) => {
     const dot = e.target.closest('.marker-deep-dot');
     if (!dot) return;
     currentMarkerIdx = parseInt(dot.dataset.idx);
-    renderMarkerDetail(markerOrder[currentMarkerIdx]);
+    openMarkerDetail(markerOrder[currentMarkerIdx]);
     window.scrollTo(0, 0);
 });
 
@@ -1201,7 +1163,7 @@ document.querySelectorAll('.teacher-extend-app-link[data-activity]').forEach(btn
 });
 
 // Creative screen: back, clear, publish
-document.getElementById('btn-back-creative').addEventListener('click', () => showScreen('welcome-screen'));
+document.getElementById('btn-back-creative').addEventListener('click', goBack);
 document.getElementById('btn-creative-clear').addEventListener('click', () => {
     if (document.getElementById('creative-textarea').value.trim() && !confirm('Clear your writing?')) return;
     document.getElementById('creative-textarea').value = '';
@@ -1339,7 +1301,7 @@ function renderGallery(filter) {
 
 // Gallery: back
 document.getElementById('btn-back-gallery').addEventListener('click', () => {
-    showScreen(getClassroom() ? 'teacher-hub-screen' : 'welcome-screen');
+    goBack();
 });
 
 // Gallery: filter
@@ -1670,7 +1632,7 @@ document.querySelectorAll('.myhope-mode-card').forEach(card => {
 });
 
 // Back button
-document.getElementById('btn-back-myhope').addEventListener('click', () => showScreen('welcome-screen'));
+document.getElementById('btn-back-myhope').addEventListener('click', goBack);
 
 // Prev
 document.getElementById('btn-myhope-prev').addEventListener('click', () => {
@@ -2308,6 +2270,8 @@ const markerSignals = {
 function evaluateFinding(finding) {
     const signals = markerSignals[finding.marker];
     const text = finding.text;
+    const example = Object.values(matchPhrases).flat().find(phrase => phrase.text === text);
+    if (example) return example.marker === finding.marker ? 'aligned' : 'notAligned';
 
     let matchCount = 0;
     signals.patterns.forEach(pattern => {
@@ -2505,11 +2469,12 @@ const matchFeedbackMessages = {
 let matchQueue = [];
 let matchIndex = 0;
 let matchAttempts = 0;
-let matchTimer = null;
+let matchAnswered = false;
+let matchCompleted = false;
 
 function initMatchActivity() {
-    clearTimeout(matchTimer);
-    matchTimer = null;
+    matchAnswered = false;
+    matchCompleted = false;
     // Shuffle phrases for the current age group
     matchQueue = [...matchPhrases[currentAge]];
     shuffleArray(matchQueue);
@@ -2552,6 +2517,7 @@ function showMatchPhrase() {
     textEl.textContent = phrase.text;
     phraseEl.className = 'match-phrase'; // reset classes
     feedbackEl.classList.add('hidden');
+    document.getElementById('btn-match-continue').classList.add('hidden');
 
     // Update progress bar
     const pct = (matchIndex / matchQueue.length) * 100;
@@ -2560,13 +2526,14 @@ function showMatchPhrase() {
 
 function handleMatchChoice(chosenMarker) {
     const phrase = matchQueue[matchIndex];
-    if (!phrase || matchTimer !== null) return;
+    if (!phrase || matchAnswered || matchCompleted) return;
     const phraseEl = document.getElementById('match-phrase');
     const feedbackEl = document.getElementById('match-feedback-msg');
     const msgs = matchFeedbackMessages[currentAge];
     const markerNames = { motivation: 'Motivation', belief: 'Belief', plans: 'Plans', agency: 'Agency' };
 
     matchAttempts++;
+    phraseEl.classList.remove('incorrect');
 
     if (chosenMarker === phrase.marker) {
         // Correct!
@@ -2587,13 +2554,12 @@ function handleMatchChoice(chosenMarker) {
         const countEl = document.getElementById(`bucket-count-${phrase.marker}`);
         countEl.textContent = parseInt(countEl.textContent) + 1;
 
-        // Move to next after delay
-        matchIndex++;
+        matchAnswered = true;
         document.querySelectorAll('.match-choice').forEach(btn => { btn.disabled = true; });
-        matchTimer = setTimeout(() => {
-            matchTimer = null;
-            showMatchPhrase();
-        }, 2500);
+        const next = document.getElementById('btn-match-continue');
+        next.textContent = matchIndex === matchQueue.length - 1 ? 'See Results' : 'Continue';
+        next.classList.remove('hidden');
+        next.focus();
     } else {
         // Incorrect — give hint
         phraseEl.classList.add('incorrect');
@@ -2604,17 +2570,25 @@ function handleMatchChoice(chosenMarker) {
         feedbackEl.textContent = `${wrongMsg} Hint: ${hint}`;
         feedbackEl.classList.remove('hidden');
 
-        // Reset animation after a moment
-        setTimeout(() => {
-            phraseEl.classList.remove('incorrect');
-        }, 500);
     }
 }
 
+function continueMatch() {
+    if (!matchAnswered || matchCompleted) return;
+    matchAnswered = false;
+    matchIndex++;
+    showMatchPhrase();
+    if (!matchCompleted) document.querySelector('.match-choice').focus();
+}
+
 function completeMatchActivity() {
+    if (matchCompleted) return;
+    matchCompleted = true;
     // Hide workspace, show complete state
     document.querySelector('.match-workspace').style.display = 'none';
     document.getElementById('match-complete').classList.remove('hidden');
+    document.getElementById('match-complete').setAttribute('tabindex', '-1');
+    document.getElementById('match-complete').focus();
 
     // Fill progress bar
     document.getElementById('match-progress-fill').style.width = '100%';
@@ -2626,6 +2600,7 @@ function completeMatchActivity() {
 }
 
 // Wire up choice buttons
+document.getElementById('btn-match-continue').addEventListener('click', continueMatch);
 document.querySelectorAll('.match-choice').forEach(btn => {
     btn.addEventListener('click', () => {
         handleMatchChoice(btn.dataset.marker);
@@ -2634,155 +2609,6 @@ document.querySelectorAll('.match-choice').forEach(btn => {
 
 
 // ===== Resources =====
-
-const resources = {
-    elementary: [
-        {
-            icon: '📚',
-            title: 'Books',
-            items: [
-                { title: 'We Are Water Protectors', desc: 'by Carole Lindstrom — A girl fights to protect Earth\'s water. Caldecott Medal winner.', meta: 'Picture Book', url: 'https://bookshop.org/search?keywords=We+Are+Water+Protectors+Carole+Lindstrom' },
-                { title: 'The Great Kapok Tree', desc: 'by Lynne Cherry — Animals in the rainforest speak up to save their home.', meta: 'Picture Book', url: 'https://bookshop.org/search?keywords=The+Great+Kapok+Tree+Lynne+Cherry' },
-                { title: 'The Watcher', desc: 'by Jeanette Winter — The true story of Jane Goodall and her work with chimpanzees.', meta: 'Picture Book', url: 'https://bookshop.org/search?keywords=The+Watcher+Jeanette+Winter+Jane+Goodall' },
-                { title: 'One Plastic Bag', desc: 'by Miranda Paul — A true story about a woman in Gambia who recycled plastic bags to help her community.', meta: 'Picture Book', url: 'https://bookshop.org/search?keywords=One+Plastic+Bag+Miranda+Paul' },
-                { title: 'The Lorax', desc: 'by Dr. Seuss — A classic story about speaking up for trees and the environment.', meta: 'Picture Book', url: 'https://bookshop.org/search?keywords=The+Lorax+Dr+Seuss' },
-            ]
-        },
-        {
-            icon: '📺',
-            title: 'TV Shows',
-            items: [
-                { title: 'Wild Kratts', desc: 'Join the Kratt brothers on animal adventures and learn about wildlife and habitats.', meta: 'PBS Kids', url: 'https://pbskids.org/wildkratts/' },
-                { title: 'Octonauts', desc: 'Explore the ocean and learn about sea creatures with Captain Barnacles and crew.', meta: 'Netflix / Disney+', url: 'https://en.wikipedia.org/wiki/Octonauts' },
-                { title: 'Molly of Denali', desc: 'An Alaska Native girl explores nature and solves problems in her community.', meta: 'PBS Kids', url: 'https://pbskids.org/molly/' },
-            ]
-        },
-        {
-            icon: '🌐',
-            title: 'Websites',
-            items: [
-                { title: 'NASA Climate Kids', desc: 'Games, videos, and activities about weather, climate, and taking care of Earth.', url: 'https://climatekids.nasa.gov/' },
-                { title: 'National Geographic Kids', desc: 'Fun facts, videos, and quizzes about animals, nature, and the planet.', url: 'https://kids.nationalgeographic.com/' },
-                { title: 'Ranger Rick', desc: 'Stories and activities about wildlife and nature from the National Wildlife Federation.', url: 'https://rangerrick.org/' },
-            ]
-        },
-        {
-            icon: '🎮',
-            title: 'Games & Activities',
-            items: [
-                { title: 'Recycle City', desc: 'Explore a virtual city and learn how to reduce, reuse, and recycle.', meta: 'EPA', url: 'https://www.epa.gov/recyclecity' },
-                { title: 'Climate Kids: Big Questions', desc: 'Interactive activities and experiments you can do at home about climate.', url: 'https://climatekids.nasa.gov/menu/make/' },
-            ]
-        },
-        {
-            icon: '📝',
-            title: 'Worksheets',
-            items: [
-                { title: 'Searching for HOPE', desc: 'A fun worksheet for finding the four HOPE markers in any story you read.', meta: 'Fillable', action: 'worksheet-search-screen' },
-                { title: 'Teacher Planning Page', desc: 'A planning tool for teachers to record HOPE markers while reading climate literature.', meta: 'For Teachers', action: 'worksheet-teacher-screen' },
-                { title: 'Climate Conversations', desc: 'Discussion starter questions for each HOPE marker to use with students.', meta: 'For Teachers', action: 'worksheet-conversations-screen' },
-            ]
-        }
-    ],
-    middle: [
-        {
-            icon: '📚',
-            title: 'Books',
-            items: [
-                { title: 'Hoot', desc: 'by Carl Hiaasen — Kids take on a construction company to protect endangered owls in Florida.', meta: 'Novel', url: 'https://bookshop.org/search?keywords=Hoot+Carl+Hiaasen' },
-                { title: 'The Wild Robot', desc: 'by Peter Brown — A robot learns to survive in the wilderness and connects with nature.', meta: 'Novel', url: 'https://bookshop.org/search?keywords=The+Wild+Robot+Peter+Brown' },
-                { title: 'A Wolf Called Wander', desc: 'by Rosanne Parry — Based on the true story of a young wolf\'s journey across the Pacific Northwest.', meta: 'Novel', url: 'https://bookshop.org/search?keywords=A+Wolf+Called+Wander+Rosanne+Parry' },
-                { title: 'Flush', desc: 'by Carl Hiaasen — A kid investigates illegal dumping threatening his local waters.', meta: 'Novel', url: 'https://bookshop.org/search?keywords=Flush+Carl+Hiaasen' },
-                { title: 'The Last Cuentista', desc: 'by Donna Barba Higuera — A girl must keep stories alive after Earth is destroyed. Newbery Medal winner.', meta: 'Novel', url: 'https://bookshop.org/search?keywords=The+Last+Cuentista+Donna+Barba+Higuera' },
-            ]
-        },
-        {
-            icon: '📺',
-            title: 'Shows & Documentaries',
-            items: [
-                { title: 'Our Planet', desc: 'Stunning documentary series about Earth\'s habitats and the animals that live in them.', meta: 'Netflix', url: 'https://en.wikipedia.org/wiki/Our_Planet' },
-                { title: 'Planet Earth', desc: 'The groundbreaking nature series exploring every corner of the planet.', meta: 'BBC / Streaming', url: 'https://en.wikipedia.org/wiki/Planet_Earth_(2006_TV_series)' },
-                { title: 'Biggest Little Farm', desc: 'A couple transforms dead farmland into a thriving ecosystem. A real-life hope story.', meta: 'Documentary', url: 'https://en.wikipedia.org/wiki/The_Biggest_Little_Farm' },
-            ]
-        },
-        {
-            icon: '🌐',
-            title: 'Websites & Organizations',
-            items: [
-                { title: 'NOAA Climate.gov', desc: 'Climate science explained clearly with data, maps, and educational resources.', url: 'https://www.climate.gov/' },
-                { title: 'NASA Climate Change', desc: 'Evidence, causes, effects, and solutions — straight from NASA scientists.', url: 'https://climate.nasa.gov/' },
-                { title: 'Roots & Shoots', desc: 'Jane Goodall\'s program for young people taking action in their communities.', url: 'https://rootsandshoots.org/' },
-            ]
-        },
-        {
-            icon: '🎙️',
-            title: 'Podcasts & Blogs',
-            items: [
-                { title: 'Brains On!', desc: 'A science podcast for curious kids — episodes on climate, oceans, and ecosystems.', url: 'https://brainson.org/' },
-                { title: 'The Gist (Yale)', desc: 'Short, clear articles explaining climate science for non-experts.', url: 'https://yaleclimateconnections.org/' },
-            ]
-        },
-        {
-            icon: '📝',
-            title: 'Worksheets',
-            items: [
-                { title: 'Finding Hope in Literature', desc: 'A worksheet for identifying HOPE markers in any story, article, or film.', meta: 'Fillable', action: 'worksheet-literature-screen' },
-                { title: 'Teacher Planning Page', desc: 'Record HOPE markers while reading climate literature — a teacher planning tool.', meta: 'For Teachers', action: 'worksheet-teacher-screen' },
-                { title: 'Climate Conversations', desc: 'Discussion prompts for each HOPE marker to spark dialogue with students.', meta: 'For Teachers', action: 'worksheet-conversations-screen' },
-            ]
-        }
-    ],
-    high: [
-        {
-            icon: '📚',
-            title: 'Books',
-            items: [
-                { title: 'Braiding Sweetgrass', desc: 'by Robin Wall Kimmerer — Indigenous wisdom, scientific knowledge, and the lessons of plants.', meta: 'Nonfiction', url: 'https://bookshop.org/search?keywords=Braiding+Sweetgrass+Robin+Wall+Kimmerer' },
-                { title: 'The Sixth Extinction', desc: 'by Elizabeth Kolbert — An investigation into the current mass extinction event. Pulitzer Prize winner.', meta: 'Nonfiction', url: 'https://bookshop.org/search?keywords=The+Sixth+Extinction+Elizabeth+Kolbert' },
-                { title: 'All We Can Save', desc: 'ed. Johnson & Wilkinson — Essays and poetry from women leading on climate. A collection of hope and vision.', meta: 'Anthology', url: 'https://bookshop.org/search?keywords=All+We+Can+Save+Johnson+Wilkinson' },
-                { title: 'The Uninhabitable Earth', desc: 'by David Wallace-Wells — What climate science tells us about our future, and what we can do.', meta: 'Nonfiction', url: 'https://bookshop.org/search?keywords=The+Uninhabitable+Earth+David+Wallace-Wells' },
-                { title: 'A Sand County Almanac', desc: 'by Aldo Leopold — A foundational text on environmental ethics and our relationship with the land.', meta: 'Classic', url: 'https://bookshop.org/search?keywords=A+Sand+County+Almanac+Aldo+Leopold' },
-            ]
-        },
-        {
-            icon: '🎬',
-            title: 'Documentaries & Film',
-            items: [
-                { title: 'Chasing Ice', desc: 'A photographer documents the dramatic retreat of glaciers worldwide. Visual evidence of climate change.', meta: 'Documentary', url: 'https://en.wikipedia.org/wiki/Chasing_Ice' },
-                { title: '2040', desc: 'A filmmaker explores what the future could look like if we adopted the best solutions available today.', meta: 'Documentary', url: 'https://en.wikipedia.org/wiki/2040_(film)' },
-                { title: 'Kiss the Ground', desc: 'How regenerative agriculture could be a key solution to climate change.', meta: 'Netflix', url: 'https://en.wikipedia.org/wiki/Kiss_the_Ground' },
-            ]
-        },
-        {
-            icon: '🌐',
-            title: 'Academic & Research',
-            items: [
-                { title: 'Yale Climate Connections', desc: 'Research-backed reporting on climate science, impacts, and solutions.', url: 'https://yaleclimateconnections.org/' },
-                { title: 'IPCC Reports', desc: 'The Intergovernmental Panel on Climate Change — the definitive source for climate science.', url: 'https://www.ipcc.ch/' },
-                { title: 'Project Drawdown', desc: 'A comprehensive plan for the most effective solutions to reverse global warming.', url: 'https://drawdown.org/' },
-                { title: 'The HOPE Framework (paper)', desc: 'Dr. Colleen Redmond\'s original research article in Climate Literacy in Education.', url: 'https://doi.org/10.24926/cle.v2i1.6231', meta: 'Academic Paper' },
-            ]
-        },
-        {
-            icon: '🎙️',
-            title: 'Podcasts & Media',
-            items: [
-                { title: 'How to Save a Planet', desc: 'Explores the science and human stories behind climate change solutions.', meta: 'Gimlet / Spotify', url: 'https://open.spotify.com/show/1KzrasExlM5dgMYwgFHns6' },
-                { title: 'The Ezra Klein Show', desc: 'In-depth interviews on climate policy, systems thinking, and agency.', meta: 'NY Times', url: 'https://www.nytimes.com/column/ezra-klein-podcast' },
-                { title: 'TED Climate', desc: 'Talks from scientists, activists, and thinkers on climate action and hope.', url: 'https://www.ted.com/topics/climate+change' },
-            ]
-        },
-        {
-            icon: '📝',
-            title: 'Worksheets',
-            items: [
-                { title: 'Finding Hope in Literature', desc: 'Identify and analyze HOPE markers across any text, film, or media.', meta: 'Fillable', action: 'worksheet-literature-screen' },
-                { title: 'Teacher Planning Page', desc: 'Structured tool for recording HOPE markers while reading climate literature with students.', meta: 'For Teachers', action: 'worksheet-teacher-screen' },
-                { title: 'Climate Conversations', desc: 'Conversation starters for each HOPE marker — includes equity and power distribution prompts.', meta: 'For Teachers', action: 'worksheet-conversations-screen' },
-            ]
-        }
-    ]
-};
 
 function renderResources() {
     const data = resources[currentAge];
@@ -2884,19 +2710,18 @@ function renderResources() {
 
 // Resources navigation
 document.getElementById('btn-resources').addEventListener('click', () => {
-    renderResources();
     showScreen('resources-screen');
 });
 document.getElementById('btn-back-resources').addEventListener('click', () => {
-    showScreen('welcome-screen');
+    goBack();
 });
 
 // ===== Worksheet Navigation =====
 // Back buttons
-document.getElementById('btn-back-ws-search').addEventListener('click', () => showScreen('welcome-screen'));
-document.getElementById('btn-back-ws-lit').addEventListener('click', () => showScreen('welcome-screen'));
-document.getElementById('btn-back-ws-teacher').addEventListener('click', () => showScreen('welcome-screen'));
-document.getElementById('btn-back-ws-convo').addEventListener('click', () => showScreen('welcome-screen'));
+document.getElementById('btn-back-ws-search').addEventListener('click', goBack);
+document.getElementById('btn-back-ws-lit').addEventListener('click', goBack);
+document.getElementById('btn-back-ws-teacher').addEventListener('click', goBack);
+document.getElementById('btn-back-ws-convo').addEventListener('click', goBack);
 
 // Print buttons
 document.getElementById('btn-print-ws-search').addEventListener('click', () => window.print());
@@ -3407,7 +3232,7 @@ function renderQuestStage() {
 
     // Play enter sound and typewriter
     questSFX.enter();
-    setTimeout(() => questSFX.type(scenario.scene.length), 400);
+    questSFX.type(scenario.scene.length);
 
     // Shuffle choices
     const letters = ['A', 'B', 'C', 'D'];
@@ -3446,6 +3271,7 @@ function handleQuestChoice(btn, scenario) {
         // Mark correct
         btn.classList.add('correct');
         document.querySelectorAll('.quest-choice').forEach(b => {
+            b.disabled = true;
             if (b !== btn) b.classList.add('dimmed-choice');
         });
 
@@ -3463,10 +3289,6 @@ function handleQuestChoice(btn, scenario) {
         `;
         resultEl.classList.remove('hidden');
 
-        // Auto-advance after a delay
-        const advanceDelay = setTimeout(() => advanceQuest(), 4000);
-
-        // Also allow clicking to skip the wait
         resultEl.insertAdjacentHTML('beforeend', `
             <div class="quest-continue">
                 <button class="btn btn-primary btn-small" id="btn-quest-next">
@@ -3474,10 +3296,8 @@ function handleQuestChoice(btn, scenario) {
                 </button>
             </div>
         `);
-        document.getElementById('btn-quest-next').addEventListener('click', () => {
-            clearTimeout(advanceDelay);
-            advanceQuest();
-        });
+        document.getElementById('btn-quest-next').addEventListener('click', advanceQuest);
+        document.getElementById('btn-quest-next').focus();
     } else {
         // Wrong
         questSFX.wrong();
@@ -3486,16 +3306,15 @@ function handleQuestChoice(btn, scenario) {
         resultEl.innerHTML = `<div class="quest-result-title">Not quite...</div><p>${scenario.wrong}</p>`;
         resultEl.classList.remove('hidden');
 
-        setTimeout(() => {
-            btn.classList.remove('wrong');
-            resultEl.classList.add('hidden');
-        }, 2500);
     }
 }
 
 function advanceQuest() {
+    if (!questChoiceMade) return;
+    questChoiceMade = false;
     questStage++;
     if (questStage >= 4) {
+        HopeMetrics.trackCompletion('quest');
         showQuestVictory();
     } else {
         renderQuestStage();
@@ -3525,11 +3344,10 @@ function showQuestVictory() {
 
 // Navigation
 document.getElementById('btn-quest').addEventListener('click', () => {
-    initQuest();
     showScreen('quest-screen');
 });
 document.getElementById('btn-back-quest').addEventListener('click', () => {
-    showScreen('welcome-screen');
+    goBack();
 });
 document.getElementById('btn-quest-restart').addEventListener('click', () => {
     initQuest();
@@ -4029,11 +3847,25 @@ const guidedStory = {
 let guidedStep = -1;
 let guidedPlaying = false;
 let guidedTimer = null;
+let guidedGeneration = 0;
+
+function pauseGuided() {
+    const wasPlaying = guidedPlaying;
+    guidedPlaying = false;
+    guidedGeneration++;
+    clearTimeout(guidedTimer);
+    guidedTimer = null;
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    if (wasPlaying) {
+        document.getElementById('btn-guided-play').textContent = '▶ Resume';
+        document.getElementById('btn-guided-play').style.display = '';
+        document.getElementById('btn-guided-pause').style.display = 'none';
+    }
+}
 
 function initGuided() {
+    pauseGuided();
     guidedStep = -1;
-    guidedPlaying = false;
-    clearTimeout(guidedTimer);
 
     // Render story with pre-placed highlights (dimmed)
     const textEl = document.getElementById('guided-text');
@@ -4062,6 +3894,9 @@ function initGuided() {
     document.getElementById('btn-guided-play').textContent = '▶ Start Guided Reading';
     document.getElementById('btn-guided-play').style.display = '';
     document.getElementById('btn-guided-pause').style.display = 'none';
+    document.getElementById('guided-completion').classList.add('hidden');
+    document.getElementById('btn-guided-next').classList.remove('hidden');
+    document.getElementById('btn-guided-next').textContent = 'Read Without Audio';
 
     // Reset progress tracker
     updateGuidedProgress(-1);
@@ -4084,12 +3919,17 @@ function updateGuidedProgress(step) {
 }
 
 function advanceGuided() {
+    if (guidedStep >= guidedStory.paragraphs.length) return;
     guidedStep++;
     if (guidedStep >= guidedStory.paragraphs.length) {
         guidedPlaying = false;
         document.getElementById('btn-guided-play').style.display = 'none';
         document.getElementById('btn-guided-pause').style.display = 'none';
-
+        document.getElementById('btn-guided-next').classList.add('hidden');
+        if (currentAge === 'elementary') {
+            document.getElementById('guided-completion').classList.remove('hidden');
+            document.getElementById('btn-guided-story').focus();
+        }
         updateGuidedProgress(4); // All done
 
         const ta = document.getElementById('guided-thinkaloud');
@@ -4108,7 +3948,15 @@ function advanceGuided() {
         return;
     }
 
+    renderGuidedStep();
+}
+
+function renderGuidedStep() {
+    clearTimeout(guidedTimer);
+    const generation = ++guidedGeneration;
     const thought = guidedStory.thoughts[currentAge][guidedStep];
+    document.getElementById('btn-guided-next').textContent = guidedStep === guidedStory.paragraphs.length - 1
+        ? 'Finish Guided Reading' : 'Next Paragraph';
 
     // Update progress tracker
     updateGuidedProgress(guidedStep);
@@ -4125,7 +3973,10 @@ function advanceGuided() {
 
     // Scroll paragraph into view
     const para = document.querySelector(`.guided-text p[data-step="${guidedStep}"]`);
-    if (para) para.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (para) para.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+        block: 'center'
+    });
 
     // Update think-aloud with marker-colored border
     const ta = document.getElementById('guided-thinkaloud');
@@ -4149,13 +4000,24 @@ function advanceGuided() {
         const voice = getSelectedVoice();
         if (voice) { utter.voice = voice; utter.lang = voice.lang; }
         utter.onend = () => {
-            if (guidedPlaying) {
-                guidedTimer = setTimeout(advanceGuided, 1500);
+            if (guidedPlaying && generation === guidedGeneration) {
+                guidedTimer = setTimeout(() => {
+                    if (guidedPlaying && generation === guidedGeneration) advanceGuided();
+                }, 1500);
             }
+        };
+        utter.onerror = event => {
+            if (generation !== guidedGeneration || event.error === 'canceled' || event.error === 'interrupted') return;
+            console.warn('Guided read-aloud failed:', event.error);
+            pauseGuided();
+            showToast('Read-aloud is unavailable. Use Next Paragraph to continue without audio.');
+            document.getElementById('btn-guided-next').focus();
         };
         window.speechSynthesis.speak(utter);
     } else if (guidedPlaying) {
-        guidedTimer = setTimeout(advanceGuided, 6000);
+        pauseGuided();
+        showToast('Read-aloud is unavailable. Use Next Paragraph to continue without audio.');
+        document.getElementById('btn-guided-next').focus();
     }
 }
 
@@ -4163,33 +4025,30 @@ document.getElementById('btn-guided-play').addEventListener('click', () => {
     guidedPlaying = true;
     document.getElementById('btn-guided-play').style.display = 'none';
     document.getElementById('btn-guided-pause').style.display = '';
+    if (guidedStep < 0) advanceGuided();
+    else renderGuidedStep();
+});
+
+document.getElementById('btn-guided-pause').addEventListener('click', pauseGuided);
+
+document.getElementById('btn-guided-next').addEventListener('click', () => {
+    pauseGuided();
     advanceGuided();
 });
 
-document.getElementById('btn-guided-pause').addEventListener('click', () => {
-    guidedPlaying = false;
-    window.speechSynthesis.cancel();
-    clearTimeout(guidedTimer);
-    document.getElementById('btn-guided-play').textContent = '▶ Resume';
-    document.getElementById('btn-guided-play').style.display = '';
-    document.getElementById('btn-guided-pause').style.display = 'none';
-});
-
 document.getElementById('btn-guided-reset').addEventListener('click', () => {
-    window.speechSynthesis.cancel();
-    clearTimeout(guidedTimer);
     initGuided();
 });
 
+document.getElementById('btn-guided-story').addEventListener('click', openStoryChoices);
 document.getElementById('btn-guided').addEventListener('click', () => {
-    initGuided();
     showScreen('guided-screen');
 });
 document.getElementById('btn-back-guided').addEventListener('click', () => {
-    window.speechSynthesis.cancel();
+    pauseGuided();
     clearTimeout(guidedTimer);
     guidedPlaying = false;
-    showScreen('welcome-screen');
+    goBack();
 });
 
 
@@ -4403,21 +4262,26 @@ const detectiveClues = {
 let detectiveCase = 0;
 let detectiveCorrect = 0;
 let detectiveTotal = 0;
+let detectiveSolved = false;
 let selectedClue = null;
 
 function initDetective() {
     const cases = detectiveClues[currentAge];
     detectiveCase = detectiveCase % cases.length;
     detectiveCorrect = 0;
+    detectiveSolved = false;
     const clueData = cases[detectiveCase];
     detectiveTotal = clueData.clues.length;
     selectedClue = null;
+    document.querySelector('.detective-board').style.display = '';
+    document.querySelector('.detective-header').style.display = '';
 
     document.getElementById('detective-score').textContent = '0';
     document.getElementById('detective-total').textContent = detectiveTotal;
     document.getElementById('detective-fill').style.width = '0%';
     document.getElementById('detective-solved').classList.add('hidden');
     document.getElementById('detective-title').textContent = `🔍 Case: ${clueData.story}`;
+    document.getElementById('detective-remaining').textContent = `${detectiveTotal} clues remain. Place every clue correctly to complete this case.`;
 
     // Clear zones
     document.querySelectorAll('.detective-zone-drop').forEach(zone => {
@@ -4434,7 +4298,7 @@ function initDetective() {
     // Render clue cards
     const list = document.getElementById('detective-clue-list');
     list.innerHTML = shuffled.map((clue, i) => `
-        <div class="detective-clue" draggable="true" data-marker="${clue.marker}" data-idx="${i}" id="clue-${i}">
+        <div class="detective-clue" role="button" tabindex="0" aria-pressed="false" draggable="true" data-marker="${clue.marker}" data-idx="${i}" id="clue-${i}">
             "${escapeHtml(clue.text)}"
         </div>
     `).join('');
@@ -4449,6 +4313,8 @@ function setupDetectiveDragDrop() {
 
     // Drag events on clues
     clues.forEach(clue => {
+        if (clue.dataset.bound === 'true') return;
+        clue.dataset.bound = 'true';
         clue.addEventListener('dragstart', (e) => {
             clue.classList.add('dragging');
             e.dataTransfer.setData('text/plain', clue.id);
@@ -4463,17 +4329,31 @@ function setupDetectiveDragDrop() {
             if (clue.classList.contains('placed')) return;
             if (selectedClue === clue) {
                 clue.classList.remove('selected');
+                clue.setAttribute('aria-pressed', 'false');
                 selectedClue = null;
             } else {
-                document.querySelectorAll('.detective-clue.selected').forEach(c => c.classList.remove('selected'));
+                document.querySelectorAll('.detective-clue.selected').forEach(c => {
+                    c.classList.remove('selected');
+                    c.setAttribute('aria-pressed', 'false');
+                });
+                clue.classList.remove('wrong-drop');
                 clue.classList.add('selected');
+                clue.setAttribute('aria-pressed', 'true');
                 selectedClue = clue;
+            }
+        });
+        clue.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                if (!event.repeat) clue.click();
             }
         });
     });
 
     // Drop events on zones
     zones.forEach(zone => {
+        if (zone.dataset.bound === 'true') return;
+        zone.dataset.bound = 'true';
         zone.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
@@ -4491,26 +4371,37 @@ function setupDetectiveDragDrop() {
         });
 
         // Tap-to-place: clicking a zone places the selected clue
-        zone.addEventListener('click', () => {
+        const placeSelected = () => {
             if (selectedClue && !selectedClue.classList.contains('placed')) {
                 handleClueDrop(selectedClue, zone);
                 selectedClue = null;
+            } else {
+                document.getElementById('detective-remaining').textContent = 'Select a clue first, then choose Place Clue under its marker.';
             }
+        };
+        zone.closest('.detective-zone').querySelector('.detective-place').addEventListener('click', placeSelected);
+        zone.addEventListener('click', event => {
+            if (!event.target.closest('.detective-clue')) placeSelected();
         });
     });
 }
 
 function handleClueDrop(clue, zone) {
+    if (clue.classList.contains('placed') || detectiveSolved) return;
     const clueMarker = clue.dataset.marker;
     const zoneMarker = zone.dataset.marker;
 
     if (clueMarker === zoneMarker) {
         // Correct!
         questSFX.fragment();
-        clue.classList.remove('selected', 'dragging');
+        clue.classList.remove('selected', 'dragging', 'wrong-drop');
         clue.classList.add('placed');
         clue.draggable = false;
         clue.removeAttribute('data-idx');
+        clue.setAttribute('aria-pressed', 'false');
+        clue.setAttribute('aria-disabled', 'true');
+        clue.tabIndex = -1;
+        selectedClue = null;
 
         // Remove hint text if present
         const hint = zone.querySelector('.detective-zone-hint');
@@ -4522,21 +4413,29 @@ function handleClueDrop(clue, zone) {
         detectiveCorrect++;
         document.getElementById('detective-score').textContent = detectiveCorrect;
         document.getElementById('detective-fill').style.width = `${(detectiveCorrect / detectiveTotal) * 100}%`;
+        document.getElementById('detective-remaining').textContent = `${detectiveTotal - detectiveCorrect} clues remain. Place every clue correctly to complete this case.`;
 
         // Check if case is solved
         if (detectiveCorrect >= detectiveTotal) {
-            setTimeout(() => solveDetective(), 600);
+            solveDetective();
+        } else {
+            document.querySelector('.detective-clue:not(.placed)')?.focus();
         }
     } else {
         // Wrong!
         questSFX.wrong();
         clue.classList.add('wrong-drop');
         clue.classList.remove('selected');
-        setTimeout(() => clue.classList.remove('wrong-drop'), 500);
+        clue.setAttribute('aria-pressed', 'false');
+        selectedClue = null;
+        document.getElementById('detective-remaining').textContent = `Not quite. Select the clue again and try another marker. ${detectiveTotal - detectiveCorrect} clues remain.`;
     }
 }
 
 function solveDetective() {
+    if (detectiveSolved || detectiveCorrect !== detectiveTotal) return;
+    detectiveSolved = true;
+    HopeMetrics.trackCompletion('detective');
     document.querySelector('.detective-board').style.display = 'none';
     document.querySelector('.detective-header').style.display = 'none';
 
@@ -4548,20 +4447,20 @@ function solveDetective() {
 
     document.getElementById('detective-solved-msg').textContent = msgs[currentAge];
     document.getElementById('detective-solved').classList.remove('hidden');
+    document.getElementById('btn-detective-next').focus();
     questSFX.victory();
     triggerCelebration();
 }
 
 // Navigation
 document.getElementById('btn-detective').addEventListener('click', () => {
-    detectiveCase = 0;
-    initDetective();
     showScreen('detective-screen');
 });
 document.getElementById('btn-back-detective').addEventListener('click', () => {
-    showScreen('welcome-screen');
+    goBack();
 });
 document.getElementById('btn-detective-next').addEventListener('click', () => {
+    if (!detectiveSolved) return;
     detectiveCase++;
     document.querySelector('.detective-board').style.display = '';
     document.querySelector('.detective-header').style.display = '';
@@ -5127,6 +5026,38 @@ const walkScenes = {
 let walkStage = 0;
 let walkSceneData = [];
 let walkSparkFound = false;
+let walkAnswered = false;
+const walkEffects = new Map();
+const walkFrames = new Map();
+
+function walkDelay(callback, delay) {
+    const id = setTimeout(() => {
+        walkEffects.delete(id);
+        callback();
+    }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : delay);
+    walkEffects.set(id, callback);
+}
+
+function walkFrame(callback) {
+    const id = requestAnimationFrame(() => {
+        walkFrames.delete(id);
+        callback();
+    });
+    walkFrames.set(id, callback);
+}
+
+function stopWalkEffects(finish = false) {
+    for (const [id, callback] of walkFrames) {
+        cancelAnimationFrame(id);
+        walkFrames.delete(id);
+        if (finish) callback();
+    }
+    for (const [id, callback] of walkEffects) {
+        clearTimeout(id);
+        walkEffects.delete(id);
+        if (finish) callback();
+    }
+}
 
 function initWalk() {
     walkStage = 0;
@@ -5141,8 +5072,10 @@ function initWalk() {
 }
 
 function renderWalkScene() {
+    stopWalkEffects();
     const scene = walkSceneData[walkStage];
     walkSparkFound = false;
+    walkAnswered = false;
     const viewport = document.getElementById('walk-viewport');
     const sky = document.getElementById('walk-sky');
     const ground = document.getElementById('walk-ground');
@@ -5262,7 +5195,7 @@ function renderWalkScene() {
 
     // Place sparks
     sparksEl.innerHTML = scene.sparks.map((s, i) => `
-        <div class="walk-spark" data-marker="${s.marker}" style="left:${s.x};top:${s.y}" id="walk-spark-${i}">✨</div>
+        <button class="walk-spark" aria-label="Find the hope in this scene" data-marker="${s.marker}" style="left:${s.x};top:${s.y}" id="walk-spark-${i}">✨</button>
     `).join('');
 
     // Narrative — start with distress
@@ -5278,16 +5211,16 @@ function renderWalkScene() {
     character.classList.add('walking');
     walkSFX.wind();
     walkSFX.footsteps();
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
+    walkFrame(() => {
+        walkFrame(() => {
             character.style.left = '';  // clear inline style so CSS class takes over
             character.classList.add('entered');
         });
     });
-    setTimeout(() => {
+    walkDelay(() => {
         character.classList.remove('walking');
         // Show "tap to find hope" hint
-        narrative.innerHTML += '<br><em style="color:var(--color-primary);font-size:0.85rem">Look for the glowing spark in the scene — tap it to find the hope!</em>';
+        if (!walkSparkFound) narrative.innerHTML += '<br><em style="color:var(--color-primary);font-size:0.85rem">Look for the glowing spark in the scene — tap it to find the hope!</em>';
     }, 2000);
 
     // Spark click handlers
@@ -5350,30 +5283,30 @@ function handleSparkClick(spark, scene) {
         const b2 = document.getElementById('walk-bird-2');
         const b3 = document.getElementById('walk-bird-3');
         if (b1) b1.classList.add('visible');
-        if (b2) setTimeout(() => b2.classList.add('visible'), 500);
-        if (b3) setTimeout(() => b3.classList.add('visible'), 900);
+        if (b2) walkDelay(() => b2.classList.add('visible'), 500);
+        if (b3) walkDelay(() => b3.classList.add('visible'), 900);
     }
     if (t.showFlowers) {
         ['walk-flower-1', 'walk-flower-2', 'walk-flower-3', 'walk-flower-4', 'walk-flower-5'].forEach((id, i) => {
             const fl = document.getElementById(id);
-            if (fl) setTimeout(() => fl.classList.add('bloomed'), i * 150);
+            if (fl) walkDelay(() => fl.classList.add('bloomed'), i * 150);
         });
     }
 
     // Always show grass, fireflies, and butterflies on hope
     for (let i = 1; i <= 6; i++) {
         const g = document.getElementById(`walk-grass-${i}`);
-        if (g) setTimeout(() => g.classList.add('visible'), i * 100);
+        if (g) walkDelay(() => g.classList.add('visible'), i * 100);
     }
     for (let i = 1; i <= 5; i++) {
         const f = document.getElementById(`walk-firefly-${i}`);
-        if (f) setTimeout(() => f.classList.add('visible'), 600 + i * 150);
+        if (f) walkDelay(() => f.classList.add('visible'), 600 + i * 150);
     }
-    setTimeout(() => {
+    walkDelay(() => {
         const bt1 = document.getElementById('walk-butterfly-1');
         const bt2 = document.getElementById('walk-butterfly-2');
         if (bt1) bt1.classList.add('visible');
-        if (bt2) setTimeout(() => bt2.classList.add('visible'), 400);
+        if (bt2) walkDelay(() => bt2.classList.add('visible'), 400);
     }, 1000);
 
     // Update water
@@ -5391,7 +5324,7 @@ function handleSparkClick(spark, scene) {
 
     // Reveal hidden-hope custom elements with staggered animation
     document.querySelectorAll('.hidden-hope').forEach((el, i) => {
-        setTimeout(() => {
+        walkDelay(() => {
             el.classList.remove('hidden-hope');
             el.classList.add('revealed-hope');
         }, 400 + i * 250);
@@ -5403,7 +5336,7 @@ function handleSparkClick(spark, scene) {
     });
 
     // Show marker pick
-    setTimeout(() => {
+    walkDelay(() => {
         document.getElementById('walk-marker-pick').classList.remove('hidden');
     }, 800);
 
@@ -5417,11 +5350,13 @@ function handleSparkClick(spark, scene) {
 }
 
 function handleWalkMarker(chosen, scene) {
+    if (!walkSparkFound || walkAnswered) return;
     const feedback = document.getElementById('walk-feedback');
     const nextBtn = document.getElementById('btn-walk-next');
     const character = document.getElementById('walk-character');
 
     if (chosen === scene.marker) {
+        walkAnswered = true;
         walkSFX.correct();
         feedback.className = 'walk-feedback correct';
         feedback.innerHTML = `<strong>That's right!</strong> ${scene.explain}`;
@@ -5435,7 +5370,7 @@ function handleWalkMarker(chosen, scene) {
         walkSFX.footsteps();
 
         // Show next button after walk-off animation
-        setTimeout(() => {
+        walkDelay(() => {
             character.classList.remove('walking');
             nextBtn.classList.remove('hidden');
         }, 2000);
@@ -5444,13 +5379,15 @@ function handleWalkMarker(chosen, scene) {
         feedback.className = 'walk-feedback wrong';
         feedback.textContent = 'Not quite — look at what you found and think about what kind of hope it shows.';
         feedback.classList.remove('hidden');
-        setTimeout(() => feedback.classList.add('hidden'), 2000);
     }
 }
 
 document.getElementById('btn-walk-next').addEventListener('click', () => {
+    if (!walkAnswered) return;
+    walkAnswered = false;
     walkStage++;
     if (walkStage >= walkSceneData.length) {
+        HopeMetrics.trackCompletion('walk');
         showWalkVictory();
     } else {
         renderWalkScene();
@@ -5475,11 +5412,10 @@ function showWalkVictory() {
 
 // Navigation
 document.getElementById('btn-walk').addEventListener('click', () => {
-    initWalk();
     showScreen('walk-screen');
 });
 document.getElementById('btn-back-walk').addEventListener('click', () => {
-    showScreen('welcome-screen');
+    goBack();
 });
 
 // Hope Trail — embedded iframe
@@ -5490,15 +5426,14 @@ function initTrail() {
 }
 
 document.getElementById('btn-back-trail').addEventListener('click', () => {
-    // Clear iframe to stop game audio/animation
-    document.getElementById('trail-iframe').src = '';
-    showScreen('welcome-screen');
+    goBack();
 });
 
 // Listen for the game's "exit" message
 window.addEventListener('message', (e) => {
-    if (e.data && e.data.type === 'hope-trail-exit') {
-        document.getElementById('trail-iframe').src = '';
+    const iframe = document.getElementById('trail-iframe');
+    if (e.source === iframe.contentWindow && e.origin === window.location.origin &&
+        e.data && e.data.type === 'hope-trail-exit') {
         showScreen('welcome-screen');
     }
 });
@@ -5567,7 +5502,8 @@ const sampleTexts = {
 };
 
 // Text picker
-document.getElementById('btn-sample-text').addEventListener('click', () => {
+function openStoryChoices() {
+    showScreen('activity-screen');
     const texts = sampleTexts[currentAge];
     const grid = document.getElementById('text-picker-grid');
     grid.innerHTML = texts.map((t, i) => `
@@ -5586,7 +5522,10 @@ document.getElementById('btn-sample-text').addEventListener('click', () => {
     });
 
     document.getElementById('text-picker-modal').classList.remove('hidden');
-});
+}
+
+document.getElementById('btn-sample-text').addEventListener('click', openStoryChoices);
+document.getElementById('btn-learn-story-choices').addEventListener('click', openStoryChoices);
 
 document.getElementById('btn-cancel-picker').addEventListener('click', () => {
     document.getElementById('text-picker-modal').classList.add('hidden');
@@ -5673,7 +5612,7 @@ document.getElementById('btn-teacher-hub').addEventListener('click', () => {
     showScreen('teacher-hub-screen');
 });
 document.getElementById('btn-back-teacher-hub').addEventListener('click', () => {
-    showScreen('age-screen');
+    goBack();
 });
 
 // Teacher Hub card buttons
@@ -5687,8 +5626,6 @@ document.getElementById('btn-teacher-hub-worksheets').addEventListener('click', 
     showScreen('worksheet-literature-screen');
 });
 document.getElementById('btn-teacher-hub-guided').addEventListener('click', () => {
-    setAge('middle'); // Default to middle for teacher guided example
-    initGuided();
     showScreen('guided-screen');
 });
 
@@ -5729,47 +5666,19 @@ document.getElementById('btn-apply-teacher').addEventListener('click', () => {
 screenToGroup['metrics-screen'] = 'metrics';
 
 // Back button
-document.getElementById('btn-back-metrics').addEventListener('click', () => showScreen('welcome-screen'));
+document.getElementById('btn-back-metrics').addEventListener('click', goBack);
 
 // Subtle metrics link in version label
 document.getElementById('btn-open-metrics').addEventListener('click', () => showScreen('metrics-screen'));
 
-async function renderMetricsDashboard() {
+function renderMetricsDashboard() {
     const localData = HopeMetrics.getData();
     const sourceBadge = document.getElementById('metrics-source-badge');
 
-    // Render local data immediately so the dashboard isn't empty
-    renderMetricsData(localData, false);
+    renderMetricsData(localData);
     if (sourceBadge) {
-        sourceBadge.textContent = '🔄 Fetching aggregate data...';
-        sourceBadge.style.color = 'var(--color-plans)';
-    }
-
-    // Try to get aggregate data from Firebase in the background
-    try {
-        const agg = await HopeMetrics.getAggregateData();
-        if (agg) {
-            renderMetricsData(agg, true);
-            if (sourceBadge) {
-                sourceBadge.textContent = `✅ Live — ${agg.totalVisitors} visitor${agg.totalVisitors !== 1 ? 's' : ''} synced`;
-                sourceBadge.style.color = 'var(--color-agency)';
-            }
-        } else {
-            if (sourceBadge) {
-                const fbError = HopeMetrics.getLastFirebaseError();
-                if (fbError && /permission|denied|unauth/i.test(fbError)) {
-                    sourceBadge.textContent = '🔒 Local data only — Firestore permission denied';
-                } else {
-                    sourceBadge.textContent = '📍 Local data only — no Firebase data yet';
-                }
-                sourceBadge.style.color = 'var(--color-text-light)';
-            }
-        }
-    } catch (e) {
-        if (sourceBadge) {
-            sourceBadge.textContent = '📍 Local data only — Firebase unavailable';
-            sourceBadge.style.color = 'var(--color-text-light)';
-        }
+        sourceBadge.textContent = 'Browser metrics only - cloud collection disabled';
+        sourceBadge.style.color = 'var(--color-text-light)';
     }
 
     // Insights always use local data (personalization)
@@ -5781,17 +5690,15 @@ async function renderMetricsDashboard() {
     renderEventLog(localData.events || []);
 }
 
-function renderMetricsData(d, isAggregate) {
+function renderMetricsData(d) {
     // KPIs
     const totalScreenViews = Object.values(d.screenViews || {}).reduce((a, b) => a + b, 0);
     const totalCompletions = Object.values(d.completions || {}).reduce((a, b) => a + b, 0);
-    const visitorsEl = document.getElementById('kpi-visitors');
-    if (visitorsEl) visitorsEl.textContent = isAggregate ? d.totalVisitors : 1;
     document.getElementById('kpi-sessions').textContent = d.totalSessions || 0;
     document.getElementById('kpi-screens').textContent = totalScreenViews;
     document.getElementById('kpi-completions').textContent = totalCompletions;
     document.getElementById('kpi-suggestions').textContent = d.suggestionsFollowed || 0;
-    document.getElementById('kpi-errors').textContent = isAggregate ? (d.errorCount || 0) : (d.errors || []).length;
+    document.getElementById('kpi-errors').textContent = (d.errors || []).length;
 
     // Usage over time chart
     renderUsageChart(d.monthlyUsage || {});
@@ -6237,6 +6144,15 @@ function formatDuration(ms) {
 // Refresh button
 document.getElementById('btn-metrics-refresh').addEventListener('click', renderMetricsDashboard);
 
+function clearBrowserMetrics() {
+    if (!confirm('Clear usage metrics in this browser? Classroom work, downloaded files and legacy cloud records will not be deleted.')) return;
+    HopeMetrics.clearData();
+    renderMetricsDashboard();
+    showToast('Browser metrics cleared. Classroom work and legacy cloud records are unchanged.');
+}
+
+document.getElementById('btn-metrics-clear').addEventListener('click', clearBrowserMetrics);
+
 // Export button
 document.getElementById('btn-metrics-export').addEventListener('click', () => {
     const data = HopeMetrics.getData();
@@ -6272,6 +6188,7 @@ if (metricsScreen) {
         showScreen('welcome-screen');
     }
 })();
+initNavigation();
 
 // ===== Feedback Widget =====
 (function initFeedbackWidget() {

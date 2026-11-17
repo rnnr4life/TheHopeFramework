@@ -1,12 +1,7 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Public metrics collection used by the app's aggregate dashboard.
-    match /visitors/{visitorId} {
-      allow read, write: if true;
-    }
-
-    // Lock everything else down by default.
+    // Metrics are browser-only. Legacy records are not client-accessible.
     match /{document=**} {
       allow read, write: if false;
     }

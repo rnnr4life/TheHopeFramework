@@ -46,7 +46,7 @@
                     <circle cx="100" cy="184" r="7" fill="#38bdf8"/><circle cx="16" cy="100" r="7" fill="#a855f7"/>
                     <path d="M68 55 L68 145 M68 100 L132 100 M132 55 L132 145" fill="none" stroke="white" stroke-width="14" stroke-linecap="round"/>
                 </svg>
-                <span class="global-nav-title">HOPE</span>
+                <span class="global-nav-title">HOPE Home</span>
             </button>
 
             <button class="global-nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
@@ -179,6 +179,7 @@
                     <text x="250" y="320" text-anchor="middle" font-family="var(--font-body)" font-size="12" fill="rgba(200,215,230,0.6)">Healing Opportunities</text>
                     <text x="250" y="338" text-anchor="middle" font-family="var(--font-body)" font-size="12" fill="rgba(200,215,230,0.6)">for Processing Eco-Grief</text>
                     <!-- Motivation (top) -->
+                    <a href="#marker-detail-screen" class="hope-wheel-link" data-wheel-marker="motivation" aria-label="Explore Motivation for Change">
                     <circle cx="250" cy="50" r="32" fill="#ff6b6b" opacity="0.9" filter="url(#wsg)"/>
                     <circle cx="250" cy="50" r="32" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
                     <path d="M238 64 L250 40 L262 64 Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
@@ -186,7 +187,10 @@
                     <circle cx="255" cy="42" r="3" fill="white" opacity="0.8"/>
                     <text x="300" y="44" text-anchor="start" font-family="var(--font-heading)" font-size="17" font-weight="800" fill="#ff6b6b">Motivation</text>
                     <text x="300" y="62" text-anchor="start" font-family="var(--font-body)" font-size="11" fill="rgba(148,163,184,0.7)">for Change</text>
+                    <circle class="hope-wheel-hit" cx="250" cy="50" r="40"/>
+                    </a>
                     <!-- Agency (right) -->
+                    <a href="#marker-detail-screen" class="hope-wheel-link" data-wheel-marker="agency" aria-label="Explore Agency to Take Action">
                     <circle cx="450" cy="250" r="32" fill="#34d399" opacity="0.9" filter="url(#wsg)"/>
                     <circle cx="450" cy="250" r="32" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
                     <circle cx="450" cy="238" r="4" fill="white"/>
@@ -197,14 +201,20 @@
                     <line x1="450" y1="256" x2="457" y2="266" stroke="white" stroke-width="2" stroke-linecap="round"/>
                     <text x="440" y="296" text-anchor="middle" font-family="var(--font-heading)" font-size="17" font-weight="800" fill="#34d399">Agency</text>
                     <text x="440" y="314" text-anchor="middle" font-family="var(--font-body)" font-size="11" fill="rgba(148,163,184,0.7)">to take action</text>
+                    <circle class="hope-wheel-hit" cx="450" cy="250" r="40"/>
+                    </a>
                     <!-- Plans (bottom) -->
+                    <a href="#marker-detail-screen" class="hope-wheel-link" data-wheel-marker="plans" aria-label="Explore Plans for a Path Forward">
                     <circle cx="250" cy="450" r="32" fill="#38bdf8" opacity="0.9" filter="url(#wsg)"/>
                     <circle cx="250" cy="450" r="32" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
                     <path d="M242 463 Q250 453 258 458 Q266 463 258 443 Q254 436 250 438" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/>
                     <circle cx="250" cy="436" r="4" fill="white" opacity="0.8"/>
                     <text x="193" y="456" text-anchor="end" font-family="var(--font-heading)" font-size="17" font-weight="800" fill="#38bdf8">Plans</text>
                     <text x="193" y="474" text-anchor="end" font-family="var(--font-body)" font-size="11" fill="rgba(148,163,184,0.7)">for a path forward</text>
+                    <circle class="hope-wheel-hit" cx="250" cy="450" r="40"/>
+                    </a>
                     <!-- Belief (left) -->
+                    <a href="#marker-detail-screen" class="hope-wheel-link" data-wheel-marker="belief" aria-label="Explore Belief that Change is Possible">
                     <circle cx="50" cy="250" r="32" fill="#a855f7" opacity="0.9" filter="url(#wsg)"/>
                     <circle cx="50" cy="250" r="32" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
                     <path d="M50 260 C40 248 40 238 47 235 C50 234 53 236 50 240" fill="none" stroke="white" stroke-width="2"/>
@@ -212,6 +222,8 @@
                     <path d="M46 248 Q50 244 54 248" fill="none" stroke="white" stroke-width="1.5" opacity="0.7"/>
                     <text x="40" y="296" text-anchor="middle" font-family="var(--font-heading)" font-size="17" font-weight="800" fill="#a855f7">Belief</text>
                     <text x="40" y="314" text-anchor="middle" font-family="var(--font-body)" font-size="11" fill="rgba(148,163,184,0.7)">change is possible</text>
+                    <circle class="hope-wheel-hit" cx="50" cy="250" r="40"/>
+                    </a>
                 </svg>
                 </div>
             </div>
@@ -1116,6 +1128,7 @@
                     <span id="btn-activity-text">Try the Activity</span>
                     <span class="btn-arrow">&rarr;</span>
                 </button>
+                <button class="btn" id="btn-learn-story-choices">Choose a Story</button>
             </div>
         </div>
     </section>
@@ -1354,7 +1367,8 @@
                             <span class="match-choice-label" id="match-label-agency">Agency</span>
                         </button>
                     </div>
-                    <div id="match-feedback-msg" class="match-feedback-msg hidden"></div>
+                    <div id="match-feedback-msg" class="match-feedback-msg hidden" role="status"></div>
+                    <button class="btn btn-primary hidden" id="btn-match-continue">Continue</button>
                 </div>
 
                 <!-- Sorted buckets — shows what's been sorted -->
@@ -1454,7 +1468,7 @@
                 <div class="text-panel">
                     <div class="text-controls">
                         <button class="btn btn-small btn-fun" id="btn-sample-text">
-                            <span class="btn-icon">📖</span> Sample Story
+                            <span class="btn-icon">📖</span> Choose Another Story
                         </button>
                         <button class="btn btn-small btn-fun" id="btn-paste-text">
                             <span class="btn-icon">📋</span> Paste Your Own
@@ -1576,6 +1590,7 @@
                     <span id="detective-score">0</span> / <span id="detective-total">0</span> clues solved
                     <div class="detective-progress-bar"><div class="detective-progress-fill" id="detective-fill"></div></div>
                 </div>
+                <p id="detective-remaining" role="status">Place every clue correctly to complete this case.</p>
             </div>
 
             <div class="detective-board">
@@ -1585,6 +1600,7 @@
                         <div class="detective-zone-header">
                             <span class="detective-zone-icon">🔥</span>
                             <span class="detective-zone-label">Motivation</span>
+                            <button class="btn btn-small detective-place" aria-label="Place selected clue in Motivation">Place Clue</button>
                         </div>
                         <div class="detective-zone-drop" data-marker="motivation">
                             <span class="detective-zone-hint">Drop clues here</span>
@@ -1594,6 +1610,7 @@
                         <div class="detective-zone-header">
                             <span class="detective-zone-icon">✨</span>
                             <span class="detective-zone-label">Belief</span>
+                            <button class="btn btn-small detective-place" aria-label="Place selected clue in Belief">Place Clue</button>
                         </div>
                         <div class="detective-zone-drop" data-marker="belief">
                             <span class="detective-zone-hint">Drop clues here</span>
@@ -1603,6 +1620,7 @@
                         <div class="detective-zone-header">
                             <span class="detective-zone-icon">🗺️</span>
                             <span class="detective-zone-label">Plans</span>
+                            <button class="btn btn-small detective-place" aria-label="Place selected clue in Plans">Place Clue</button>
                         </div>
                         <div class="detective-zone-drop" data-marker="plans">
                             <span class="detective-zone-hint">Drop clues here</span>
@@ -1612,6 +1630,7 @@
                         <div class="detective-zone-header">
                             <span class="detective-zone-icon">💪</span>
                             <span class="detective-zone-label">Agency</span>
+                            <button class="btn btn-small detective-place" aria-label="Place selected clue in Agency">Place Clue</button>
                         </div>
                         <div class="detective-zone-drop" data-marker="agency">
                             <span class="detective-zone-hint">Drop clues here</span>
@@ -1683,7 +1702,7 @@
                 </div>
                 <div class="quest-narrative" id="quest-narrative"></div>
                 <div class="quest-choices" id="quest-choices"></div>
-                <div class="quest-result hidden" id="quest-result"></div>
+                <div class="quest-result hidden" id="quest-result" role="status"></div>
             </div>
 
             <!-- Victory -->
@@ -2153,6 +2172,12 @@
                             <button class="btn btn-lg" id="btn-guided-pause" style="display:none">⏸ Pause</button>
                         </div>
                         <button class="btn btn-small btn-muted" id="btn-guided-reset">↺ Start Over</button>
+                        <button class="btn btn-small" id="btn-guided-next">Read Without Audio</button>
+                    </div>
+
+                    <div class="guided-action-card hidden" id="guided-completion">
+                        <p role="status">Guided reading complete.</p>
+                        <button class="btn btn-primary" id="btn-guided-story">Try a Story on Your Own</button>
                     </div>
 
                     <!-- Think-aloud panel — the main feedback area -->
@@ -2297,19 +2322,17 @@
 
             <div class="metrics-header">
                 <h2>📊 Usage Metrics Dashboard</h2>
-                <p class="section-intro">Aggregate usage across all visitors. Data synced via Firebase. <span class="metrics-source-badge" id="metrics-source-badge">Loading...</span></p>
+                <p class="section-intro">Usage in this browser profile only, not a count of individual people. <span class="metrics-source-badge" id="metrics-source-badge">Cloud collection disabled</span></p>
                 <div class="metrics-header-actions">
                     <button class="btn btn-small" id="btn-metrics-refresh">🔄 Refresh</button>
                     <button class="btn btn-small" id="btn-metrics-export">📥 Export JSON</button>
+                    <button class="btn btn-small" id="btn-metrics-clear">Clear browser metrics</button>
                 </div>
+                <p class="metrics-card-subtitle">Clearing browser metrics also removes any legacy visitor ID. Classroom work, saved exports and legacy cloud records are not deleted.</p>
             </div>
 
             <!-- KPI Row -->
             <div class="metrics-kpi-row" id="metrics-kpi-row">
-                <div class="metrics-kpi">
-                    <span class="metrics-kpi-value" id="kpi-visitors">0</span>
-                    <span class="metrics-kpi-label">Unique Visitors</span>
-                </div>
                 <div class="metrics-kpi">
                     <span class="metrics-kpi-value" id="kpi-sessions">0</span>
                     <span class="metrics-kpi-label">Total Sessions</span>
@@ -2460,24 +2483,7 @@
     </div>
 
     <div id="app-version" class="app-version-label">v2.4.0 <button class="metrics-subtle-link" id="btn-open-metrics" aria-label="Usage metrics">📊</button></div>
-    <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore-compat.js"></script>
-    <script>
-        var hopeFirestore;
-        if (typeof firebase !== 'undefined' && typeof firebase.firestore === 'function') {
-        firebase.initializeApp({
-            apiKey: "AIzaSyBG5v80U10WjMNtDn1qcMCzZDdnz9qpmi8",
-            authDomain: "hope-framework-metrics.firebaseapp.com",
-            projectId: "hope-framework-metrics",
-            storageBucket: "hope-framework-metrics.firebasestorage.app",
-            messagingSenderId: "904103140768",
-            appId: "1:904103140768:web:c056d0bf2ac52c091ed8c5"
-        });
-        hopeFirestore = firebase.firestore();
-        } else {
-            console.error('Firebase SDK unavailable. Metrics will remain on this device.');
-        }
-    </script>
+    <script src="js/resources.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

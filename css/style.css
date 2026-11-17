@@ -5461,6 +5461,23 @@ body { padding-top: 28px; }
 .skip-nav:focus { top: 0; }
 :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
+.walk-spark { border: 0; background: transparent; padding: 0.5rem; }
+.detective-zone-header { flex-wrap: wrap; }
+.detective-place { margin-left: auto; }
+.hope-wheel-link { cursor: pointer; }
+.hope-wheel-hit { fill: transparent; stroke: transparent; stroke-width: 3px; }
+.hope-wheel-link:hover .hope-wheel-hit,
+.hope-wheel-link:focus-visible .hope-wheel-hit { stroke: var(--color-primary); }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 
 /* ===== Utilities ===== */
 .hidden { display: none !important; }

@@ -105,6 +105,16 @@ h2 {
     text-shadow: 0 0 8px var(--hope-green);
 }
 
+.menu-option[role="button"] { display: inline-block; }
+.menu-option:focus-visible {
+    outline: 2px solid var(--hope-green-light);
+    outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
 .prompt {
     text-align: center;
     font-size: 10px;

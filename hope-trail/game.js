@@ -1201,6 +1201,22 @@ function drawLandmarkScene(canvas, landmark) {
 
 // --- TRAVEL ANIMATION ---
 let travelAnim = null;
+let travelResume = null;
+let travelPauseStarted = null;
+
+function setTrailVisible(active) {
+    if (!active && travelAnim !== null) {
+        cancelAnimationFrame(travelAnim);
+        travelAnim = null;
+        travelPauseStarted = performance.now();
+    } else if (active && travelPauseStarted !== null && travelResume) {
+        travelResume();
+    }
+    if (audioCtx) {
+        const action = active && soundOn ? audioCtx.resume() : audioCtx.suspend();
+        action.catch(error => console.error('Trail audio state change failed:', error));
+    }
+}
 
 function playTravelAnimation(milesGained, onComplete) {
     const canvas = document.getElementById('scene-canvas');
@@ -1214,8 +1230,9 @@ function playTravelAnimation(milesGained, onComplete) {
 
     const paceSpeed = { slow: 1.0, steady: 1.6, fast: 2.4 };
     const speed = paceSpeed[game.pace] || 1.6;
-    const durationMs = Math.max(3000, Math.min(6000, 5000 / speed));
-    const startTime = performance.now();
+    const durationMs = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 1 : Math.max(3000, Math.min(6000, 5000 / speed));
+    let startTime = performance.now();
 
     const scenery = [];
     const region = getRegion(game.miles);
@@ -1365,9 +1382,16 @@ function playTravelAnimation(milesGained, onComplete) {
             travelAnim = requestAnimationFrame(frame);
         } else {
             travelAnim = null;
+            travelResume = null;
+            travelPauseStarted = null;
             onComplete();
         }
     }
+    travelResume = () => {
+        startTime += performance.now() - travelPauseStarted;
+        travelPauseStarted = null;
+        travelAnim = requestAnimationFrame(frame);
+    };
     travelAnim = requestAnimationFrame(frame);
 }
 
@@ -1481,7 +1505,34 @@ let challengeIndex = 0;
 // =====================
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+    const screen = document.getElementById(id);
+    screen.classList.add('active');
+    prepareTrailControls(screen);
+    const firstControl = screen.querySelector('input, button, [role="button"]');
+    if (firstControl) firstControl.focus({ preventScroll: true });
+}
+
+function prepareTrailControls(root) {
+    root.querySelectorAll('span.menu-option').forEach(control => {
+        control.setAttribute('role', 'button');
+        control.setAttribute('tabindex', '0');
+    });
+}
+
+function handleTrailKeydown(event) {
+    if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.key !== ' ' && event.key !== 'Enter') return;
+    if (event.target.closest('input, textarea, select, button, a, [contenteditable]:not([contenteditable="false"])')) return;
+    const screen = document.querySelector('.screen.active');
+    if (!screen) return;
+    let control = event.target.closest('.menu-option');
+    if (!control || !screen.contains(control)) {
+        const prompt = event.key === ' ' ? /Press SPACE BAR/i : /Press ENTER/i;
+        control = [...screen.querySelectorAll('.menu-option')].find(item => prompt.test(item.textContent));
+    }
+    if (!control) return;
+    event.preventDefault();
+    if (!event.repeat) control.click();
 }
 
 function goBackToHOPE() {
@@ -3029,3 +3080,15 @@ function closeMap() {
     updateUI();
     showGameMenu();
 }
+
+prepareTrailControls(document);
+new MutationObserver(() => prepareTrailControls(document)).observe(
+    document.getElementById('game-container'), { childList: true, subtree: true }
+);
+document.addEventListener('keydown', handleTrailKeydown);
+window.addEventListener('message', event => {
+    if (event.source === window.parent && event.origin === window.location.origin &&
+        event.data?.type === 'hope-trail-visibility' && typeof event.data.active === 'boolean') {
+        setTrailVisible(event.data.active);
+    }
+});
