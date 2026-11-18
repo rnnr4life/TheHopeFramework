@@ -106,7 +106,104 @@ test('one story button uses the recommended narrator and toggles pause/resume wi
     assert.equal(calls.at(-1)[0], 'start');
 });
 
-test('Back uses application history once and falls back to Home after refresh', () => {
+test('returning visitors start at grade selection while explicit activity links retain the saved grade', () => {
+    const start = source.indexOf('(function initAdaptiveUX()');
+    const startup = source.slice(start, source.indexOf('\ninitNavigation();', start));
+    for (const grade of ['elementary', 'middle', 'high', 'unknown', null]) {
+        for (const hash of ['', '#learn-screen']) {
+            let active = 'age-screen';
+            let selectedGrade = 'middle';
+            let navVisible = false;
+            const context = vm.createContext({
+                ageContent: { elementary: {}, middle: {}, high: {} },
+                HopeMetrics: { getData: () => ({ lastGrade: grade, totalSessions: 4 }) },
+                setAge(value) { selectedGrade = value; navVisible = true; },
+                updateNavActive(id) { navVisible = id !== 'age-screen'; },
+                showScreen(id) { active = id; navVisible = id !== 'age-screen'; },
+                screens: [{ id: 'age-screen' }, { id: 'learn-screen' }],
+                document: { querySelector: () => ({ id: active }) },
+                navigationSession: 'fixture', navigationReady: false,
+                window: {
+                    location: { hash }, addEventListener() {},
+                    history: { replaceState(state) { this.state = state; } }
+                }
+            });
+            vm.runInContext(functionSource('initNavigation') + '\n' + startup + '\ninitNavigation()', context);
+            assert.equal(active, hash ? 'learn-screen' : 'age-screen');
+            assert.equal(navVisible, !!hash);
+            assert.equal(selectedGrade, ['elementary', 'middle', 'high'].includes(grade) ? grade : 'middle');
+        }
+    }
+});
+
+test('HOPE opens grade selection, Grade activities stays in grade, and the grade dropdown switches directly', () => {
+    const ids = ['nav-home', 'nav-change-grade', 'nav-grade', 'nav-toggle', 'nav-links',
+        'nav-dropdown-grade', 'nav-dropdown-games', 'nav-dropdown-tools', 'global-nav'];
+    const elements = new Map(ids.map(id => [id, element()]));
+    const activities = element();
+    activities.dataset = { nav: 'welcome-screen', group: 'home' };
+    const games = element();
+    games.dataset = { nav: 'games', group: 'games' };
+    const choices = ['elementary', 'middle', 'high'].map(age => {
+        const choice = element();
+        choice.dataset.age = age;
+        return choice;
+    });
+    const dropdowns = ids.filter(id => id.startsWith('nav-dropdown')).map(id => elements.get(id));
+    const selections = [];
+    const destinations = [];
+    const documentEvents = {};
+    const context = vm.createContext({
+        document: {
+            getElementById: id => elements.get(id),
+            querySelectorAll(selector) {
+                if (selector === '.global-nav-link') return [activities, games];
+                if (selector === '.global-nav-dropdown') return dropdowns;
+                if (selector === '.age-btn, [data-grade-choice]') return choices;
+                return [];
+            },
+            addEventListener(name, callback) { documentEvents[name] = callback; }
+        },
+        setAge: grade => selections.push(grade),
+        showScreen: id => destinations.push(id)
+    });
+    const navStart = source.indexOf('const screenToGroup =');
+    const ageStart = source.indexOf("document.querySelectorAll('.age-btn, [data-grade-choice]')");
+    vm.runInContext(source.slice(navStart, source.indexOf('// ===== Learn Screen', navStart))
+        + '\n' + source.slice(ageStart, source.indexOf('// ===== Adaptive UX Engine', ageStart)), context);
+    elements.get('nav-home').click();
+    activities.click();
+    assert.deepEqual(destinations, ['age-screen', 'welcome-screen']);
+    const toggle = elements.get('nav-change-grade');
+    const dropdown = elements.get('nav-dropdown-grade');
+    const open = () => toggle.dispatch('click', { currentTarget: toggle, stopPropagation() {} });
+    for (const [index, choice] of choices.entries()) {
+        open();
+        assert.equal(toggle['aria-expanded'], 'true');
+        assert.equal(dropdown.classList.contains('open'), true);
+        assert.equal(destinations.length, index + 2);
+        choice.click();
+        assert.equal(toggle['aria-expanded'], 'false');
+        assert.equal(dropdown.classList.contains('open'), false);
+        assert.equal(destinations.at(-1), 'welcome-screen');
+    }
+    assert.deepEqual(selections, ['elementary', 'middle', 'high']);
+    let restoredFocus = false;
+    toggle.focus = () => { restoredFocus = true; };
+    open();
+    elements.get('nav-grade').dispatch('keydown', { key: 'Escape' });
+    assert.equal(restoredFocus, true);
+    assert.equal(toggle['aria-expanded'], 'false');
+    open();
+    documentEvents.click({ target: { closest: () => null } });
+    assert.equal(dropdown.classList.contains('open'), false);
+    open();
+    games.dispatch('click', { stopPropagation() {} });
+    assert.equal(toggle['aria-expanded'], 'false');
+    assert.equal(elements.get('nav-dropdown-games').classList.contains('open'), true);
+});
+
+test('Back uses application history once and falls back to grade activities after refresh', () => {
     let backs = 0;
     const screens = [];
     const context = {
@@ -135,6 +232,7 @@ test('screen history ignores duplicate destinations and restores browser Back wi
     }));
     active = elements.get('welcome-screen');
     let pushes = 0;
+    let welcomeRefreshes = 0;
     const context = {
         document: {
             getElementById: id => id === 'trail-iframe' ? {} : elements.get(id),
@@ -149,7 +247,8 @@ test('screen history ignores duplicate destinations and restores browser Back wi
                 replaceState(state) { this.state = state; }
             }
         },
-        HopeMetrics: { trackScreenView() {} }, updateAdaptiveWelcome() {}, updateNavActive() {},
+        HopeMetrics: { trackScreenView() {} },
+        updateAdaptiveWelcome() { welcomeRefreshes++; }, updateNavActive() {},
         navigationReady: true, navigationSession: 'fixture', navigationIndex: 0,
         markerOrder: ['motivation', 'belief', 'plans', 'agency'], currentMarkerIdx: 1,
         console, showToast: message => { throw new Error(message); }
@@ -158,6 +257,7 @@ test('screen history ignores duplicate destinations and restores browser Back wi
     vm.runInContext(functionSource('showScreen'), context);
     vm.runInContext("showScreen('welcome-screen'); showScreen('learn-screen')", context);
     assert.equal(pushes, 1);
+    assert.equal(welcomeRefreshes, 1);
     active = elements.get('learn-screen');
     vm.runInContext("showScreen('marker-detail-screen')", context);
     assert.equal(pushes, 2);

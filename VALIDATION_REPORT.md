@@ -2,6 +2,27 @@
 
 ## Outcome and boundaries
 
+### Landing page and grade navigation
+
+Opening the app without an activity link shows the grade-selection landing
+page, including for returning visitors. A saved grade is retained for explicit
+activity links, but no longer bypasses grade selection on launch.
+
+The HOPE logo returns to that app landing page. **Grade activities** returns to
+the current grade's activity menu, with a grade-specific accessible label.
+The upper-right grade button opens direct Elementary, Middle School and High
+School choices; selecting one updates the grade and opens its activity menu
+without revisiting the landing page. The dropdown supports native keyboard
+activation, Escape to close and restore focus, and outside-click dismissal.
+
+Focused regressions cover returning visitors, explicit links, invalid saved
+grades, the two distinct navigation destinations and direct grade switching.
+All **41 normal tests pass**, along with JavaScript syntax and patch checks.
+Local browser verification covered all three grades, refreshed landing and
+activity links, Back/Forward, same-page grade changes, Enter/Space/Tab/Escape,
+and dropdown fit at viewport widths from 375 to 1280 pixels. The compact
+navigation breakpoint is 820 pixels to keep the longer activity label readable.
+
 ### Publication authorization and rules release
 
 On 2026-11-17 the owner explicitly approved website publication and Firebase

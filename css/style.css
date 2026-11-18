@@ -5375,7 +5375,14 @@ button.resource-card-action {
 
 /* Grade badge */
 .global-nav-grade {
-    flex-shrink: 0; margin-left: auto;
+    flex-shrink: 0; margin-left: auto; position: relative;
+}
+.global-nav-grade .global-nav-dropdown {
+    position: absolute; left: auto; right: 0;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    padding: 0.35rem; margin: 0;
+    box-shadow: var(--shadow-lg);
 }
 .global-nav-grade-btn {
     display: flex; align-items: center; gap: 0.35rem;
@@ -5403,7 +5410,7 @@ button.resource-card-action {
 }
 
 /* Mobile nav */
-@media (max-width: 700px) {
+@media (max-width: 820px) {
     .global-nav-toggle { display: flex; }
 
     .global-nav-links {

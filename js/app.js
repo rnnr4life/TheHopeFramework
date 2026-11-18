@@ -322,6 +322,7 @@ function setAge(age) {
     const gradeLabels = { elementary: 'Elementary', middle: 'Middle', high: 'High School' };
     const gradeEl = document.getElementById('nav-grade-label');
     if (gradeEl) gradeEl.textContent = gradeLabels[age] || age;
+    document.getElementById('nav-grade-activities').setAttribute('aria-label', `${gradeLabels[age]} activities`);
 
     const c = ageContent[age];
     document.getElementById('welcome-title').textContent = c.welcomeTitle;
@@ -366,8 +367,10 @@ function setAge(age) {
 }
 
 // Age selector buttons
-document.querySelectorAll('.age-btn').forEach(btn => {
+document.querySelectorAll('.age-btn, [data-grade-choice]').forEach(btn => {
     btn.addEventListener('click', () => {
+        closeNavDropdowns();
+        closeNavMobile();
         setAge(btn.dataset.age);
         showScreen('welcome-screen');
     });
@@ -611,6 +614,7 @@ function showScreen(id, options = {}) {
     const previous = document.querySelector('.screen.active');
     prepareScreen(id);
     if (previous === target) {
+        if (id === 'welcome-screen') updateAdaptiveWelcome();
         if (id === 'marker-detail-screen' && navigationReady) {
             window.history.replaceState({ ...window.history.state, hopeMarker: markerOrder[currentMarkerIdx] }, '');
         }
@@ -701,7 +705,7 @@ document.querySelectorAll('.global-nav-link').forEach(link => {
             const dd = document.getElementById(`nav-dropdown-${target}`);
             const wasOpen = dd.classList.contains('open');
             // Close all dropdowns first
-            document.querySelectorAll('.global-nav-dropdown').forEach(d => d.classList.remove('open'));
+            closeNavDropdowns();
             if (!wasOpen) dd.classList.add('open');
             return;
         }
@@ -713,7 +717,7 @@ document.querySelectorAll('.global-nav-link').forEach(link => {
 });
 
 // Dropdown item clicks
-document.querySelectorAll('.global-nav-dropdown-item').forEach(item => {
+document.querySelectorAll('.global-nav-dropdown-item[data-nav]').forEach(item => {
     item.addEventListener('click', () => {
         const target = item.dataset.nav;
         closeNavDropdowns();
@@ -722,18 +726,31 @@ document.querySelectorAll('.global-nav-dropdown-item').forEach(item => {
     });
 });
 
-// Home button
+// App landing page
 document.getElementById('nav-home').addEventListener('click', () => {
     closeNavDropdowns();
     closeNavMobile();
-    showScreen('welcome-screen');
+    showScreen('age-screen');
 });
 
 // Grade change
-document.getElementById('nav-change-grade').addEventListener('click', () => {
+document.getElementById('nav-change-grade').addEventListener('click', event => {
+    event.stopPropagation();
+    const dropdown = document.getElementById('nav-dropdown-grade');
+    const wasOpen = dropdown.classList.contains('open');
     closeNavDropdowns();
     closeNavMobile();
-    showScreen('age-screen');
+    if (!wasOpen) {
+        dropdown.classList.add('open');
+        event.currentTarget.setAttribute('aria-expanded', 'true');
+    }
+});
+
+document.getElementById('nav-grade').addEventListener('keydown', event => {
+    if (event.key === 'Escape' && document.getElementById('nav-dropdown-grade').classList.contains('open')) {
+        closeNavDropdowns();
+        document.getElementById('nav-change-grade').focus();
+    }
 });
 
 // Hamburger toggle
@@ -753,6 +770,7 @@ document.addEventListener('click', (e) => {
 
 function closeNavDropdowns() {
     document.querySelectorAll('.global-nav-dropdown').forEach(d => d.classList.remove('open'));
+    document.getElementById('nav-change-grade').setAttribute('aria-expanded', 'false');
 }
 function closeNavMobile() {
     const links = document.getElementById('nav-links');
@@ -6116,9 +6134,9 @@ if (metricsScreen) {
 // Must run after all globals (screens, screenToGroup, etc.) are defined
 (function initAdaptiveUX() {
     const d = HopeMetrics.getData();
-    if (d.lastGrade && d.totalSessions > 1) {
+    if (Object.hasOwn(ageContent, d.lastGrade) && d.totalSessions > 1) {
         setAge(d.lastGrade);
-        showScreen('welcome-screen');
+        updateNavActive('age-screen');
     }
 })();
 initNavigation();

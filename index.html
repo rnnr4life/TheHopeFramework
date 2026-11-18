@@ -30,7 +30,7 @@
     <!-- ===== Global Navigation ===== -->
     <nav class="global-nav" id="global-nav" aria-label="Main navigation">
         <div class="global-nav-inner">
-            <button class="global-nav-brand" id="nav-home" aria-label="Home">
+            <button class="global-nav-brand" id="nav-home" aria-label="HOPE landing page">
                 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="global-nav-logo" aria-hidden="true">
                     <defs>
                         <linearGradient id="nr1" x1="0.5" y1="0" x2="1" y2="0.5"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="100%" stop-color="#e84575"/></linearGradient>
@@ -46,7 +46,7 @@
                     <circle cx="100" cy="184" r="7" fill="#38bdf8"/><circle cx="16" cy="100" r="7" fill="#a855f7"/>
                     <path d="M68 55 L68 145 M68 100 L132 100 M132 55 L132 145" fill="none" stroke="white" stroke-width="14" stroke-linecap="round"/>
                 </svg>
-                <span class="global-nav-title">HOPE Home</span>
+                <span class="global-nav-title">HOPE</span>
             </button>
 
             <button class="global-nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
@@ -54,8 +54,8 @@
             </button>
 
             <div class="global-nav-links" id="nav-links">
-                <button class="global-nav-link" data-nav="welcome-screen" data-group="home">
-                    <span class="global-nav-link-icon">🏠</span> Home
+                <button class="global-nav-link" id="nav-grade-activities" data-nav="welcome-screen" data-group="home">
+                    <span class="global-nav-link-icon">🏠</span> Grade activities
                 </button>
                 <button class="global-nav-link" data-nav="learn-screen" data-group="learn">
                     <span class="global-nav-link-icon">📖</span> Learn
@@ -86,10 +86,15 @@
             </div>
 
             <div class="global-nav-grade" id="nav-grade">
-                <button class="global-nav-grade-btn" id="nav-change-grade" aria-label="Change grade level">
+                <button class="global-nav-grade-btn" id="nav-change-grade" aria-label="Change grade level" aria-expanded="false" aria-controls="nav-dropdown-grade">
                     <span id="nav-grade-label">Middle</span>
                     <span class="global-nav-grade-arrow">▾</span>
                 </button>
+                <div class="global-nav-dropdown" id="nav-dropdown-grade" role="group" aria-label="Choose grade level">
+                    <button class="global-nav-dropdown-item" data-grade-choice data-age="elementary">Elementary</button>
+                    <button class="global-nav-dropdown-item" data-grade-choice data-age="middle">Middle School</button>
+                    <button class="global-nav-dropdown-item" data-grade-choice data-age="high">High School</button>
+                </div>
             </div>
         </div>
     </nav>
