@@ -1,0 +1,148 @@
+{
+  "generatedAt": "2026-11-18T16:30:32.922Z",
+  "storyId": "factory-town",
+  "transcriptSha256": "fb52dfb443fde1fe5b36a2c4df4861482ea8fd5a663e1265355db29b3e182e83",
+  "audioSha256": "71928fca713f03585dcc238a9d5bc91df31d3bed44b11307aa996b2edba20bc2",
+  "modelId": "onnx-community/Kokoro-82M-v1.0-ONNX",
+  "revision": "1939ad2a8e416c0acfeecc08a694d14ef25f2231",
+  "dtype": "q8",
+  "voice": "af_heart",
+  "engine": "kokoro-js@1.2.1",
+  "speed": 0.95,
+  "sampleRate": 24000,
+  "channels": 1,
+  "duration": 122.225,
+  "peak": 0.85,
+  "rms": 0.07801611097069078,
+  "wordsPerMinute": 115.85191245653509,
+  "segments": [
+    {
+      "text": "For three generations, the families of Millbrook lived in the shadow of the Consolidated Chemical plant.",
+      "startSeconds": 0,
+      "durationSeconds": 6.925
+    },
+    {
+      "text": "Cancer rates were 40% above the state average.",
+      "startSeconds": 7.225,
+      "durationSeconds": 3.925
+    },
+    {
+      "text": "The river ran grey.",
+      "startSeconds": 11.45,
+      "durationSeconds": 1.9
+    },
+    {
+      "text": "When 16-year-old Elena tested the tap water for her AP Environmental Science project and found lead levels exceeding EPA limits by a factor of three, something shifted.",
+      "startSeconds": 13.65,
+      "durationSeconds": 12.125
+    },
+    {
+      "text": "\"We've been drinking this,\" she said, her voice barely above a whisper.",
+      "startSeconds": 26.075,
+      "durationSeconds": 4.475
+    },
+    {
+      "text": "\"My little brother drinks this.\"",
+      "startSeconds": 30.85,
+      "durationSeconds": 2.25
+    },
+    {
+      "text": "Elena's teacher, Dr. Parekh, connected her with researchers at State University who had documented successful community-led water remediation in Flint, Michigan, and Hinkley, California.",
+      "startSeconds": 33.8,
+      "durationSeconds": 13.15
+    },
+    {
+      "text": "\"Change is possible,\" Dr. Parekh told her, \"but it requires evidence, organization, and persistence. Communities have won these fights before.\"",
+      "startSeconds": 47.25,
+      "durationSeconds": 9.75
+    },
+    {
+      "text": "Elena and her classmates developed a comprehensive campaign.",
+      "startSeconds": 57.7,
+      "durationSeconds": 4.4
+    },
+    {
+      "text": "They established a citizen science water testing network with standardized protocols.",
+      "startSeconds": 62.4,
+      "durationSeconds": 5.725
+    },
+    {
+      "text": "They filed Freedom of Information requests for the plant's discharge records.",
+      "startSeconds": 68.425,
+      "durationSeconds": 5.1
+    },
+    {
+      "text": "They partnered with the university's environmental law clinic to understand their legal options.",
+      "startSeconds": 73.825,
+      "durationSeconds": 6.3
+    },
+    {
+      "text": "They created a public data dashboard showing real-time water quality readings.",
+      "startSeconds": 80.425,
+      "durationSeconds": 5.425
+    },
+    {
+      "text": "The data dashboard went viral locally.",
+      "startSeconds": 86.55,
+      "durationSeconds": 3.075
+    },
+    {
+      "text": "Within six months, the state environmental agency launched a formal investigation.",
+      "startSeconds": 89.925,
+      "durationSeconds": 6.35
+    },
+    {
+      "text": "The plant was fined $2.4 million and required to install new filtration systems.",
+      "startSeconds": 96.575,
+      "durationSeconds": 6.675
+    },
+    {
+      "text": "Elena testified before the state legislature about the importance of environmental monitoring in underserved communities.",
+      "startSeconds": 103.55,
+      "durationSeconds": 8.55
+    },
+    {
+      "text": "A new community water treatment facility was funded through a combination of the fine revenue and a federal environmental justice grant.",
+      "startSeconds": 112.4,
+      "durationSeconds": 9.125
+    }
+  ],
+  "provenance": [
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/config.json",
+      "sha256": "df34b4f930b23447cd4dc410fabfb42eb3f24e803e6c3f97d618fb359380a36f",
+      "bytes": 44
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/tokenizer.json",
+      "sha256": "77a02c8e164413299b4b4c403b14f8e0e1c1b727db4d46a09d6327b861060a34",
+      "bytes": 3497
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/tokenizer_config.json",
+      "sha256": "be1cb066d6ef6b074b3f15e6a6dd21ac88ff3cdaedf325f0aaed686c70f75d20",
+      "bytes": 113
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/onnx/model_quantized.onnx",
+      "sha256": "fbae9257e1e05ffc727e951ef9b9c98418e6d79f1c9b6b13bd59f5c9028a1478",
+      "bytes": 92361116
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/README.md",
+      "sha256": "b8fd888b4782f4d4ae85e2f1587cafd727037f4f138f72429ef1bd5908c0e9d8",
+      "bytes": 10627
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/voices/af_heart.bin",
+      "sha256": "d583ccff3cdca2f7fae535cb998ac07e9fcb90f09737b9a41fa2734ec44a8f0b",
+      "bytes": 522240
+    },
+    {
+      "url": "https://huggingface.co/hexgrad/Kokoro-82M/raw/main/README.md",
+      "sha256": "91dcabced89db6f109b8786642f50402d3ee87450e8189589b6f85520e7f4d78",
+      "bytes": 6348
+    }
+  ],
+  "review": "Technical preview only. Human listening review pending."
+}

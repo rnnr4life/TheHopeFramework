@@ -1,0 +1,138 @@
+{
+  "generatedAt": "2026-11-18T16:24:03.969Z",
+  "storyId": "beach-cleanup",
+  "transcriptSha256": "5c1c9f7323c3ef6334fc2a27e831c1ee6a3bd703ac5f413dca09098e33b6cc87",
+  "audioSha256": "071bd545417a11d81d93691faa7e54f094aa452ce6f199ad15026d052c6ce83f",
+  "modelId": "onnx-community/Kokoro-82M-v1.0-ONNX",
+  "revision": "1939ad2a8e416c0acfeecc08a694d14ef25f2231",
+  "dtype": "q8",
+  "voice": "af_heart",
+  "engine": "kokoro-js@1.2.1",
+  "speed": 0.95,
+  "sampleRate": 24000,
+  "channels": 1,
+  "duration": 69.9,
+  "peak": 0.85,
+  "rms": 0.06584600151148612,
+  "wordsPerMinute": 145.92274678111588,
+  "segments": [
+    {
+      "text": "Every Saturday, Jaylen and his friends played at Sunset Beach.",
+      "startSeconds": 0,
+      "durationSeconds": 4.175
+    },
+    {
+      "text": "But one morning, they found plastic bottles, chip bags, and old fishing line tangled everywhere.",
+      "startSeconds": 4.475,
+      "durationSeconds": 6.4
+    },
+    {
+      "text": "\"This is horrible,\" said Jaylen, looking at a seagull trying to eat a piece of plastic.",
+      "startSeconds": 11.175,
+      "durationSeconds": 5.65
+    },
+    {
+      "text": "He felt sick to his stomach.",
+      "startSeconds": 17.125,
+      "durationSeconds": 2.15
+    },
+    {
+      "text": "Their neighbor, Ms. Rivera, told them about a town in Oregon where kids organized a beach cleanup and now the beach is one of the cleanest in the state.",
+      "startSeconds": 19.975,
+      "durationSeconds": 9.75
+    },
+    {
+      "text": "\"Kids just like you did that,\" she said.",
+      "startSeconds": 30.025,
+      "durationSeconds": 2.85
+    },
+    {
+      "text": "Jaylen's eyes lit up.",
+      "startSeconds": 33.175,
+      "durationSeconds": 2.075
+    },
+    {
+      "text": "\"We could do that here!\"",
+      "startSeconds": 35.55,
+      "durationSeconds": 1.775
+    },
+    {
+      "text": "They made a plan: every Saturday morning, they'd bring bags and gloves.",
+      "startSeconds": 38.025,
+      "durationSeconds": 4.825
+    },
+    {
+      "text": "Jaylen would make posters for the neighborhood.",
+      "startSeconds": 43.15,
+      "durationSeconds": 2.925
+    },
+    {
+      "text": "Sofia would ask the school for supplies.",
+      "startSeconds": 46.375,
+      "durationSeconds": 2.85
+    },
+    {
+      "text": "And Marcus would count and sort what they collected.",
+      "startSeconds": 49.525,
+      "durationSeconds": 3.45
+    },
+    {
+      "text": "The first cleanup day, twelve kids showed up.",
+      "startSeconds": 53.675,
+      "durationSeconds": 3.125
+    },
+    {
+      "text": "They filled nine bags of trash.",
+      "startSeconds": 57.1,
+      "durationSeconds": 2.475
+    },
+    {
+      "text": "By the end of the month, they had removed over 200 pounds of waste from the beach.",
+      "startSeconds": 59.875,
+      "durationSeconds": 5.15
+    },
+    {
+      "text": "The seagulls were back, and so were the tide pool creatures.",
+      "startSeconds": 65.325,
+      "durationSeconds": 3.875
+    }
+  ],
+  "provenance": [
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/config.json",
+      "sha256": "df34b4f930b23447cd4dc410fabfb42eb3f24e803e6c3f97d618fb359380a36f",
+      "bytes": 44
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/tokenizer.json",
+      "sha256": "77a02c8e164413299b4b4c403b14f8e0e1c1b727db4d46a09d6327b861060a34",
+      "bytes": 3497
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/tokenizer_config.json",
+      "sha256": "be1cb066d6ef6b074b3f15e6a6dd21ac88ff3cdaedf325f0aaed686c70f75d20",
+      "bytes": 113
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/onnx/model_quantized.onnx",
+      "sha256": "fbae9257e1e05ffc727e951ef9b9c98418e6d79f1c9b6b13bd59f5c9028a1478",
+      "bytes": 92361116
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/README.md",
+      "sha256": "b8fd888b4782f4d4ae85e2f1587cafd727037f4f138f72429ef1bd5908c0e9d8",
+      "bytes": 10627
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/voices/af_heart.bin",
+      "sha256": "d583ccff3cdca2f7fae535cb998ac07e9fcb90f09737b9a41fa2734ec44a8f0b",
+      "bytes": 522240
+    },
+    {
+      "url": "https://huggingface.co/hexgrad/Kokoro-82M/raw/main/README.md",
+      "sha256": "91dcabced89db6f109b8786642f50402d3ee87450e8189589b6f85520e7f4d78",
+      "bytes": 6348
+    }
+  ],
+  "review": "Technical preview only. Human listening review pending."
+}

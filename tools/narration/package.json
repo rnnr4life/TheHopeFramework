@@ -1,0 +1,12 @@
+{
+  "name": "hope-local-narration",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "pilot": "node generate.mjs --pilot",
+    "generate": "node generate.mjs"
+  },
+  "dependencies": {
+    "kokoro-js": "1.2.1"
+  }
+}

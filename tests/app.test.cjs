@@ -78,6 +78,7 @@ test('guided Resume renders the paused paragraph instead of skipping ahead', () 
     const context = {
         guidedPlaying: false,
         guidedStep: 1,
+        stopStoryNarration() {},
         document: { getElementById: id => ({ ...element(), addEventListener: (_, callback) => { handlers[id] = callback; } }) },
         advanceGuided: () => advances++,
         renderGuidedStep: () => renders++
@@ -128,7 +129,7 @@ test('screen history ignores duplicate destinations and restores browser Back wi
             querySelector: () => active
         },
         screens: [...elements.values()],
-        prepareScreen() {}, pauseGuided() {},
+        prepareScreen() {}, pauseGuided() {}, stopStoryNarration() {},
         window: {
             location: { origin: 'https://fixture.test' }, scrollTo() {},
             history: {
@@ -220,7 +221,9 @@ function guidedFixture(grade = 'elementary') {
             }
         },
         SpeechSynthesisUtterance: function(text) { this.text = text; },
-        getSelectedVoice: () => null, escapeHtml: String, triggerCelebration() { celebrations++; },
+        getSelectedVoice: () => null, storyNarration: { rate: 0.9 }, stopStoryNarration() {},
+        updateNarrationControls() {},
+        escapeHtml: String, triggerCelebration() { celebrations++; },
         showToast: message => notices.push(message),
         setTimeout(callback) { timers.set(++timerId, callback); return timerId; },
         clearTimeout: id => timers.delete(id)
@@ -284,18 +287,56 @@ test('guided story choices open the analyzer and load the selected grade-specifi
         modal.classList.add('hidden');
         const context = {
             currentAge: grade,
-            sampleTexts: { [grade]: [{ title: 'A story', desc: 'A description', text: `${grade} story text` }] },
+            sampleTexts: { [grade]: [{ id: 'test-story', title: 'A story', desc: 'A description', text: `${grade} story text` }] },
             showScreen: screen => screens.push(screen),
-            escapeHtml: String, loadText: text => loaded.push(text),
+            escapeHtml: String, loadText: (text, id) => loaded.push({ text, id }),
             document: { getElementById: id => id === 'text-picker-grid' ? grid : modal }
         };
         vm.runInNewContext(functionSource('openStoryChoices') + '\nopenStoryChoices()', context);
         assert.deepEqual(screens, ['activity-screen']);
         assert.equal(modal.classList.contains('hidden'), false);
         card.click();
-        assert.deepEqual(loaded, [`${grade} story text`]);
+        assert.deepEqual(loaded, [{ text: `${grade} story text`, id: 'test-story' }]);
         assert.equal(modal.classList.contains('hidden'), true);
     }
+});
+
+test('loading a story refreshes narration after replacing its transcript and stable identity', () => {
+    const textContent = element();
+    const refreshed = [];
+    const context = {
+        textContent, findings: [], collectedMarkers: new Set(),
+        stopStoryNarration() {}, updateFindings() {}, resetCollectionTracker() {},
+        escapeHtml: String,
+        updateNarrationControls: () => refreshed.push({ ...textContent.dataset, html: textContent.innerHTML })
+    };
+    vm.runInNewContext(functionSource('loadText') + '\nloadText("A paragraph.", "butterfly-garden"); loadText("Edited text.");', context);
+    assert.deepEqual(refreshed, [
+        { storyId: 'butterfly-garden', html: '<p>A paragraph.</p>' },
+        { storyId: '', html: '<p>Edited text.</p>' }
+    ]);
+});
+
+test('reading preference changes survive the synchronous controls refresh caused by stopping Guided', () => {
+    let change;
+    let configured;
+    const rate = { value: '1.15' };
+    const voice = { value: 'chosen-voice' };
+    const context = {
+        panel: {
+            querySelectorAll: () => [{ addEventListener: (_, callback) => { change = callback; } }],
+            querySelector: selector => selector === '[data-reading-rate]' ? rate : voice
+        },
+        pauseGuided() { rate.value = '0.9'; voice.value = ''; },
+        storyNarration: { configure: (...values) => { configured = values; } }
+    };
+    const normalized = source.replace(/\r\n/g, '\n');
+    const start = normalized.indexOf("panel.querySelectorAll('select').forEach");
+    const end = normalized.indexOf('\n});\nupdateNarrationControls();', start);
+    assert.ok(start >= 0 && end > start);
+    vm.runInNewContext(normalized.slice(start, end), context);
+    change();
+    assert.deepEqual(configured, [1.15, 'chosen-voice']);
 });
 
 test('each landing wheel link opens its existing marker detail without default hash navigation', () => {
@@ -602,6 +643,7 @@ test('changing grade after loading a story does not require the removed placehol
     const context = {
         currentAge: 'middle',
         ageContent: { high: { reflectTitle: 'Critical Reflection' } },
+        stopStoryNarration() {}, pauseGuided() {},
         HopeMetrics: { trackAge() {} },
         updateWelcomeClassroomStep() {},
         document: {

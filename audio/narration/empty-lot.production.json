@@ -1,0 +1,123 @@
+{
+  "generatedAt": "2026-11-18T16:27:27.522Z",
+  "storyId": "empty-lot",
+  "transcriptSha256": "8c621f1d379535715419c4fc1cd31cdac953753e79cb5849ddbfc171b06a96c7",
+  "audioSha256": "a19fb79b793ba22054317b2c8ad09f0dfb0f95d19403fa8ae699bac74d74d182",
+  "modelId": "onnx-community/Kokoro-82M-v1.0-ONNX",
+  "revision": "1939ad2a8e416c0acfeecc08a694d14ef25f2231",
+  "dtype": "q8",
+  "voice": "af_heart",
+  "engine": "kokoro-js@1.2.1",
+  "speed": 0.95,
+  "sampleRate": 24000,
+  "channels": 1,
+  "duration": 78.375,
+  "peak": 0.85,
+  "rms": 0.05943342911656957,
+  "wordsPerMinute": 137.0334928229665,
+  "segments": [
+    {
+      "text": "The corner lot on Maple Street had been empty for years — just cracked concrete, weeds, and broken glass.",
+      "startSeconds": 0,
+      "durationSeconds": 7.325
+    },
+    {
+      "text": "Every time Daniela walked past it, she felt a pang of frustration.",
+      "startSeconds": 7.625,
+      "durationSeconds": 4.825
+    },
+    {
+      "text": "Her neighborhood deserved better.",
+      "startSeconds": 12.75,
+      "durationSeconds": 2.35
+    },
+    {
+      "text": "\"Why does nobody care about this place?\" she asked her grandmother.",
+      "startSeconds": 15.4,
+      "durationSeconds": 4.175
+    },
+    {
+      "text": "Her grandmother smiled and told her about community gardens in Detroit, where neighbors turned hundreds of empty lots into farms that now feed thousands of people.",
+      "startSeconds": 20.275,
+      "durationSeconds": 10.425
+    },
+    {
+      "text": "\"They started with nothing too,\" she said.",
+      "startSeconds": 31,
+      "durationSeconds": 2.9
+    },
+    {
+      "text": "\"But they believed something beautiful could grow there.\"",
+      "startSeconds": 34.2,
+      "durationSeconds": 3.1
+    },
+    {
+      "text": "Daniela started small.",
+      "startSeconds": 38,
+      "durationSeconds": 2.2
+    },
+    {
+      "text": "She researched what vegetables grow well in their climate.",
+      "startSeconds": 40.5,
+      "durationSeconds": 3.625
+    },
+    {
+      "text": "She drafted a proposal for the city with a budget, a timeline, and a maintenance plan.",
+      "startSeconds": 44.425,
+      "durationSeconds": 5.925
+    },
+    {
+      "text": "She recruited five neighbors to form a garden committee, each responsible for a different section.",
+      "startSeconds": 50.65,
+      "durationSeconds": 6.3
+    },
+    {
+      "text": "Three months later, the lot had raised beds, a rain barrel system, and a hand-painted sign that read \"Maple Street Community Garden.\" The first harvest produced enough tomatoes, peppers, and herbs for twenty families.",
+      "startSeconds": 57.65,
+      "durationSeconds": 14.375
+    },
+    {
+      "text": "Neighbors who had never spoken to each other were now sharing recipes over the fence.",
+      "startSeconds": 72.325,
+      "durationSeconds": 5.35
+    }
+  ],
+  "provenance": [
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/config.json",
+      "sha256": "df34b4f930b23447cd4dc410fabfb42eb3f24e803e6c3f97d618fb359380a36f",
+      "bytes": 44
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/tokenizer.json",
+      "sha256": "77a02c8e164413299b4b4c403b14f8e0e1c1b727db4d46a09d6327b861060a34",
+      "bytes": 3497
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/tokenizer_config.json",
+      "sha256": "be1cb066d6ef6b074b3f15e6a6dd21ac88ff3cdaedf325f0aaed686c70f75d20",
+      "bytes": 113
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/onnx/model_quantized.onnx",
+      "sha256": "fbae9257e1e05ffc727e951ef9b9c98418e6d79f1c9b6b13bd59f5c9028a1478",
+      "bytes": 92361116
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/README.md",
+      "sha256": "b8fd888b4782f4d4ae85e2f1587cafd727037f4f138f72429ef1bd5908c0e9d8",
+      "bytes": 10627
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/voices/af_heart.bin",
+      "sha256": "d583ccff3cdca2f7fae535cb998ac07e9fcb90f09737b9a41fa2734ec44a8f0b",
+      "bytes": 522240
+    },
+    {
+      "url": "https://huggingface.co/hexgrad/Kokoro-82M/raw/main/README.md",
+      "sha256": "91dcabced89db6f109b8786642f50402d3ee87450e8189589b6f85520e7f4d78",
+      "bytes": 6348
+    }
+  ],
+  "review": "Technical preview only. Human listening review pending."
+}

@@ -2,3 +2,4 @@
 .firebase/
 **/node_modules/
 tests/firestore/*-debug.log
+tools/narration/.cache/

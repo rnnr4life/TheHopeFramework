@@ -6034,3 +6034,23 @@ body { padding-top: 28px; }
     }
     .feedback-widget { bottom: 1rem; right: 1rem; }
 }
+.narration-controls {
+    margin-block: 0.75rem;
+    font-size: 0.9rem;
+}
+.narration-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.narration-controls label {
+    display: block;
+    margin-block: 0.5rem;
+}
+.narration-controls select {
+    max-width: 100%;
+    font: inherit;
+}
+.narration-controls summary { cursor: pointer; }
+.narration-controls [data-reading-status] { margin-block: 0.5rem; }

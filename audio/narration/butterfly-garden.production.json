@@ -1,0 +1,123 @@
+{
+  "generatedAt": "2026-11-18T16:33:54.995Z",
+  "storyId": "butterfly-garden",
+  "transcriptSha256": "ca68f1ce1db5fc3e4d01df77f6d7515a67c5ce31cd063639362376560b484184",
+  "audioSha256": "2bb11d5a1719ccdf850fc96820decf415dba42995d3a6ccd729ef6674828ec75",
+  "modelId": "onnx-community/Kokoro-82M-v1.0-ONNX",
+  "revision": "1939ad2a8e416c0acfeecc08a694d14ef25f2231",
+  "dtype": "q8",
+  "voice": "af_heart",
+  "engine": "kokoro-js@1.2.1",
+  "speed": 0.95,
+  "sampleRate": 24000,
+  "channels": 1,
+  "duration": 64.775,
+  "peak": 0.85,
+  "rms": 0.07260701917953884,
+  "wordsPerMinute": 137.08992666923967,
+  "segments": [
+    {
+      "text": "Ms. Thompson's class noticed something sad — the butterflies that used to fill the school garden every spring weren't coming anymore.",
+      "startSeconds": 0,
+      "durationSeconds": 8.1
+    },
+    {
+      "text": "\"Where did they go?\" asked Priya.",
+      "startSeconds": 8.4,
+      "durationSeconds": 2.525
+    },
+    {
+      "text": "The class learned that the wildflowers butterflies need had been replaced by plain grass.",
+      "startSeconds": 11.225,
+      "durationSeconds": 5.625
+    },
+    {
+      "text": "\"But there's good news,\" said Ms. Thompson.",
+      "startSeconds": 17.55,
+      "durationSeconds": 2.975
+    },
+    {
+      "text": "She showed them photos of a school in Texas that planted a butterfly garden and now has hundreds of butterflies every year.",
+      "startSeconds": 20.825,
+      "durationSeconds": 8.65
+    },
+    {
+      "text": "\"Nature can bounce back when we help.\"",
+      "startSeconds": 29.775,
+      "durationSeconds": 2.55
+    },
+    {
+      "text": "The class drew up a garden plan.",
+      "startSeconds": 33.025,
+      "durationSeconds": 2.525
+    },
+    {
+      "text": "They picked flowers that butterflies love — milkweed, zinnias, and lavender.",
+      "startSeconds": 35.85,
+      "durationSeconds": 5.15
+    },
+    {
+      "text": "They measured the garden space and made a shopping list.",
+      "startSeconds": 41.3,
+      "durationSeconds": 3.45
+    },
+    {
+      "text": "Each student picked one plant to be responsible for.",
+      "startSeconds": 45.05,
+      "durationSeconds": 3.725
+    },
+    {
+      "text": "By May, the garden was blooming.",
+      "startSeconds": 49.475,
+      "durationSeconds": 2.575
+    },
+    {
+      "text": "The first monarch butterfly arrived on a Tuesday morning, and the whole class ran to the window to watch.",
+      "startSeconds": 52.35,
+      "durationSeconds": 6.75
+    },
+    {
+      "text": "By June, they counted 47 butterflies in one afternoon.",
+      "startSeconds": 59.4,
+      "durationSeconds": 4.675
+    }
+  ],
+  "provenance": [
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/config.json",
+      "sha256": "df34b4f930b23447cd4dc410fabfb42eb3f24e803e6c3f97d618fb359380a36f",
+      "bytes": 44
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/tokenizer.json",
+      "sha256": "77a02c8e164413299b4b4c403b14f8e0e1c1b727db4d46a09d6327b861060a34",
+      "bytes": 3497
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/tokenizer_config.json",
+      "sha256": "be1cb066d6ef6b074b3f15e6a6dd21ac88ff3cdaedf325f0aaed686c70f75d20",
+      "bytes": 113
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/onnx/model_quantized.onnx",
+      "sha256": "fbae9257e1e05ffc727e951ef9b9c98418e6d79f1c9b6b13bd59f5c9028a1478",
+      "bytes": 92361116
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/README.md",
+      "sha256": "b8fd888b4782f4d4ae85e2f1587cafd727037f4f138f72429ef1bd5908c0e9d8",
+      "bytes": 10627
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/voices/af_heart.bin",
+      "sha256": "d583ccff3cdca2f7fae535cb998ac07e9fcb90f09737b9a41fa2734ec44a8f0b",
+      "bytes": 522240
+    },
+    {
+      "url": "https://huggingface.co/hexgrad/Kokoro-82M/raw/main/README.md",
+      "sha256": "91dcabced89db6f109b8786642f50402d3ee87450e8189589b6f85520e7f4d78",
+      "bytes": 6348
+    }
+  ],
+  "review": "Technical preview only. Human listening review pending."
+}

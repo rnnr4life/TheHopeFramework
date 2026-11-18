@@ -311,6 +311,8 @@ function rotateHopeQuote() {
 })();
 
 function setAge(age) {
+    stopStoryNarration();
+    pauseGuided();
     currentAge = age;
     document.body.className = `age-${age}`;
     HopeMetrics.trackAge(age);
@@ -616,6 +618,7 @@ function showScreen(id, options = {}) {
         return;
     }
     if (previous?.id === 'walk-screen') stopWalkEffects(true);
+    stopStoryNarration();
     if (navigationReady && options.record !== false) {
         navigationIndex++;
         window.history.pushState({ hopeScreen: id, hopeSession: navigationSession, hopeIndex: navigationIndex,
@@ -1717,7 +1720,9 @@ pasteModal.addEventListener('click', (e) => {
     }
 });
 
-function loadText(text) {
+function loadText(text, storyId = null) {
+    stopStoryNarration();
+    textContent.dataset.storyId = storyId || '';
     findings = [];
     collectedMarkers = new Set();
     updateFindings();
@@ -1727,6 +1732,7 @@ function loadText(text) {
     textContent.innerHTML = paragraphs
         .map(p => `<p>${escapeHtml(p.trim())}</p>`)
         .join('');
+    updateNarrationControls();
 }
 
 function escapeHtml(text) {
@@ -3445,6 +3451,7 @@ document.getElementById('btn-close-glossary').addEventListener('click', () => {
 // ===== Edit Toggle =====
 let editMode = false;
 document.getElementById('btn-edit-text').addEventListener('click', () => {
+    stopStoryNarration();
     editMode = !editMode;
     const tc = document.getElementById('text-content');
     tc.contentEditable = editMode;
@@ -3567,66 +3574,107 @@ function initSearchableSelect(inputId, hiddenId, dropdownId, options) {
 }
 
 // ===== Read Aloud =====
-let readAloudUtterance = null;
-let availableVoices = [];
-let voiceSearchable = null;
+const narrationPanels = [...document.querySelectorAll('[data-narration-target]')];
+let storyNarration;
+storyNarration = new HopeNarration({
+    speech: window.speechSynthesis,
+    Utterance: window.SpeechSynthesisUtterance,
+    storage: localStorage,
+    notify: showToast,
+    onStart: pauseGuided,
+    createAudio: src => new Audio(src),
+    onChange: updateNarrationControls
+});
 
-function populateVoicePicker() {
-    availableVoices = window.speechSynthesis.getVoices();
-    if (!availableVoices.length) return;
-
-    const english = availableVoices.filter(v => v.lang.startsWith('en'));
-    const other = availableVoices.filter(v => !v.lang.startsWith('en'));
-
-    const groups = [];
-
-    if (english.length) {
-        groups.push({
-            group: 'English',
-            items: english.map(v => ({
-                value: v.name,
-                label: v.name.replace(/Microsoft |Google |Apple /g, '') + (v.default ? ' (default)' : '')
-            }))
-        });
-    }
-
-    if (other.length) {
-        const langGroups = {};
-        other.forEach(v => {
-            const langName = v.lang;
-            if (!langGroups[langName]) langGroups[langName] = [];
-            langGroups[langName].push(v);
-        });
-        Object.keys(langGroups).sort().forEach(lang => {
-            groups.push({
-                group: lang,
-                items: langGroups[lang].map(v => ({
-                    value: v.name,
-                    label: v.name.replace(/Microsoft |Google |Apple /g, '')
-                }))
-            });
-        });
-    }
-
-    if (voiceSearchable) {
-        voiceSearchable.setOptions(groups);
-    } else {
-        voiceSearchable = initSearchableSelect('voice-search', 'voice-picker-value', 'voice-dropdown', groups);
-    }
-
-    // Select default voice
-    const defaultVoice = availableVoices.find(v => v.default);
-    if (defaultVoice && !document.getElementById('voice-picker-value').value) {
-        const label = defaultVoice.name.replace(/Microsoft |Google |Apple /g, '') + ' (default)';
-        voiceSearchable.selectItem(defaultVoice.name, label);
-    }
+function stopStoryNarration() {
+    storyNarration.stop();
 }
 
-// Voices load async in some browsers
-if ('speechSynthesis' in window) {
-    populateVoicePicker();
-    window.speechSynthesis.onvoiceschanged = populateVoicePicker;
+function storyReadingSource(panel) {
+    const id = panel.dataset.narrationTarget;
+    const target = document.getElementById(id);
+    const paragraphs = [...target.querySelectorAll('p')];
+    return {
+        id,
+        text: target.querySelector('.placeholder-empty') ? ''
+            : paragraphs.map(paragraph => paragraph.textContent.trim()).join('\n\n'),
+        language: id === 'guided-text' ? target.lang || 'en' : 'en',
+        storyId: id === 'guided-text' ? 'riverside-creek' : target.dataset.storyId || ''
+    };
 }
+
+function updateNarrationControls() {
+    if (!storyNarration) return;
+    narrationPanels.forEach(panel => {
+        const voicePicker = panel.querySelector('[data-reading-voice]');
+        if (!voicePicker) return;
+        const source = storyReadingSource(panel);
+        const { id, language } = source;
+        const owns = storyNarration.id === id;
+        const state = owns ? storyNarration.state : 'idle';
+        const selected = storyNarration.voiceFor(language);
+        const sourcePicker = panel.querySelector('[data-reading-source]');
+        const previousSource = sourcePicker.value;
+        const recording = findNarrationRecording(source, narrationLibrary, document.baseURI);
+        sourcePicker.replaceChildren(new Option('Browser voice', 'browser'));
+        if (recording) {
+            sourcePicker.add(new Option(`${recording.label}${recording.status === 'preview' ? ' (preview, listening review pending)' : ''}`, 'recording'));
+            if (previousSource === 'recording') sourcePicker.value = 'recording';
+        }
+        voicePicker.replaceChildren(new Option('Automatic (prefer local)', ''));
+        storyNarration.voices.forEach(voice => {
+            voicePicker.add(new Option(`${voice.name} - ${voice.lang} (${voice.localService ? 'local' : 'network'})`, voice.voiceURI));
+        });
+        voicePicker.value = storyNarration.voiceURI;
+        if (voicePicker.selectedIndex < 0) voicePicker.value = '';
+        panel.querySelector('[data-reading-rate]').value = String(storyNarration.rate);
+        panel.querySelector('[data-reading="play"]').textContent = state === 'paused'
+            ? storyNarration.audio ? 'Resume Audio' : 'Resume Paragraph' : 'Read Aloud';
+        panel.querySelector('[data-reading="play"]').disabled = ['playing', 'loading'].includes(state);
+        panel.querySelector('[data-reading="pause"]').disabled = !['playing', 'loading'].includes(state);
+        panel.querySelector('[data-reading="restart"]').disabled = !owns || ['idle', 'error'].includes(state);
+        panel.querySelector('[data-reading="stop"]').disabled = !['playing', 'loading', 'paused'].includes(state);
+        const voiceLabel = selected ? `${selected.name} (${selected.localService ? 'local' : 'network'})` : 'browser default; processing location unknown';
+        const recordingSelected = sourcePicker.value === 'recording';
+        panel.querySelector('[data-reading-status]').textContent = `${state === 'playing' ? 'Reading' : state === 'loading' ? 'Loading audio' : state === 'paused' ? 'Paused' : state === 'ended' ? 'Finished' : state === 'error' ? 'Audio unavailable; choose Browser voice or read the text' : 'Ready'}. ${recordingSelected ? `${recording.label}. ${recording.status === 'preview' ? 'Listening review pending. ' : ''}Audio Resume preserves playback position.` : `Voice: ${voiceLabel}. Browser Resume restarts the current paragraph.`}`;
+    });
+}
+
+narrationPanels.forEach(panel => {
+    panel.append(document.getElementById('narration-controls-template').content.cloneNode(true));
+    panel.querySelector('[data-reading="play"]').addEventListener('click', () => {
+        const source = storyReadingSource(panel);
+        if (storyNarration.state === 'paused' && storyNarration.id === source.id
+            && storyNarration.text === source.text && storyNarration.language === source.language) storyNarration.resume();
+        else storyNarration.start({
+            ...source,
+            recording: panel.querySelector('[data-reading-source]').value === 'recording'
+                ? findNarrationRecording(source, narrationLibrary, document.baseURI) : null
+        });
+    });
+    panel.querySelector('[data-reading="pause"]').addEventListener('click', () => storyNarration.pause());
+    panel.querySelector('[data-reading="stop"]').addEventListener('click', stopStoryNarration);
+    panel.querySelector('[data-reading="restart"]').addEventListener('click', () => {
+        const source = storyReadingSource(panel);
+        storyNarration.start({
+            ...source,
+            recording: panel.querySelector('[data-reading-source]').value === 'recording'
+                ? findNarrationRecording(source, narrationLibrary, document.baseURI) : null
+        });
+    });
+    panel.querySelectorAll('select').forEach(select => select.addEventListener('change', () => {
+        const rate = Number(panel.querySelector('[data-reading-rate]').value);
+        const voiceURI = panel.querySelector('[data-reading-voice]').value;
+        pauseGuided();
+        storyNarration.configure(rate, voiceURI);
+    }));
+});
+updateNarrationControls();
+document.getElementById('text-content').addEventListener('input', stopStoryNarration);
+window.addEventListener('pagehide', () => {
+    pauseGuided();
+    stopStoryNarration();
+});
 
 // Init translate searchable dropdown
 const translateOptions = [
@@ -3663,74 +3711,8 @@ const translateOptions = [
 initSearchableSelect('translate-search', 'translate-lang', 'translate-dropdown', translateOptions);
 
 function getSelectedVoice() {
-    const pickerValue = document.getElementById('voice-picker-value').value;
-    return availableVoices.find(v => v.name === pickerValue) || null;
+    return storyNarration.voiceFor('en');
 }
-
-document.getElementById('btn-read-aloud').addEventListener('click', () => {
-    // Read from whichever panel is visible — guided text or activity text
-    const guidedEl = document.getElementById('guided-text');
-    const activityEl = document.getElementById('text-content');
-    const guidedScreen = document.getElementById('guided-screen');
-    const tc = guidedScreen.classList.contains('active') ? guidedEl : activityEl;
-
-    const text = tc.innerText.trim();
-    if (!text) {
-        showToast('Load a story first');
-        return;
-    }
-
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        readAloudUtterance = new SpeechSynthesisUtterance(text);
-        readAloudUtterance.rate = 0.9;
-
-        const voice = getSelectedVoice();
-        if (voice) {
-            readAloudUtterance.voice = voice;
-            readAloudUtterance.lang = voice.lang;
-        }
-
-        document.getElementById('btn-read-aloud').style.display = 'none';
-        document.getElementById('btn-stop-reading').style.display = '';
-
-        readAloudUtterance.onboundary = (e) => {
-            if (e.name === 'word') {
-                tc.querySelectorAll('.reading-word').forEach(el => {
-                    const parent = el.parentNode;
-                    parent.replaceChild(document.createTextNode(el.textContent), el);
-                    parent.normalize();
-                });
-            }
-        };
-
-        readAloudUtterance.onend = () => {
-            tc.querySelectorAll('.reading-word').forEach(el => {
-                const parent = el.parentNode;
-                parent.replaceChild(document.createTextNode(el.textContent), el);
-                parent.normalize();
-            });
-            document.getElementById('btn-read-aloud').style.display = '';
-            document.getElementById('btn-stop-reading').style.display = 'none';
-        };
-
-        window.speechSynthesis.speak(readAloudUtterance);
-    } else {
-        showToast('Read aloud is not supported in this browser');
-    }
-});
-
-document.getElementById('btn-stop-reading').addEventListener('click', () => {
-    window.speechSynthesis.cancel();
-    const tc = document.getElementById('text-content');
-    tc.querySelectorAll('.reading-word').forEach(el => {
-        const parent = el.parentNode;
-        parent.replaceChild(document.createTextNode(el.textContent), el);
-        parent.normalize();
-    });
-    document.getElementById('btn-read-aloud').style.display = '';
-    document.getElementById('btn-stop-reading').style.display = 'none';
-});
 
 
 // ===== Drag-and-Drop Margin Markers =====
@@ -3850,6 +3832,7 @@ let guidedTimer = null;
 let guidedGeneration = 0;
 
 function pauseGuided() {
+    stopStoryNarration();
     const wasPlaying = guidedPlaying;
     guidedPlaying = false;
     guidedGeneration++;
@@ -3864,8 +3847,10 @@ function pauseGuided() {
 }
 
 function initGuided() {
+    stopStoryNarration();
     pauseGuided();
     guidedStep = -1;
+    document.getElementById('guided-text').lang = 'en';
 
     // Render story with pre-placed highlights (dimmed)
     const textEl = document.getElementById('guided-text');
@@ -3903,6 +3888,7 @@ function initGuided() {
 
     // Reset paragraph highlights
     document.querySelectorAll('.guided-text p').forEach(p => p.classList.remove('active-para'));
+    updateNarrationControls();
 }
 
 function updateGuidedProgress(step) {
@@ -3996,7 +3982,7 @@ function renderGuidedStep() {
     if ('speechSynthesis' in window && guidedPlaying) {
         window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(ta.querySelector('.guided-thought').innerText);
-        utter.rate = 0.9;
+        utter.rate = storyNarration.rate;
         const voice = getSelectedVoice();
         if (voice) { utter.voice = voice; utter.lang = voice.lang; }
         utter.onend = () => {
@@ -4022,6 +4008,7 @@ function renderGuidedStep() {
 }
 
 document.getElementById('btn-guided-play').addEventListener('click', () => {
+    stopStoryNarration();
     guidedPlaying = true;
     document.getElementById('btn-guided-play').style.display = 'none';
     document.getElementById('btn-guided-pause').style.display = '';
@@ -4057,6 +4044,8 @@ document.getElementById('btn-back-guided').addEventListener('click', () => {
 let originalGuidedHtml = '';
 
 document.getElementById('btn-translate').addEventListener('click', async () => {
+    stopStoryNarration();
+    pauseGuided();
     const lang = document.getElementById('translate-lang').value;
     const textEl = document.getElementById('guided-text');
 
@@ -4120,6 +4109,8 @@ document.getElementById('btn-translate').addEventListener('click', async () => {
         }
 
         // Apply translations
+        stopStoryNarration();
+        textEl.lang = lang;
         let tIdx = 0;
         pElements.forEach(p => {
             const text = p.innerText.trim();
@@ -4139,6 +4130,7 @@ document.getElementById('btn-translate').addEventListener('click', async () => {
         notice.className = 'translated-notice';
         notice.textContent = `🌐 Translated to ${langNames[lang] || lang}. Select "Original (English)" and click Translate to revert.`;
         textEl.parentNode.insertBefore(notice, textEl.nextSibling);
+        updateNarrationControls();
 
     } catch (err) {
         console.error('Translation error:', err);
@@ -5450,16 +5442,19 @@ document.getElementById('btn-walk-to-home').addEventListener('click', () => {
 const sampleTexts = {
     elementary: [
         {
+            id: 'beach-cleanup',
             title: '🏖️ The Beach Cleanup',
             desc: 'Kids find trash on their favorite beach and decide to do something about it.',
             text: `Every Saturday, Jaylen and his friends played at Sunset Beach. But one morning, they found plastic bottles, chip bags, and old fishing line tangled everywhere. "This is horrible," said Jaylen, looking at a seagull trying to eat a piece of plastic. He felt sick to his stomach.\n\nTheir neighbor, Ms. Rivera, told them about a town in Oregon where kids organized a beach cleanup and now the beach is one of the cleanest in the state. "Kids just like you did that," she said. Jaylen's eyes lit up. "We could do that here!"\n\nThey made a plan: every Saturday morning, they'd bring bags and gloves. Jaylen would make posters for the neighborhood. Sofia would ask the school for supplies. And Marcus would count and sort what they collected.\n\nThe first cleanup day, twelve kids showed up. They filled nine bags of trash. By the end of the month, they had removed over 200 pounds of waste from the beach. The seagulls were back, and so were the tide pool creatures.`
         },
         {
+            id: 'butterfly-garden',
             title: '🦋 The Butterfly Garden',
             desc: 'A class discovers why butterflies are disappearing and takes action.',
             text: `Ms. Thompson's class noticed something sad — the butterflies that used to fill the school garden every spring weren't coming anymore. "Where did they go?" asked Priya. The class learned that the wildflowers butterflies need had been replaced by plain grass.\n\n"But there's good news," said Ms. Thompson. She showed them photos of a school in Texas that planted a butterfly garden and now has hundreds of butterflies every year. "Nature can bounce back when we help."\n\nThe class drew up a garden plan. They picked flowers that butterflies love — milkweed, zinnias, and lavender. They measured the garden space and made a shopping list. Each student picked one plant to be responsible for.\n\nBy May, the garden was blooming. The first monarch butterfly arrived on a Tuesday morning, and the whole class ran to the window to watch. By June, they counted 47 butterflies in one afternoon.`
         },
         {
+            id: 'riverside-creek',
             title: '🌊 The Creek Behind School',
             desc: 'Students at Riverside Middle School tackle a polluted creek.',
             text: sampleText
@@ -5467,16 +5462,19 @@ const sampleTexts = {
     ],
     middle: [
         {
+            id: 'riverside-creek',
             title: '🌊 The Creek Behind School',
             desc: 'Students tackle a polluted creek with science and community action.',
             text: sampleText
         },
         {
+            id: 'empty-lot',
             title: '🌱 The Empty Lot',
             desc: 'A neighborhood transforms an abandoned lot into a community food garden.',
             text: `The corner lot on Maple Street had been empty for years — just cracked concrete, weeds, and broken glass. Every time Daniela walked past it, she felt a pang of frustration. Her neighborhood deserved better. "Why does nobody care about this place?" she asked her grandmother.\n\nHer grandmother smiled and told her about community gardens in Detroit, where neighbors turned hundreds of empty lots into farms that now feed thousands of people. "They started with nothing too," she said. "But they believed something beautiful could grow there."\n\nDaniela started small. She researched what vegetables grow well in their climate. She drafted a proposal for the city with a budget, a timeline, and a maintenance plan. She recruited five neighbors to form a garden committee, each responsible for a different section.\n\nThree months later, the lot had raised beds, a rain barrel system, and a hand-painted sign that read "Maple Street Community Garden." The first harvest produced enough tomatoes, peppers, and herbs for twenty families. Neighbors who had never spoken to each other were now sharing recipes over the fence.`
         },
         {
+            id: 'pollinator-project',
             title: '🐝 The Pollinator Project',
             desc: 'A science class investigates declining bee populations and designs a solution.',
             text: `The data was alarming. In their year-long bee monitoring project, Ms. Okafor's 7th grade class found that pollinator visits to the school grounds had dropped by 35% compared to records from five years ago. "If bees disappear, so does a third of our food supply," said Marcus, looking up from his spreadsheet. The class sat in stunned silence.\n\nBut then Ms. Okafor shared research from the University of Sussex showing that even small wildflower patches in urban areas can increase bee populations by up to 25% within a single growing season. "The science is clear," she said. "Small actions can have measurable impact."\n\nThe class developed a three-part plan. First, they mapped every green space within a mile of the school. Second, they identified native wildflower species that bloom at different times to provide year-round food for pollinators. Third, they wrote grant applications to three local businesses to fund seed and supplies.\n\nTwo of the three grants were approved. Over the next semester, students planted six pollinator patches across the neighborhood. Their spring monitoring showed a 20% increase in bee visits. The local newspaper covered their project, and two other schools reached out to replicate it.`
@@ -5484,16 +5482,19 @@ const sampleTexts = {
     ],
     high: [
         {
+            id: 'riverside-creek',
             title: '🌊 Riverside Creek Restoration',
             desc: 'Student-led environmental restoration with community impact.',
             text: sampleText
         },
         {
+            id: 'factory-town',
             title: '🏭 The Factory Town',
             desc: 'A community confronts industrial pollution through data and advocacy.',
             text: `For three generations, the families of Millbrook lived in the shadow of the Consolidated Chemical plant. Cancer rates were 40% above the state average. The river ran grey. When 16-year-old Elena tested the tap water for her AP Environmental Science project and found lead levels exceeding EPA limits by a factor of three, something shifted. "We've been drinking this," she said, her voice barely above a whisper. "My little brother drinks this."\n\nElena's teacher, Dr. Parekh, connected her with researchers at State University who had documented successful community-led water remediation in Flint, Michigan, and Hinkley, California. "Change is possible," Dr. Parekh told her, "but it requires evidence, organization, and persistence. Communities have won these fights before."\n\nElena and her classmates developed a comprehensive campaign. They established a citizen science water testing network with standardized protocols. They filed Freedom of Information requests for the plant's discharge records. They partnered with the university's environmental law clinic to understand their legal options. They created a public data dashboard showing real-time water quality readings.\n\nThe data dashboard went viral locally. Within six months, the state environmental agency launched a formal investigation. The plant was fined $2.4 million and required to install new filtration systems. Elena testified before the state legislature about the importance of environmental monitoring in underserved communities. A new community water treatment facility was funded through a combination of the fine revenue and a federal environmental justice grant.`
         },
         {
+            id: 'carbon-audit',
             title: '🌍 The Carbon Audit',
             desc: 'Students conduct a school-wide carbon audit and implement systemic changes.',
             text: `When the student sustainability council at Lincoln High calculated the school's annual carbon footprint — 847 metric tons of CO2 equivalent — the number felt abstract until they contextualized it: equivalent to driving a car 2.1 million miles, or the annual emissions of 184 average homes. "We talk about climate change in class," said council president James, "but our own institution is part of the problem. That realization was uncomfortable but necessary."\n\nThe council reviewed case studies from the Second Nature climate commitment, which showed that over 400 colleges and universities had achieved significant emissions reductions through systematic planning. Several K-12 schools in the consortium had reduced emissions by 30-50% within five years using similar frameworks. The evidence suggested that institutional change, while complex, was achievable and measurable.\n\nThe council proposed a five-year carbon reduction plan to the school board. Phase one: a comprehensive energy audit and LED lighting conversion. Phase two: a waste diversion program targeting 60% landfill reduction. Phase three: advocating for the district to source 50% renewable electricity. Each phase included specific metrics, responsible parties, and quarterly review points.\n\nThe school board approved the plan unanimously. Within the first year, the LED conversion reduced electricity consumption by 22%. The waste program diverted 45% of cafeteria waste to composting. James and two other students were invited to present their model at a national education sustainability conference, and the district committed to implementing the plan across all twelve schools.`
@@ -5516,7 +5517,7 @@ function openStoryChoices() {
     grid.querySelectorAll('.text-picker-card').forEach(card => {
         card.addEventListener('click', () => {
             const idx = parseInt(card.dataset.index);
-            loadText(texts[idx].text);
+            loadText(texts[idx].text, texts[idx].id);
             document.getElementById('text-picker-modal').classList.add('hidden');
         });
     });

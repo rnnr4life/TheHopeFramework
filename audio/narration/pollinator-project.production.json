@@ -1,0 +1,133 @@
+{
+  "generatedAt": "2026-11-18T16:28:57.845Z",
+  "storyId": "pollinator-project",
+  "transcriptSha256": "3dbfbeeb40f1188b6ed017366d448bf45e15c4dab008ec9004da7415e5a76cd1",
+  "audioSha256": "66ec10c5580c52ff1826784f3ad1aecf7ff1e346de66e8c0c83c999a21b9bd31",
+  "modelId": "onnx-community/Kokoro-82M-v1.0-ONNX",
+  "revision": "1939ad2a8e416c0acfeecc08a694d14ef25f2231",
+  "dtype": "q8",
+  "voice": "af_heart",
+  "engine": "kokoro-js@1.2.1",
+  "speed": 0.95,
+  "sampleRate": 24000,
+  "channels": 1,
+  "duration": 91.275,
+  "peak": 0.85,
+  "rms": 0.07313165651366477,
+  "wordsPerMinute": 128.84141331142152,
+  "segments": [
+    {
+      "text": "The data was alarming.",
+      "startSeconds": 0,
+      "durationSeconds": 2.175
+    },
+    {
+      "text": "In their year-long bee monitoring project, Ms. Okafor's 7th grade class found that pollinator visits to the school grounds had dropped by 35% compared to records from five years ago.",
+      "startSeconds": 2.475,
+      "durationSeconds": 13.25
+    },
+    {
+      "text": "\"If bees disappear, so does a third of our food supply,\" said Marcus, looking up from his spreadsheet.",
+      "startSeconds": 16.025,
+      "durationSeconds": 6.5
+    },
+    {
+      "text": "The class sat in stunned silence.",
+      "startSeconds": 22.825,
+      "durationSeconds": 2.4
+    },
+    {
+      "text": "But then Ms. Okafor shared research from the University of Sussex showing that even small wildflower patches in urban areas can increase bee populations by up to 25% within a single growing season.",
+      "startSeconds": 25.925,
+      "durationSeconds": 14.55
+    },
+    {
+      "text": "\"The science is clear,\" she said.",
+      "startSeconds": 40.775,
+      "durationSeconds": 2.525
+    },
+    {
+      "text": "\"Small actions can have measurable impact.\"",
+      "startSeconds": 43.6,
+      "durationSeconds": 3.275
+    },
+    {
+      "text": "The class developed a three-part plan.",
+      "startSeconds": 47.575,
+      "durationSeconds": 2.8
+    },
+    {
+      "text": "First, they mapped every green space within a mile of the school.",
+      "startSeconds": 50.675,
+      "durationSeconds": 4.025
+    },
+    {
+      "text": "Second, they identified native wildflower species that bloom at different times to provide year-round food for pollinators.",
+      "startSeconds": 55,
+      "durationSeconds": 8.625
+    },
+    {
+      "text": "Third, they wrote grant applications to three local businesses to fund seed and supplies.",
+      "startSeconds": 63.925,
+      "durationSeconds": 6.325
+    },
+    {
+      "text": "Two of the three grants were approved.",
+      "startSeconds": 70.95,
+      "durationSeconds": 2.625
+    },
+    {
+      "text": "Over the next semester, students planted six pollinator patches across the neighborhood.",
+      "startSeconds": 73.875,
+      "durationSeconds": 5.675
+    },
+    {
+      "text": "Their spring monitoring showed a 20% increase in bee visits.",
+      "startSeconds": 79.85,
+      "durationSeconds": 4.475
+    },
+    {
+      "text": "The local newspaper covered their project, and two other schools reached out to replicate it.",
+      "startSeconds": 84.625,
+      "durationSeconds": 5.95
+    }
+  ],
+  "provenance": [
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/config.json",
+      "sha256": "df34b4f930b23447cd4dc410fabfb42eb3f24e803e6c3f97d618fb359380a36f",
+      "bytes": 44
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/tokenizer.json",
+      "sha256": "77a02c8e164413299b4b4c403b14f8e0e1c1b727db4d46a09d6327b861060a34",
+      "bytes": 3497
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/tokenizer_config.json",
+      "sha256": "be1cb066d6ef6b074b3f15e6a6dd21ac88ff3cdaedf325f0aaed686c70f75d20",
+      "bytes": 113
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/onnx/model_quantized.onnx",
+      "sha256": "fbae9257e1e05ffc727e951ef9b9c98418e6d79f1c9b6b13bd59f5c9028a1478",
+      "bytes": 92361116
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/README.md",
+      "sha256": "b8fd888b4782f4d4ae85e2f1587cafd727037f4f138f72429ef1bd5908c0e9d8",
+      "bytes": 10627
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/voices/af_heart.bin",
+      "sha256": "d583ccff3cdca2f7fae535cb998ac07e9fcb90f09737b9a41fa2734ec44a8f0b",
+      "bytes": 522240
+    },
+    {
+      "url": "https://huggingface.co/hexgrad/Kokoro-82M/raw/main/README.md",
+      "sha256": "91dcabced89db6f109b8786642f50402d3ee87450e8189589b6f85520e7f4d78",
+      "bytes": 6348
+    }
+  ],
+  "review": "Technical preview only. Human listening review pending."
+}

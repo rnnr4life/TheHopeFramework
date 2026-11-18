@@ -1,0 +1,153 @@
+{
+  "generatedAt": "2026-11-18T16:26:15.296Z",
+  "storyId": "riverside-creek",
+  "transcriptSha256": "797622b419360443989025b05763c86fac629b49319fe61a15fa49a0b41f66cd",
+  "audioSha256": "a59d45160dc2612bb6561d05c769610d77b337cd28dc322972898c6530444a33",
+  "modelId": "onnx-community/Kokoro-82M-v1.0-ONNX",
+  "revision": "1939ad2a8e416c0acfeecc08a694d14ef25f2231",
+  "dtype": "q8",
+  "voice": "af_heart",
+  "engine": "kokoro-js@1.2.1",
+  "speed": 0.95,
+  "sampleRate": 24000,
+  "channels": 1,
+  "duration": 92.625,
+  "peak": 0.85,
+  "rms": 0.07898707763058767,
+  "wordsPerMinute": 136.03238866396762,
+  "segments": [
+    {
+      "text": "The students at Riverside Middle School couldn't ignore it anymore.",
+      "startSeconds": 0,
+      "durationSeconds": 4.5
+    },
+    {
+      "text": "Every spring, the creek behind their school flooded with murky, polluted water.",
+      "startSeconds": 4.8,
+      "durationSeconds": 5.35
+    },
+    {
+      "text": "\"We have to do something,\" said Amara, staring at the brown water pooling near the playground.",
+      "startSeconds": 10.45,
+      "durationSeconds": 5.825
+    },
+    {
+      "text": "She felt a deep ache thinking about the frogs and fish that used to live there.",
+      "startSeconds": 16.575,
+      "durationSeconds": 4.85
+    },
+    {
+      "text": "Their science teacher, Mr. Chen, showed them data from a nearby city where students had successfully restored a wetland area.",
+      "startSeconds": 22.125,
+      "durationSeconds": 8.425
+    },
+    {
+      "text": "\"If they could do it, we can too,\" he said.",
+      "startSeconds": 30.85,
+      "durationSeconds": 3.1
+    },
+    {
+      "text": "The class erupted with ideas.",
+      "startSeconds": 34.25,
+      "durationSeconds": 2.425
+    },
+    {
+      "text": "They had seen change happen before — the community garden downtown was once an empty lot.",
+      "startSeconds": 36.975,
+      "durationSeconds": 6.175
+    },
+    {
+      "text": "The class formed three teams.",
+      "startSeconds": 43.85,
+      "durationSeconds": 2.275
+    },
+    {
+      "text": "Team one would test water quality weekly and log the results.",
+      "startSeconds": 46.425,
+      "durationSeconds": 4.275
+    },
+    {
+      "text": "Team two would research native plants that filter pollutants.",
+      "startSeconds": 51,
+      "durationSeconds": 4.175
+    },
+    {
+      "text": "Team three would write a proposal to the city council asking for funding to install a rain garden.",
+      "startSeconds": 55.475,
+      "durationSeconds": 6.825
+    },
+    {
+      "text": "They created a timeline and assigned roles.",
+      "startSeconds": 62.6,
+      "durationSeconds": 3.125
+    },
+    {
+      "text": "Amara led the presentation to the city council.",
+      "startSeconds": 66.425,
+      "durationSeconds": 3.675
+    },
+    {
+      "text": "She brought water samples, charts, and photos.",
+      "startSeconds": 70.4,
+      "durationSeconds": 3.25
+    },
+    {
+      "text": "The council approved their proposal.",
+      "startSeconds": 73.95,
+      "durationSeconds": 2.6
+    },
+    {
+      "text": "Over the next two months, the students planted 200 native plants along the creek bank.",
+      "startSeconds": 76.85,
+      "durationSeconds": 5.775
+    },
+    {
+      "text": "They organized weekend volunteer days.",
+      "startSeconds": 82.925,
+      "durationSeconds": 3.075
+    },
+    {
+      "text": "By the end of the school year, the water quality tests showed a 40% improvement.",
+      "startSeconds": 86.3,
+      "durationSeconds": 5.625
+    }
+  ],
+  "provenance": [
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/config.json",
+      "sha256": "df34b4f930b23447cd4dc410fabfb42eb3f24e803e6c3f97d618fb359380a36f",
+      "bytes": 44
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/tokenizer.json",
+      "sha256": "77a02c8e164413299b4b4c403b14f8e0e1c1b727db4d46a09d6327b861060a34",
+      "bytes": 3497
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/tokenizer_config.json",
+      "sha256": "be1cb066d6ef6b074b3f15e6a6dd21ac88ff3cdaedf325f0aaed686c70f75d20",
+      "bytes": 113
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/onnx/model_quantized.onnx",
+      "sha256": "fbae9257e1e05ffc727e951ef9b9c98418e6d79f1c9b6b13bd59f5c9028a1478",
+      "bytes": 92361116
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/README.md",
+      "sha256": "b8fd888b4782f4d4ae85e2f1587cafd727037f4f138f72429ef1bd5908c0e9d8",
+      "bytes": 10627
+    },
+    {
+      "url": "https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/1939ad2a8e416c0acfeecc08a694d14ef25f2231/voices/af_heart.bin",
+      "sha256": "d583ccff3cdca2f7fae535cb998ac07e9fcb90f09737b9a41fa2734ec44a8f0b",
+      "bytes": 522240
+    },
+    {
+      "url": "https://huggingface.co/hexgrad/Kokoro-82M/raw/main/README.md",
+      "sha256": "91dcabced89db6f109b8786642f50402d3ee87450e8189589b6f85520e7f4d78",
+      "bytes": 6348
+    }
+  ],
+  "review": "Technical preview only. Human listening review pending."
+}
