@@ -71,27 +71,39 @@ test('screen preparation initializes every activity once per grade without reset
     }
 });
 
-test('guided Resume renders the paused paragraph instead of skipping ahead', () => {
-    const handlers = {};
-    let advances = 0;
-    let renders = 0;
-    const context = {
-        guidedPlaying: false,
-        guidedStep: 1,
-        stopStoryNarration() {},
-        document: { getElementById: id => ({ ...element(), addEventListener: (_, callback) => { handlers[id] = callback; } }) },
-        advanceGuided: () => advances++,
-        renderGuidedStep: () => renders++
+test('one story button uses the recommended narrator and toggles pause/resume without restarting', () => {
+    const calls = [];
+    const recording = { src: 'audio/narration/story.wav' };
+    const story = { id: 'guided-text', text: 'Story text.', language: 'en' };
+    const player = {
+        preferBrowser: false, state: 'idle',
+        start(source) { Object.assign(this, source, { state: 'playing' }); calls.push(['start', source.recording]); },
+        pause() { this.state = 'paused'; calls.push(['pause']); },
+        resume() { this.state = 'playing'; calls.push(['resume']); }
     };
-    const start = source.indexOf("document.getElementById('btn-guided-play').addEventListener");
-    const end = source.indexOf("document.getElementById('btn-guided-pause').addEventListener", start);
-    vm.runInNewContext(source.slice(start, end), context);
-    handlers['btn-guided-play']();
-    assert.equal(advances, 0);
-    assert.equal(renders, 1);
-    context.guidedStep = -1;
-    handlers['btn-guided-play']();
-    assert.equal(advances, 1);
+    const context = {
+        storyNarration: player, storyReadingSource: () => story,
+        narrationLibrary: [recording], document: { baseURI: 'https://example.test/' },
+        findNarrationRecording: () => recording
+    };
+    vm.createContext(context);
+    vm.runInContext(functionSource('selectedStoryRecording') + '\n' + functionSource('toggleStoryNarration'), context);
+    const click = () => vm.runInContext('toggleStoryNarration({})', context);
+    click();
+    click();
+    click();
+    assert.deepEqual(calls, [['start', recording], ['pause'], ['resume']]);
+    player.state = 'loading';
+    click();
+    assert.equal(calls.at(-1)[0], 'pause');
+    player.preferBrowser = true;
+    player.state = 'idle';
+    click();
+    assert.deepEqual(calls.at(-1), ['start', null]);
+    player.state = 'paused';
+    story.text = 'Different story.';
+    click();
+    assert.equal(calls.at(-1)[0], 'start');
 });
 
 test('Back uses application history once and falls back to Home after refresh', () => {
@@ -129,7 +141,7 @@ test('screen history ignores duplicate destinations and restores browser Back wi
             querySelector: () => active
         },
         screens: [...elements.values()],
-        prepareScreen() {}, pauseGuided() {}, stopStoryNarration() {},
+        prepareScreen() {}, stopStoryNarration() {},
         window: {
             location: { origin: 'https://fixture.test' }, scrollTo() {},
             history: {
@@ -201,12 +213,14 @@ function guidedFixture(grade = 'elementary') {
     const notices = [];
     let timerId = 0;
     let celebrations = 0;
+    let focused = '';
     const context = vm.createContext({
         currentAge: grade, console: { warn() {} },
         document: {
             getElementById(id) {
                 if (!elements.has(id)) {
                     const item = element();
+                    item.focus = () => { focused = id; };
                     if (id === 'guided-thinkaloud') item.querySelector = () => ({ innerText: 'A marker explanation.' });
                     elements.set(id, item);
                 }
@@ -221,7 +235,7 @@ function guidedFixture(grade = 'elementary') {
             }
         },
         SpeechSynthesisUtterance: function(text) { this.text = text; },
-        getSelectedVoice: () => null, storyNarration: { rate: 0.9 }, stopStoryNarration() {},
+        stopStoryNarration() {},
         updateNarrationControls() {},
         escapeHtml: String, triggerCelebration() { celebrations++; },
         showToast: message => notices.push(message),
@@ -229,48 +243,30 @@ function guidedFixture(grade = 'elementary') {
         clearTimeout: id => timers.delete(id)
     });
     const start = source.indexOf('const guidedStory =');
-    vm.runInContext(source.slice(start, source.indexOf("document.getElementById('btn-guided-play').addEventListener", start)), context);
+    vm.runInContext(source.slice(start, source.indexOf("document.getElementById('btn-guided-next').addEventListener", start)), context);
     const run = code => vm.runInContext(code, context);
     run('initGuided()');
-    return { run, context, elements, utterances, timers, notices, get celebrations() { return celebrations; } };
+    return { run, context, elements, utterances, timers, notices,
+        get celebrations() { return celebrations; }, get focused() { return focused; } };
 }
 
-test('guided pause, resume and reset invalidate old speech callbacks and report playback failure', () => {
-    const fixture = guidedFixture();
-    fixture.run('guidedPlaying = true; advanceGuided()');
-    const old = fixture.utterances[0];
-    old.onend();
-    assert.equal(fixture.timers.size, 1);
-    fixture.run('pauseGuided()');
-    assert.equal(fixture.timers.size, 0);
-    fixture.run('guidedPlaying = true; renderGuidedStep()');
-    old.onend();
-    old.onerror({ error: 'network' });
-    assert.equal(fixture.timers.size, 0);
-    assert.equal(fixture.notices.length, 0);
-    fixture.utterances.at(-1).onerror({ error: 'network' });
-    assert.equal(fixture.run('guidedPlaying'), false);
-    assert.equal(fixture.notices.length, 1);
-    assert.equal(fixture.run('guidedStep'), 0);
-    fixture.run('initGuided()');
-    old.onend();
-    assert.equal(fixture.run('guidedStep'), -1);
-    assert.equal(fixture.timers.size, 0);
-});
-
-test('text-only guided reading does not time out and elementary completion offers a next step exactly once', () => {
+test('Guided explanations advance only manually, never speak, and complete once for every grade', () => {
     for (const grade of ['elementary', 'middle', 'high']) {
         const fixture = guidedFixture(grade);
-        delete fixture.context.window.speechSynthesis;
-        fixture.run('guidedPlaying = true; advanceGuided()');
-        assert.equal(fixture.run('guidedPlaying'), false);
+        assert.equal(fixture.elements.get('btn-guided-next').textContent, 'Start exploring');
+        fixture.run('advanceGuided()');
+        assert.equal(fixture.run('guidedStep'), 0);
+        assert.equal(fixture.elements.get('btn-guided-next').textContent, 'Next marker');
         assert.equal(fixture.timers.size, 0);
-        assert.equal(fixture.notices.length, 1);
+        assert.equal(fixture.utterances.length, 0);
+        assert.equal(fixture.notices.length, 0);
         fixture.run('for (let i = 0; i <= guidedStory.paragraphs.length; i++) advanceGuided()');
         assert.equal(fixture.celebrations, 1);
         assert.equal(fixture.elements.get('guided-completion').classList.contains('hidden'), grade !== 'elementary');
         assert.equal(fixture.elements.get('btn-guided-next').classList.contains('hidden'), true);
+        assert.equal(fixture.focused, grade === 'elementary' ? 'btn-guided-story' : 'btn-guided-reset');
         fixture.run('initGuided()');
+        assert.equal(fixture.run('guidedStep'), -1);
         assert.equal(fixture.elements.get('guided-completion').classList.contains('hidden'), true);
     }
 });
@@ -317,18 +313,17 @@ test('loading a story refreshes narration after replacing its transcript and sta
     ]);
 });
 
-test('reading preference changes survive the synchronous controls refresh caused by stopping Guided', () => {
+test('one voice picker maps recommended and device choices to persistent preferences', () => {
     let change;
-    let configured;
+    const configured = [];
     const rate = { value: '1.15' };
-    const voice = { value: 'chosen-voice' };
+    const voice = { value: 'voice:chosen-voice' };
     const context = {
         panel: {
             querySelectorAll: () => [{ addEventListener: (_, callback) => { change = callback; } }],
             querySelector: selector => selector === '[data-reading-rate]' ? rate : voice
         },
-        pauseGuided() { rate.value = '0.9'; voice.value = ''; },
-        storyNarration: { configure: (...values) => { configured = values; } }
+        storyNarration: { configure: (...values) => configured.push(values) }
     };
     const normalized = source.replace(/\r\n/g, '\n');
     const start = normalized.indexOf("panel.querySelectorAll('select').forEach");
@@ -336,7 +331,11 @@ test('reading preference changes survive the synchronous controls refresh caused
     assert.ok(start >= 0 && end > start);
     vm.runInNewContext(normalized.slice(start, end), context);
     change();
-    assert.deepEqual(configured, [1.15, 'chosen-voice']);
+    voice.value = 'device';
+    change();
+    voice.value = '';
+    change();
+    assert.deepEqual(configured, [[1.15, 'chosen-voice', true], [1.15, '', true], [1.15, '', false]]);
 });
 
 test('each landing wheel link opens its existing marker detail without default hash navigation', () => {
@@ -643,7 +642,7 @@ test('changing grade after loading a story does not require the removed placehol
     const context = {
         currentAge: 'middle',
         ageContent: { high: { reflectTitle: 'Critical Reflection' } },
-        stopStoryNarration() {}, pauseGuided() {},
+        stopStoryNarration() {},
         HopeMetrics: { trackAge() {} },
         updateWelcomeClassroomStep() {},
         document: {

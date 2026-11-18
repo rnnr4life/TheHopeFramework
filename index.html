@@ -2156,13 +2156,10 @@
                 <div class="guided-sidebar">
                     <!-- Main action -->
                     <div class="guided-action-card">
-                        <div class="guided-controls">
-                            <button class="btn btn-primary btn-lg guided-play-btn" id="btn-guided-play">▶ Start Guided Reading</button>
-                            <button class="btn btn-lg" id="btn-guided-pause" style="display:none">⏸ Pause</button>
-                        </div>
-                        <p class="metrics-card-subtitle">Guided Resume restarts the current explanation. Story audio uses the separate Read Aloud controls.</p>
+                        <h3>Explore HOPE markers</h3>
+                        <p class="metrics-card-subtitle">Read one explanation at a time, at your own pace.</p>
+                        <button class="btn btn-primary" id="btn-guided-next">Start exploring</button>
                         <button class="btn btn-small btn-muted" id="btn-guided-reset">↺ Start Over</button>
-                        <button class="btn btn-small" id="btn-guided-next">Read Without Audio</button>
                     </div>
 
                     <div class="guided-action-card hidden" id="guided-completion">
@@ -2171,13 +2168,13 @@
                     </div>
 
                     <!-- Think-aloud panel — the main feedback area -->
-                    <div class="guided-thinkaloud" id="guided-thinkaloud">
+                    <div class="guided-thinkaloud" id="guided-thinkaloud" aria-live="polite" aria-atomic="true">
                         <div class="guided-thinkaloud-header">
                             <span class="guided-thinkaloud-icon">💭</span>
-                            <h4>Think-Aloud</h4>
+                            <h4>HOPE explanations</h4>
                         </div>
                         <div class="guided-thinkaloud-body">
-                            <p class="guided-placeholder">Press the green button above to start.<br>I'll walk you through the story and explain each HOPE marker as we find it.</p>
+                            <p class="guided-placeholder">Choose Start exploring to see the first HOPE marker.</p>
                         </div>
                     </div>
 
@@ -2475,17 +2472,12 @@
     <div id="app-version" class="app-version-label">v2.4.0 <button class="metrics-subtle-link" id="btn-open-metrics" aria-label="Usage metrics">📊</button></div>
     <template id="narration-controls-template">
         <div class="narration-actions" role="group" aria-label="Story Read Aloud">
-            <button type="button" class="btn btn-small" data-reading="play">Read Aloud</button>
-            <button type="button" class="btn btn-small" data-reading="pause" disabled>Pause</button>
-            <button type="button" class="btn btn-small" data-reading="restart" disabled>Restart</button>
+            <button type="button" class="btn btn-small" data-reading="play">Read aloud</button>
             <button type="button" class="btn btn-small" data-reading="stop" disabled>Stop</button>
         </div>
         <details>
-            <summary>Reading settings</summary>
-            <label>Narration source
-                <select data-reading-source><option value="browser">Browser voice</option></select>
-            </label>
-            <label>Reading speed
+            <summary>Settings</summary>
+            <label>Speed
                 <select data-reading-rate>
                     <option value="0.75">Slower (0.75x)</option>
                     <option value="0.9">Gentle (0.9x)</option>
@@ -2493,10 +2485,11 @@
                     <option value="1.15">Faster (1.15x)</option>
                 </select>
             </label>
-            <label>Browser voice <select data-reading-voice></select></label>
-            <p class="metrics-card-subtitle">Local voices are preferred. Network voices may send text to a speech provider. Availability varies by device.</p>
+            <label>Voice <select data-reading-voice></select></label>
+            <p class="metrics-card-subtitle" data-reading-note></p>
+            <button type="button" class="btn btn-small" data-reading="restart" disabled>Read from beginning</button>
         </details>
-        <p data-reading-status role="status" aria-live="polite">Ready. Browser Resume restarts the current paragraph.</p>
+        <p data-reading-status role="status" aria-live="polite">Ready.</p>
     </template>
     <script src="js/narration-library.js"></script>
     <script src="js/narration.js"></script>

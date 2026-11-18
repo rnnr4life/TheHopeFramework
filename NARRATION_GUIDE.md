@@ -9,19 +9,21 @@ Publication status is tracked by repository history and GitHub Pages deployments
 
 | Phase | Result |
 |---|---|
-| Browser narration | Shared controls, voice/rate preferences, local-voice preference and paragraph resume |
+| Simplified story player | One Read aloud/Pause/Resume button and Stop; optional speed/voice choices in Settings |
 | Free-license gate | Apache-licensed Kokoro v1.0 / stock `af_heart`; evidence below |
 | Recorded playback | Stable story IDs, exact transcript/language matching, native audio playback and explicit fallback |
-| Butterfly Garden pilot | Installed as an optional synthetic preview, not the default |
+| Recommended voice | Automatically uses the matching story recording; device voices remain an explicit Settings choice |
 | App-wide expansion | User requested expansion to every built-in story; all remain labeled previews |
 | Technical regression/documentation | Full-library transcript/audio checks, browser checks and reproducible workflow below |
 
 Seven unique recordings cover all nine grade-specific story choices and the
 Guided story. The shared Riverside Creek transcript uses the same recording
 across grades and Guided. This adds one consistent **Kokoro Heart** narrator,
-not the entire collection of Kokoro voices; the browser-voice list is unchanged.
-Guided teaching explanations, translations and entered text still use browser
-speech. No recording is certified as listening-approved.
+not the entire collection of Kokoro voices; device voices still come from the
+browser and operating system.
+Guided teaching explanations are now text-only, advanced manually with Start
+exploring / Next marker. Translations and entered story text use browser speech.
+No recording is certified as listening-approved.
 
 | Recording | Available in | Duration |
 |---|---|---|
@@ -33,24 +35,35 @@ speech. No recording is certified as listening-approved.
 | The Factory Town | High | 122.225 s |
 | The Carbon Audit | High | 125.750 s |
 
-### Try recorded narration
+### Read a story
 
 1. Choose any built-in story at any grade, or open the Guided example.
-2. Expand **Reading settings**. Set **Narration source** to
-   **Story narrator - Kokoro Heart (synthetic)**, labeled as a preview.
-3. Use Read Aloud, Pause, Resume Audio, Restart and Stop.
-   The recording resumes at its audio position; browser speech resumes from
-   the start of the current paragraph.
+2. Press **Read aloud**. The matching story narrator is chosen automatically.
+   The same button changes to **Pause**, then **Resume**; **Stop** ends playback.
+3. Optionally open **Settings** for speed, one Voice picker, or **Read from
+   beginning**. No separate narration-source choice is needed.
 
-Browser voice remains the default. Source choice is deliberately not saved.
+**Recommended** uses the story recording when available, otherwise a compatible
+device voice (preferring local). **Device voice - automatic** and named device
+voices explicitly bypass the recording; **Recommended** restores automatic
+narration. Explicit device choices and speed are saved locally. Existing saved
+voice/rate values are retained, but old preferences do not disable the new
+recommended narrator until a device choice is explicitly made in this UI.
+
+Recorded audio resumes at its playback position. Device speech resumes from the
+start of the current paragraph; Settings explains that limitation. Preview
+status stays visible in the short player status, with synthetic-voice attribution
+and pending listening review disclosed in Settings.
+
 Edits, translations or a changed story cannot reuse mismatched recorded audio.
-Missing or rejected audio shows an error; learners explicitly choose Browser
-voice rather than being silently switched to a potentially network-backed voice.
+Missing or rejected audio shows an error; learners explicitly choose a device
+voice in Settings rather than being silently switched to a potentially
+network-backed voice.
 
 The browser player works for story text in Guided and the Text Analyzer.
-Guided explanations remain a separate teaching sequence. Their Resume action
-restarts the current explanation; browser story Resume restarts the current
-paragraph. This avoids promising unreliable device-specific mid-word resume.
+**Explore HOPE markers** is a silent, learner-paced teaching sequence, not a
+second audio player. It has no spoken explanations, timers or automatic
+progression. Next marker reveals an explanation without changing story playback.
 
 No paid service, API key, free trial, account, voice cloning or student-text
 upload is part of this implementation. Existing translation and browser-network
@@ -89,7 +102,8 @@ zero-budget implementation. No payment setup is needed.
   Explicit compatible voice choices are retained when voices load later.
 - Network voices are identified. `localService` describes the browser's
   reported service location, not a comprehensive provider/privacy guarantee.
-- Voice/rate preferences are stored locally under `hope-narration`.
+- Voice/rate and explicit device-voice preferences are stored locally under
+  `hope-narration` (`rate`, `voiceURI`, `preferBrowser`).
 - Text-only reading always works without audio or a supported voice.
 - No word highlighting is promised without timing data.
 - The frontend must never import the local production tool or model.
@@ -164,8 +178,9 @@ its model name, successful generation or technical measurements.
 ### Validation
 
 `node --test` passes **39 tests**, without installing production dependencies.
-Tests include paragraph cancellation, voice persistence, preferences surviving
-control refresh, exact story linkage, same-origin matching, audio position,
+Tests include the shared button's playback state transitions, recommended/device
+choice persistence, silent manual Guided progression, paragraph cancellation,
+exact story linkage, same-origin matching, audio position,
 stale promises, rejected/synchronous playback errors, PCM encoding, installed
 audio/transcript hashes and complete sentence coverage for every built-in story.
 
@@ -176,10 +191,14 @@ Browser verification on the local preview confirmed:
   decode the matching recording, play, pause and stop correctly (12 paths total).
 - Actual WAV decoding/playback, speed changes, pause/resume at 12 seconds,
   restart, completion and navigation cleanup.
-- Enter starts audio and Space pauses the focused native control.
-- Deliberately blocked asset shows an error; explicit Browser voice fallback works.
-- Editing the transcript removes the recorded option. Pasted/teacher-entered
-  writing and translations cannot inherit a built-in recording.
+- Enter/Space activate the same story button for play, pause and resume.
+- Speed and explicit device choices survive reload; temporarily unavailable
+  voices retain their saved selection rather than being discarded.
+- Exploring markers neither starts narration nor changes ongoing/paused story
+  playback. Completion restores keyboard focus to a visible next action.
+- Deliberately blocked asset shows an error; explicit device-voice selection works.
+- Editing the transcript changes Recommended to a device voice. Pasted/teacher-
+  entered writing and translations cannot inherit a built-in recording.
 - Controls fit both panels at a 375-pixel viewport; desktop viewport restored.
 
 The missing-asset check intentionally produced one browser resource failure and

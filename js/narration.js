@@ -11,11 +11,13 @@ class HopeNarration {
         this.state = 'idle';
         this.rate = 0.9;
         this.voiceURI = '';
+        this.preferBrowser = false;
         this.voices = [];
         try {
             const saved = JSON.parse(storage.getItem('hope-narration') || '{}');
             if ([0.75, 0.9, 1, 1.15].includes(saved.rate)) this.rate = saved.rate;
             if (typeof saved.voiceURI === 'string') this.voiceURI = saved.voiceURI;
+            this.preferBrowser = saved.preferBrowser === true;
         } catch (error) {
             console.warn('Narration preferences could not be read:', error);
             notify('Reading preferences could not be restored. Default settings are available.');
@@ -39,12 +41,13 @@ class HopeNarration {
             || compatible[0] || null;
     }
 
-    configure(rate, voiceURI) {
+    configure(rate, voiceURI, preferBrowser = false) {
         this.stop();
         this.rate = [0.75, 0.9, 1, 1.15].includes(rate) ? rate : 0.9;
         this.voiceURI = voiceURI;
+        this.preferBrowser = preferBrowser;
         try {
-            this.storage.setItem('hope-narration', JSON.stringify({ rate: this.rate, voiceURI }));
+            this.storage.setItem('hope-narration', JSON.stringify({ rate: this.rate, voiceURI, preferBrowser }));
         } catch (error) {
             console.warn('Narration preferences could not be saved:', error);
             this.notify('Reading settings apply now, but could not be saved in this browser.');
@@ -68,7 +71,7 @@ class HopeNarration {
     }
 
     start({ id, text, language = 'en', recording = null }) {
-        this.onStart();
+        this.onStart?.();
         this.stop();
         this.id = id;
         this.text = text;
@@ -80,7 +83,7 @@ class HopeNarration {
             return;
         }
         if (recording && !this.createAudio) {
-            this.fail('Recording unavailable. Choose Browser voice to try speech, or continue reading the text.');
+            this.fail('Narrator unavailable. Choose a device voice in Settings, or continue reading.');
             return;
         }
         if (recording) {
@@ -90,7 +93,7 @@ class HopeNarration {
                 this.playRecording();
             } catch (error) {
                 console.warn('Recorded narration could not start:', error);
-                this.fail('Recording unavailable. Choose Browser voice to try speech, or continue reading the text.');
+                this.fail('Narrator unavailable. Choose a device voice in Settings, or continue reading.');
             }
             return;
         }
@@ -109,7 +112,7 @@ class HopeNarration {
         audio.onerror = () => {
             if (generation !== this.generation) return;
             console.warn('Recorded narration failed:', audio.error?.code);
-            this.fail('Recording unavailable. Choose Browser voice to try speech, or continue reading the text.');
+            this.fail('Narrator unavailable. Choose a device voice in Settings, or continue reading.');
         };
         this.onChange?.();
         let playback;
@@ -117,7 +120,7 @@ class HopeNarration {
             playback = audio.play();
         } catch (error) {
             console.warn('Recorded narration playback could not start:', error);
-            this.fail('Recording could not play. Choose Browser voice to try speech, or continue reading the text.');
+            this.fail('Narrator could not play. Choose a device voice in Settings, or continue reading.');
             return;
         }
         Promise.resolve(playback).then(() => {
@@ -130,7 +133,7 @@ class HopeNarration {
         }).catch(error => {
             if (generation !== this.generation) return;
             console.warn('Recorded narration playback was rejected:', error);
-            this.fail('Recording could not play. Choose Browser voice to try speech, or continue reading the text.');
+            this.fail('Narrator could not play. Choose a device voice in Settings, or continue reading.');
         });
     }
 

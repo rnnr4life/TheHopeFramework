@@ -197,7 +197,7 @@ test('recorded failure offers an explicit fallback choice without silently switc
     media[0].plays[0].reject(Error('Autoplay blocked'));
     await settle();
     assert.equal(player.state, 'error');
-    assert.match(notices.at(-1), /Choose Browser voice/);
+    assert.match(notices.at(-1), /Choose a device voice in Settings/);
     assert.equal(utterances.length, 0);
     player.start(recordedStory);
     media[1].onerror();
@@ -211,7 +211,21 @@ test('recorded failure offers an explicit fallback choice without silently switc
     media[2].play = () => { throw Error('Device unavailable on resume'); };
     assert.doesNotThrow(() => player.resume());
     assert.equal(player.state, 'error');
-    assert.match(notices.at(-1), /Choose Browser voice/);
+    assert.match(notices.at(-1), /Choose a device voice in Settings/);
+});
+
+test('recommended narration is the default and explicit device preferences survive reload', () => {
+    const { player, storage } = fixture({
+        'hope-narration': JSON.stringify({ rate: 1, voiceURI: 'legacy-voice' })
+    });
+    assert.equal(player.preferBrowser, false);
+    player.configure(1.15, 'chosen-voice', true);
+    const reloaded = fixture(Object.fromEntries(storage));
+    assert.equal(reloaded.player.preferBrowser, true);
+    assert.equal(reloaded.player.voiceURI, 'chosen-voice');
+    reloaded.player.configure(0.9, '');
+    assert.equal(reloaded.player.preferBrowser, false);
+    assert.equal(JSON.parse(reloaded.storage.get('hope-narration')).preferBrowser, false);
 });
 
 test('local audio encoding rejects unusable output and normalizes peaks without clipping', async () => {

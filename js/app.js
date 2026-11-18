@@ -312,7 +312,6 @@ function rotateHopeQuote() {
 
 function setAge(age) {
     stopStoryNarration();
-    pauseGuided();
     currentAge = age;
     document.body.className = `age-${age}`;
     HopeMetrics.trackAge(age);
@@ -629,8 +628,6 @@ function showScreen(id, options = {}) {
         iframe.contentWindow.postMessage({ type: 'hope-trail-visibility', active: id === 'trail-screen' },
             window.location.origin === 'null' ? '*' : window.location.origin);
     }
-    pauseGuided();
-
     screens.forEach(s => s.classList.remove('active'));
     target.classList.add('active');
     window.scrollTo(0, 0);
@@ -3581,7 +3578,6 @@ storyNarration = new HopeNarration({
     Utterance: window.SpeechSynthesisUtterance,
     storage: localStorage,
     notify: showToast,
-    onStart: pauseGuided,
     createAudio: src => new Audio(src),
     onChange: updateNarrationControls
 });
@@ -3603,6 +3599,20 @@ function storyReadingSource(panel) {
     };
 }
 
+function selectedStoryRecording(source) {
+    return storyNarration.preferBrowser ? null
+        : findNarrationRecording(source, narrationLibrary, document.baseURI);
+}
+
+function toggleStoryNarration(panel) {
+    const source = storyReadingSource(panel);
+    const matches = storyNarration.id === source.id && storyNarration.text === source.text
+        && storyNarration.language === source.language;
+    if (matches && ['playing', 'loading'].includes(storyNarration.state)) storyNarration.pause();
+    else if (matches && storyNarration.state === 'paused') storyNarration.resume();
+    else storyNarration.start({ ...source, recording: selectedStoryRecording(source) });
+}
+
 function updateNarrationControls() {
     if (!storyNarration) return;
     narrationPanels.forEach(panel => {
@@ -3613,68 +3623,64 @@ function updateNarrationControls() {
         const owns = storyNarration.id === id;
         const state = owns ? storyNarration.state : 'idle';
         const selected = storyNarration.voiceFor(language);
-        const sourcePicker = panel.querySelector('[data-reading-source]');
-        const previousSource = sourcePicker.value;
-        const recording = findNarrationRecording(source, narrationLibrary, document.baseURI);
-        sourcePicker.replaceChildren(new Option('Browser voice', 'browser'));
-        if (recording) {
-            sourcePicker.add(new Option(`${recording.label}${recording.status === 'preview' ? ' (preview, listening review pending)' : ''}`, 'recording'));
-            if (previousSource === 'recording') sourcePicker.value = 'recording';
-        }
-        voicePicker.replaceChildren(new Option('Automatic (prefer local)', ''));
-        storyNarration.voices.forEach(voice => {
-            voicePicker.add(new Option(`${voice.name} - ${voice.lang} (${voice.localService ? 'local' : 'network'})`, voice.voiceURI));
+        const availableRecording = findNarrationRecording(source, narrationLibrary, document.baseURI);
+        const recording = storyNarration.preferBrowser ? null : availableRecording;
+        voicePicker.replaceChildren(new Option(
+            availableRecording ? 'Recommended - story narrator' : 'Recommended - device voice', ''));
+        voicePicker.add(new Option('Device voice - automatic', 'device'));
+        const compatible = storyNarration.voices.filter(voice =>
+            voice.lang.toLowerCase().split('-')[0] === language.toLowerCase().split('-')[0]);
+        compatible.forEach(voice => {
+            const name = voice.name.replace(/^(Microsoft|Google|Apple)\s+/, '').split(' - ')[0];
+            voicePicker.add(new Option(`${name} (${voice.lang}${voice.localService ? '' : ', online'})`, `voice:${voice.voiceURI}`));
         });
-        voicePicker.value = storyNarration.voiceURI;
-        if (voicePicker.selectedIndex < 0) voicePicker.value = '';
+        const unavailable = storyNarration.preferBrowser && storyNarration.voiceURI
+            && !compatible.some(voice => voice.voiceURI === storyNarration.voiceURI);
+        if (unavailable) {
+            const option = new Option('Saved device voice (unavailable)', `voice:${storyNarration.voiceURI}`);
+            option.disabled = true;
+            voicePicker.add(option);
+        }
+        voicePicker.value = !storyNarration.preferBrowser ? ''
+            : storyNarration.voiceURI ? `voice:${storyNarration.voiceURI}` : 'device';
         panel.querySelector('[data-reading-rate]').value = String(storyNarration.rate);
-        panel.querySelector('[data-reading="play"]').textContent = state === 'paused'
-            ? storyNarration.audio ? 'Resume Audio' : 'Resume Paragraph' : 'Read Aloud';
-        panel.querySelector('[data-reading="play"]').disabled = ['playing', 'loading'].includes(state);
-        panel.querySelector('[data-reading="pause"]').disabled = !['playing', 'loading'].includes(state);
+        panel.querySelector('[data-reading="play"]').textContent = ['playing', 'loading'].includes(state)
+            ? 'Pause' : state === 'paused' ? 'Resume' : 'Read aloud';
+        panel.querySelector('[data-reading="play"]').disabled = !source.text;
         panel.querySelector('[data-reading="restart"]').disabled = !owns || ['idle', 'error'].includes(state);
         panel.querySelector('[data-reading="stop"]').disabled = !['playing', 'loading', 'paused'].includes(state);
-        const voiceLabel = selected ? `${selected.name} (${selected.localService ? 'local' : 'network'})` : 'browser default; processing location unknown';
-        const recordingSelected = sourcePicker.value === 'recording';
-        panel.querySelector('[data-reading-status]').textContent = `${state === 'playing' ? 'Reading' : state === 'loading' ? 'Loading audio' : state === 'paused' ? 'Paused' : state === 'ended' ? 'Finished' : state === 'error' ? 'Audio unavailable; choose Browser voice or read the text' : 'Ready'}. ${recordingSelected ? `${recording.label}. ${recording.status === 'preview' ? 'Listening review pending. ' : ''}Audio Resume preserves playback position.` : `Voice: ${voiceLabel}. Browser Resume restarts the current paragraph.`}`;
+        panel.querySelector('[data-reading-note]').textContent = recording
+            ? `${recording.label}. ${recording.status === 'preview' ? 'Listening review pending. ' : ''}Resumes where you paused.`
+            : `${unavailable ? 'Saved voice unavailable for this language; using a compatible device voice. ' : ''}${selected?.localService ? 'This voice runs on your device.' : 'This voice may send text to a speech provider.'} Resume restarts the current paragraph.`;
+        const voiceLabel = recording ? `Story narrator${recording.status === 'preview' ? ' (preview)' : ''}`
+            : selected ? selected.name.replace(/^(Microsoft|Google|Apple)\s+/, '').split(' - ')[0] : 'Device voice';
+        const status = { idle: 'Ready', loading: 'Loading', playing: 'Reading', paused: 'Paused', ended: 'Finished' }[state];
+        panel.querySelector('[data-reading-status]').textContent = state === 'error'
+            ? 'Audio unavailable. Choose a device voice in Settings.'
+            : `${status}. ${voiceLabel}.`;
     });
 }
 
 narrationPanels.forEach(panel => {
     panel.append(document.getElementById('narration-controls-template').content.cloneNode(true));
-    panel.querySelector('[data-reading="play"]').addEventListener('click', () => {
-        const source = storyReadingSource(panel);
-        if (storyNarration.state === 'paused' && storyNarration.id === source.id
-            && storyNarration.text === source.text && storyNarration.language === source.language) storyNarration.resume();
-        else storyNarration.start({
-            ...source,
-            recording: panel.querySelector('[data-reading-source]').value === 'recording'
-                ? findNarrationRecording(source, narrationLibrary, document.baseURI) : null
-        });
-    });
-    panel.querySelector('[data-reading="pause"]').addEventListener('click', () => storyNarration.pause());
+    panel.querySelector('[data-reading="play"]').addEventListener('click', () => toggleStoryNarration(panel));
     panel.querySelector('[data-reading="stop"]').addEventListener('click', stopStoryNarration);
     panel.querySelector('[data-reading="restart"]').addEventListener('click', () => {
         const source = storyReadingSource(panel);
         storyNarration.start({
             ...source,
-            recording: panel.querySelector('[data-reading-source]').value === 'recording'
-                ? findNarrationRecording(source, narrationLibrary, document.baseURI) : null
+            recording: selectedStoryRecording(source)
         });
     });
     panel.querySelectorAll('select').forEach(select => select.addEventListener('change', () => {
         const rate = Number(panel.querySelector('[data-reading-rate]').value);
-        const voiceURI = panel.querySelector('[data-reading-voice]').value;
-        pauseGuided();
-        storyNarration.configure(rate, voiceURI);
+        const choice = panel.querySelector('[data-reading-voice]').value;
+        storyNarration.configure(rate, choice.startsWith('voice:') ? choice.slice(6) : '', choice !== '');
     }));
 });
 updateNarrationControls();
 document.getElementById('text-content').addEventListener('input', stopStoryNarration);
-window.addEventListener('pagehide', () => {
-    pauseGuided();
-    stopStoryNarration();
-});
+window.addEventListener('pagehide', stopStoryNarration);
 
 // Init translate searchable dropdown
 const translateOptions = [
@@ -3709,11 +3715,6 @@ const translateOptions = [
     ]}
 ];
 initSearchableSelect('translate-search', 'translate-lang', 'translate-dropdown', translateOptions);
-
-function getSelectedVoice() {
-    return storyNarration.voiceFor('en');
-}
-
 
 // ===== Drag-and-Drop Margin Markers =====
 
@@ -3827,28 +3828,9 @@ const guidedStory = {
 };
 
 let guidedStep = -1;
-let guidedPlaying = false;
-let guidedTimer = null;
-let guidedGeneration = 0;
-
-function pauseGuided() {
-    stopStoryNarration();
-    const wasPlaying = guidedPlaying;
-    guidedPlaying = false;
-    guidedGeneration++;
-    clearTimeout(guidedTimer);
-    guidedTimer = null;
-    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-    if (wasPlaying) {
-        document.getElementById('btn-guided-play').textContent = '▶ Resume';
-        document.getElementById('btn-guided-play').style.display = '';
-        document.getElementById('btn-guided-pause').style.display = 'none';
-    }
-}
 
 function initGuided() {
     stopStoryNarration();
-    pauseGuided();
     guidedStep = -1;
     document.getElementById('guided-text').lang = 'en';
 
@@ -3869,19 +3851,16 @@ function initGuided() {
     ta.innerHTML = `
         <div class="guided-thinkaloud-header">
             <span class="guided-thinkaloud-icon">💭</span>
-            <h4>Think-Aloud</h4>
+            <h4>HOPE explanations</h4>
         </div>
         <div class="guided-thinkaloud-body">
-            <p class="guided-placeholder">Press the green button above to start.<br>I'll walk you through the story and explain each HOPE marker as we find it.</p>
+            <p class="guided-placeholder">Choose Start exploring to see the first HOPE marker.</p>
         </div>`;
 
     // Reset controls
-    document.getElementById('btn-guided-play').textContent = '▶ Start Guided Reading';
-    document.getElementById('btn-guided-play').style.display = '';
-    document.getElementById('btn-guided-pause').style.display = 'none';
     document.getElementById('guided-completion').classList.add('hidden');
     document.getElementById('btn-guided-next').classList.remove('hidden');
-    document.getElementById('btn-guided-next').textContent = 'Read Without Audio';
+    document.getElementById('btn-guided-next').textContent = 'Start exploring';
 
     // Reset progress tracker
     updateGuidedProgress(-1);
@@ -3908,13 +3887,12 @@ function advanceGuided() {
     if (guidedStep >= guidedStory.paragraphs.length) return;
     guidedStep++;
     if (guidedStep >= guidedStory.paragraphs.length) {
-        guidedPlaying = false;
-        document.getElementById('btn-guided-play').style.display = 'none';
-        document.getElementById('btn-guided-pause').style.display = 'none';
         document.getElementById('btn-guided-next').classList.add('hidden');
         if (currentAge === 'elementary') {
             document.getElementById('guided-completion').classList.remove('hidden');
             document.getElementById('btn-guided-story').focus();
+        } else {
+            document.getElementById('btn-guided-reset').focus();
         }
         updateGuidedProgress(4); // All done
 
@@ -3938,11 +3916,9 @@ function advanceGuided() {
 }
 
 function renderGuidedStep() {
-    clearTimeout(guidedTimer);
-    const generation = ++guidedGeneration;
     const thought = guidedStory.thoughts[currentAge][guidedStep];
     document.getElementById('btn-guided-next').textContent = guidedStep === guidedStory.paragraphs.length - 1
-        ? 'Finish Guided Reading' : 'Next Paragraph';
+        ? 'Finish exploring' : 'Next marker';
 
     // Update progress tracker
     updateGuidedProgress(guidedStep);
@@ -3978,50 +3954,9 @@ function renderGuidedStep() {
             </div>
         </div>`;
 
-    // Read aloud the thought
-    if ('speechSynthesis' in window && guidedPlaying) {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(ta.querySelector('.guided-thought').innerText);
-        utter.rate = storyNarration.rate;
-        const voice = getSelectedVoice();
-        if (voice) { utter.voice = voice; utter.lang = voice.lang; }
-        utter.onend = () => {
-            if (guidedPlaying && generation === guidedGeneration) {
-                guidedTimer = setTimeout(() => {
-                    if (guidedPlaying && generation === guidedGeneration) advanceGuided();
-                }, 1500);
-            }
-        };
-        utter.onerror = event => {
-            if (generation !== guidedGeneration || event.error === 'canceled' || event.error === 'interrupted') return;
-            console.warn('Guided read-aloud failed:', event.error);
-            pauseGuided();
-            showToast('Read-aloud is unavailable. Use Next Paragraph to continue without audio.');
-            document.getElementById('btn-guided-next').focus();
-        };
-        window.speechSynthesis.speak(utter);
-    } else if (guidedPlaying) {
-        pauseGuided();
-        showToast('Read-aloud is unavailable. Use Next Paragraph to continue without audio.');
-        document.getElementById('btn-guided-next').focus();
-    }
 }
 
-document.getElementById('btn-guided-play').addEventListener('click', () => {
-    stopStoryNarration();
-    guidedPlaying = true;
-    document.getElementById('btn-guided-play').style.display = 'none';
-    document.getElementById('btn-guided-pause').style.display = '';
-    if (guidedStep < 0) advanceGuided();
-    else renderGuidedStep();
-});
-
-document.getElementById('btn-guided-pause').addEventListener('click', pauseGuided);
-
-document.getElementById('btn-guided-next').addEventListener('click', () => {
-    pauseGuided();
-    advanceGuided();
-});
+document.getElementById('btn-guided-next').addEventListener('click', advanceGuided);
 
 document.getElementById('btn-guided-reset').addEventListener('click', () => {
     initGuided();
@@ -4032,9 +3967,7 @@ document.getElementById('btn-guided').addEventListener('click', () => {
     showScreen('guided-screen');
 });
 document.getElementById('btn-back-guided').addEventListener('click', () => {
-    pauseGuided();
-    clearTimeout(guidedTimer);
-    guidedPlaying = false;
+    stopStoryNarration();
     goBack();
 });
 
@@ -4045,7 +3978,6 @@ let originalGuidedHtml = '';
 
 document.getElementById('btn-translate').addEventListener('click', async () => {
     stopStoryNarration();
-    pauseGuided();
     const lang = document.getElementById('translate-lang').value;
     const textEl = document.getElementById('guided-text');
 
