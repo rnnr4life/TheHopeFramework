@@ -5117,15 +5117,30 @@ button.resource-card-action {
 }
 
 /* Guided highlights */
+.guided-reading-mode {
+    border: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin: 0.75rem 0;
+}
+.guided-reading-mode legend { font-size: 0.85rem; margin-bottom: 0.25rem; }
+.guided-reading-mode label { cursor: pointer; }
+.guided-reading-hint { padding: 0.5rem 1.25rem; }
 .guided-hl {
+    display: inline;
+    font: inherit;
+    color: inherit;
+    text-align: inherit;
+    border: 0;
+    cursor: pointer;
     padding: 2px 4px;
     border-radius: 4px;
     transition: all 0.5s ease;
-    opacity: 0.2;
+    opacity: 1;
 }
 .guided-hl.active {
-    opacity: 1;
-    box-shadow: 0 0 8px rgba(255,255,255,0.1);
+    outline: 1px solid var(--color-text-light);
 }
 .guided-hl[data-marker="motivation"] { background: var(--color-motivation-bg); border-bottom: 2px solid var(--color-motivation); }
 .guided-hl[data-marker="belief"] { background: var(--color-belief-bg); border-bottom: 2px solid var(--color-belief); }

@@ -3663,7 +3663,7 @@ function updateNarrationControls() {
             : storyNarration.voiceURI ? `voice:${storyNarration.voiceURI}` : 'device';
         panel.querySelector('[data-reading-rate]').value = String(storyNarration.rate);
         panel.querySelector('[data-reading="play"]').textContent = ['playing', 'loading'].includes(state)
-            ? 'Pause' : state === 'paused' ? 'Resume' : 'Read aloud';
+            ? 'Pause' : state === 'paused' ? 'Resume' : id === 'guided-text' ? 'Play story' : 'Read aloud';
         panel.querySelector('[data-reading="play"]').disabled = !source.text;
         panel.querySelector('[data-reading="restart"]').disabled = !owns || ['idle', 'error'].includes(state);
         panel.querySelector('[data-reading="stop"]').disabled = !['playing', 'loading', 'paused'].includes(state);
@@ -3847,18 +3847,27 @@ const guidedStory = {
 
 let guidedStep = -1;
 
-function initGuided() {
+function setGuidedReadingMode(mode) {
     stopStoryNarration();
+    document.querySelectorAll('input[name="guided-reading-mode"]').forEach(input => {
+        input.checked = input.value === mode;
+    });
+    document.querySelector('[data-narration-target="guided-text"]').classList.toggle('hidden', mode !== 'aloud');
+}
+
+function initGuided() {
+    setGuidedReadingMode('myself');
     guidedStep = -1;
     document.getElementById('guided-text').lang = 'en';
+    document.getElementById('guided-reading-hint').textContent =
+        'Read at your own pace. Choose any underlined passage to see its HOPE explanation.';
 
-    // Render story with pre-placed highlights (dimmed)
     const textEl = document.getElementById('guided-text');
     textEl.innerHTML = guidedStory.paragraphs.map((para, pi) => {
         let html = escapeHtml(para.text);
         para.highlights.forEach(hl => {
             const escaped = escapeHtml(hl.start);
-            html = html.replace(escaped, `<span class="guided-hl" data-marker="${hl.marker}" data-step="${pi}">${escaped}</span>`);
+            html = html.replace(escaped, `<button type="button" class="guided-hl" data-marker="${hl.marker}" data-step="${pi}" aria-controls="guided-thinkaloud" aria-pressed="false">${escaped}</button>`);
         });
         return `<p data-step="${pi}">${html}</p>`;
     }).join('');
@@ -3872,7 +3881,7 @@ function initGuided() {
             <h4>HOPE explanations</h4>
         </div>
         <div class="guided-thinkaloud-body">
-            <p class="guided-placeholder">Choose Start exploring to see the first HOPE marker.</p>
+            <p class="guided-placeholder">Choose an underlined passage, or Start exploring, to see a HOPE explanation.</p>
         </div>`;
 
     // Reset controls
@@ -3934,22 +3943,13 @@ function advanceGuided() {
 }
 
 function renderGuidedStep() {
-    const thought = guidedStory.thoughts[currentAge][guidedStep];
     document.getElementById('btn-guided-next').textContent = guidedStep === guidedStory.paragraphs.length - 1
         ? 'Finish exploring' : 'Next marker';
 
     // Update progress tracker
     updateGuidedProgress(guidedStep);
 
-    // Activate highlights for this step
-    document.querySelectorAll('.guided-hl').forEach(hl => {
-        hl.classList.toggle('active', parseInt(hl.dataset.step) <= guidedStep);
-    });
-
-    // Highlight active paragraph
-    document.querySelectorAll('.guided-text p').forEach(p => {
-        p.classList.toggle('active-para', parseInt(p.dataset.step) === guidedStep);
-    });
+    showGuidedExplanation(guidedStep);
 
     // Scroll paragraph into view
     const para = document.querySelector(`.guided-text p[data-step="${guidedStep}"]`);
@@ -3958,7 +3958,23 @@ function renderGuidedStep() {
         block: 'center'
     });
 
-    // Update think-aloud with marker-colored border
+}
+
+function showGuidedExplanation(step) {
+    if (!Number.isInteger(step) || step < 0 || step >= guidedStory.paragraphs.length) {
+        console.error('Unknown Guided passage:', step);
+        showToast('That HOPE explanation is not available.');
+        return;
+    }
+    const thought = guidedStory.thoughts[currentAge][step];
+    document.querySelectorAll('.guided-hl').forEach(hl => {
+        const selected = Number(hl.dataset.step) === step;
+        hl.classList.toggle('active', selected);
+        hl.setAttribute('aria-pressed', String(selected));
+    });
+    document.querySelectorAll('.guided-text p').forEach(p => {
+        p.classList.toggle('active-para', Number(p.dataset.step) === step);
+    });
     const ta = document.getElementById('guided-thinkaloud');
     ta.className = `guided-thinkaloud marker-${thought.marker}`;
     ta.innerHTML = `
@@ -3975,6 +3991,22 @@ function renderGuidedStep() {
 }
 
 document.getElementById('btn-guided-next').addEventListener('click', advanceGuided);
+
+document.querySelectorAll('input[name="guided-reading-mode"]').forEach(input => {
+    input.addEventListener('change', () => setGuidedReadingMode(input.value));
+});
+
+document.getElementById('guided-text').addEventListener('click', event => {
+    const passage = event.target.closest('.guided-hl');
+    if (!passage) return;
+    showGuidedExplanation(Number(passage.dataset.step));
+    if (window.matchMedia('(max-width: 768px)').matches) {
+        document.getElementById('guided-thinkaloud').scrollIntoView({
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+            block: 'nearest'
+        });
+    }
+});
 
 document.getElementById('btn-guided-reset').addEventListener('click', () => {
     initGuided();
@@ -4069,6 +4101,8 @@ document.getElementById('btn-translate').addEventListener('click', async () => {
                 tIdx++;
             }
         });
+        document.getElementById('guided-reading-hint').textContent =
+            'Translated passages do not have interactive underlines. Use Next marker for the original English explanations, or restore Original (English) for passage links.';
 
         // Add notice
         const langNames = { es: 'Spanish', fr: 'French', de: 'German', pt: 'Portuguese',

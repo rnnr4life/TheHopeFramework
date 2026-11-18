@@ -2141,9 +2141,15 @@
                 <div class="guided-text-panel">
                     <div class="guided-text-header">
                         <h3 id="guided-story-title">📖 The Creek Behind School</h3>
+                        <fieldset class="guided-reading-mode">
+                            <legend>How would you like to read?</legend>
+                            <label><input type="radio" name="guided-reading-mode" value="myself" checked> Read Myself</label>
+                            <label><input type="radio" name="guided-reading-mode" value="aloud"> Read Aloud</label>
+                        </fieldset>
                         <!-- Tools row -->
-                        <div class="narration-controls" data-narration-target="guided-text"></div>
+                        <div class="narration-controls hidden" data-narration-target="guided-text"></div>
                     </div>
+                    <p class="metrics-card-subtitle guided-reading-hint" id="guided-reading-hint">Read at your own pace. Choose any underlined passage to see its HOPE explanation.</p>
                     <div class="guided-text" id="guided-text"></div>
                     <!-- Translate bar -->
                     <div class="guided-translate-bar">
@@ -2162,7 +2168,7 @@
                     <!-- Main action -->
                     <div class="guided-action-card">
                         <h3>Explore HOPE markers</h3>
-                        <p class="metrics-card-subtitle">Read one explanation at a time, at your own pace.</p>
+                        <p class="metrics-card-subtitle">Choose underlined passages in any order, or use Next marker to explore in story order.</p>
                         <button class="btn btn-primary" id="btn-guided-next">Start exploring</button>
                         <button class="btn btn-small btn-muted" id="btn-guided-reset">↺ Start Over</button>
                     </div>
@@ -2179,7 +2185,7 @@
                             <h4>HOPE explanations</h4>
                         </div>
                         <div class="guided-thinkaloud-body">
-                            <p class="guided-placeholder">Choose Start exploring to see the first HOPE marker.</p>
+                            <p class="guided-placeholder">Choose an underlined passage, or Start exploring, to see a HOPE explanation.</p>
                         </div>
                     </div>
 

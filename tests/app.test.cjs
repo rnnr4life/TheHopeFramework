@@ -314,6 +314,13 @@ function guidedFixture(grade = 'elementary') {
     let timerId = 0;
     let celebrations = 0;
     let focused = '';
+    let stops = 0;
+    const modeInputs = ['myself', 'aloud'].map(value => ({ value, checked: false }));
+    const highlights = Array.from({ length: 8 }, (_, index) => {
+        const item = element();
+        item.dataset.step = String(Math.floor(index / 2));
+        return item;
+    });
     const context = vm.createContext({
         currentAge: grade, console: { warn() {} },
         document: {
@@ -326,7 +333,13 @@ function guidedFixture(grade = 'elementary') {
                 }
                 return elements.get(id);
             },
-            querySelectorAll: () => [], querySelector: () => null
+            querySelectorAll(selector) {
+                if (selector === 'input[name="guided-reading-mode"]') return modeInputs;
+                if (selector === '.guided-hl') return highlights;
+                return [];
+            },
+            querySelector: selector => selector === '[data-narration-target="guided-text"]'
+                ? elements.get('guided-player') : null
         },
         window: {
             speechSynthesis: {
@@ -335,7 +348,7 @@ function guidedFixture(grade = 'elementary') {
             }
         },
         SpeechSynthesisUtterance: function(text) { this.text = text; },
-        stopStoryNarration() {},
+        stopStoryNarration() { stops++; },
         updateNarrationControls() {},
         escapeHtml: String, triggerCelebration() { celebrations++; },
         showToast: message => notices.push(message),
@@ -345,10 +358,51 @@ function guidedFixture(grade = 'elementary') {
     const start = source.indexOf('const guidedStory =');
     vm.runInContext(source.slice(start, source.indexOf("document.getElementById('btn-guided-next').addEventListener", start)), context);
     const run = code => vm.runInContext(code, context);
+    elements.set('guided-player', element());
     run('initGuided()');
-    return { run, context, elements, utterances, timers, notices,
+    return { run, context, elements, utterances, timers, notices, modeInputs, highlights,
+        get stops() { return stops; },
         get celebrations() { return celebrations; }, get focused() { return focused; } };
 }
+
+test('Read Myself is silent by default and switching modes stops playback without changing exploration', () => {
+    const fixture = guidedFixture();
+    assert.equal(fixture.modeInputs[0].checked, true);
+    assert.equal(fixture.elements.get('guided-player').classList.contains('hidden'), true);
+    fixture.run('advanceGuided()');
+    const before = fixture.stops;
+    fixture.run("setGuidedReadingMode('aloud')");
+    assert.equal(fixture.modeInputs[1].checked, true);
+    assert.equal(fixture.elements.get('guided-player').classList.contains('hidden'), false);
+    assert.equal(fixture.utterances.length, 0);
+    fixture.run("setGuidedReadingMode('myself')");
+    assert.equal(fixture.stops, before + 2);
+    assert.equal(fixture.run('guidedStep'), 0);
+    assert.equal(fixture.elements.get('guided-player').classList.contains('hidden'), true);
+});
+
+test('all Guided passages select existing grade explanations in any order without skipping progression or speaking', () => {
+    for (const grade of ['elementary', 'middle', 'high']) {
+        const fixture = guidedFixture(grade);
+        const stops = fixture.stops;
+        for (const step of [3, 0, 2, 1]) {
+            fixture.run(`showGuidedExplanation(${step})`);
+            const text = fixture.run(`guidedStory.thoughts[currentAge][${step}].text`);
+            assert.ok(fixture.elements.get('guided-thinkaloud').innerHTML.includes(text));
+            for (const highlight of fixture.highlights) {
+                assert.equal(highlight['aria-pressed'], String(Number(highlight.dataset.step) === step));
+            }
+            assert.equal(fixture.run('guidedStep'), -1);
+        }
+        assert.equal(fixture.stops, stops);
+        assert.equal(fixture.utterances.length, 0);
+        assert.equal(fixture.celebrations, 0);
+        fixture.run('advanceGuided()');
+        assert.equal(fixture.run('guidedStep'), 0);
+        assert.ok(fixture.elements.get('guided-thinkaloud').innerHTML.includes(
+            fixture.run('guidedStory.thoughts[currentAge][0].text')));
+    }
+});
 
 test('Guided explanations advance only manually, never speak, and complete once for every grade', () => {
     for (const grade of ['elementary', 'middle', 'high']) {

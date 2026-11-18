@@ -37,8 +37,10 @@ No recording is certified as listening-approved.
 
 ### Read a story
 
-1. Choose any built-in story at any grade, or open the Guided example.
+1. Choose any built-in story at any grade. In the Guided example, select
+   **Read Aloud** to reveal the optional story player.
 2. Press **Read aloud**. The matching story narrator is chosen automatically.
+   In Guided, this button is labeled **Play story**.
    The same button changes to **Pause**, then **Resume**; **Stop** ends playback.
 3. Optionally open **Settings** for speed, one Voice picker, or **Read from
    beginning**. No separate narration-source choice is needed.
@@ -61,9 +63,24 @@ voice in Settings rather than being silently switched to a potentially
 network-backed voice.
 
 The browser player works for story text in Guided and the Text Analyzer.
+Guided starts in **Read Myself**, which hides the audio player and stops playback.
+Selecting **Read Aloud** reveals the existing player without autoplay; **Play
+story** starts narration. Switching back to Read Myself stops it. Start Over
+restores Read Myself. The Text Analyzer's controls are unchanged.
+
+All eight existing underlined evidence fragments are interactive native buttons.
+Click, tap, Enter or Space shows the corresponding grade-specific explanation.
+All four markers can be explored in any order without starting/stopping narration,
+skipping ordered steps or awarding completion. Existing story wording and
+explanations are unchanged, so exact-transcript recordings remain eligible.
+On narrow layouts, passage activation scrolls the explanation into view.
+
 **Explore HOPE markers** is a silent, learner-paced teaching sequence, not a
 second audio player. It has no spoken explanations, timers or automatic
 progression. Next marker reveals an explanation without changing story playback.
+Translations cannot preserve English passage mappings: their underlines are
+removed and a notice directs learners to ordered English explanations or to
+restore Original (English). Restoring English restores the interactive passages.
 
 No paid service, API key, free trial, account, voice cloning or student-text
 upload is part of this implementation. Existing translation and browser-network
@@ -177,15 +194,26 @@ its model name, successful generation or technical measurements.
 
 ### Validation
 
-`node --test` passes **39 tests**, without installing production dependencies.
+`node --test` passes **43 tests**, without installing production dependencies.
 Tests include the shared button's playback state transitions, recommended/device
-choice persistence, silent manual Guided progression, paragraph cancellation,
+choice persistence, silent independent mode, unordered passage selection,
+silent manual Guided progression, paragraph cancellation,
 exact story linkage, same-origin matching, audio position,
 stale promises, rejected/synchronous playback errors, PCM encoding, installed
 audio/transcript hashes and complete sentence coverage for every built-in story.
 
 Browser verification on the local preview confirmed:
 
+- Read Myself initializes silently at every grade; Read Aloud reveals the player
+  without autoplay, and switching back stops audio.
+- All eight passages select the existing correct explanation at every grade in
+  shuffled order without advancing ordered progress or changing audio playback.
+- Story transcript equality and recorded playback/pause/resume remain intact
+  with interactive buttons; the Text Analyzer player remains available.
+- Native Enter/Space activate passages. Layout checks at 375, 768 and 1280 pixels
+  keep passages within the story panel, including with reduced motion enabled.
+- Mocked translation (no provider request) removes obsolete passage mappings,
+  discloses the limitation and restores all eight links when returning to English.
 - Fresh reload and both narration panels initialize without application exceptions.
 - All nine story-picker paths and Guided at all three grades expose the narrator,
   decode the matching recording, play, pause and stop correctly (12 paths total).

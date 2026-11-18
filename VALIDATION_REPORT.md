@@ -2,6 +2,37 @@
 
 ## Outcome and boundaries
 
+### Independent Guided reading
+
+The read-only analysis found that story narration and marker explanations were
+already independent, but underlined evidence consisted of noninteractive spans.
+The existing four paragraphs and three grade-specific explanation sets are
+reused without curriculum changes.
+
+Read Myself is the silent default. Read Aloud reveals the existing player;
+Play story starts it. Each of the eight existing evidence fragments now opens
+its marker explanation independently of ordered progression or narration.
+
+All **43 tests pass**, plus syntax/patch checks. Local browser verification
+covered all eight fragments in shuffled order at all three grades, exact
+recording transcript preservation, playback/pause/resume, stopping on Read
+Myself, ordered completion/reset, native keyboard activation, and layouts at
+375, 768 and 1280 pixels. Translation behavior was verified using a local stub,
+without sending story text to a translation provider. These are browser/emulated
+layout checks, not physical-device or screen-reader certification.
+
+| Acceptance check | Result |
+|---|---|
+| Students can choose Read Myself or Read Aloud | Pass |
+| Read Myself works without playing audio | Pass |
+| Underlined passages can be clicked or tapped | Pass (native button/pointer activation; physical touch review remains) |
+| Correct marker explanations appear on the right | Pass; below the story on narrow screens |
+| All four HOPE markers remain available | Pass |
+| Students can explore markers in any order | Pass |
+| Elementary, Middle and High School all work | Pass |
+| Mobile and keyboard access are functional | Pass in viewport and native keyboard checks |
+| Existing Read Aloud still works | Pass |
+
 ### Landing page and grade navigation
 
 Opening the app without an activity link shows the grade-selection landing
