@@ -313,6 +313,10 @@ function rotateHopeQuote() {
 function setAge(age) {
     stopStoryNarration();
     currentAge = age;
+    const trailFrame = document.getElementById('trail-iframe');
+    if (trailFrame?.contentWindow) {
+        trailFrame.contentWindow.postMessage({ type: 'hope-trail-grade', grade: age }, window.location.origin);
+    }
     document.body.className = `age-${age}`;
     HopeMetrics.trackAge(age);
 
@@ -622,6 +626,7 @@ function showScreen(id, options = {}) {
     }
     if (previous?.id === 'walk-screen') stopWalkEffects(true);
     stopStoryNarration();
+    gameAudio.suspend();
     if (navigationReady && options.record !== false) {
         navigationIndex++;
         window.history.pushState({ hopeScreen: id, hopeSession: navigationSession, hopeIndex: navigationIndex,
@@ -2272,7 +2277,7 @@ const markerSignals = {
         ],
         aligned: {
             elementary: 'Amazing! This shows someone actually DOING something — not just talking about it. That\'s the power of taking action!',
-            middle: 'This passage shows Agency — someone is actually doing something, not just talking about it. Action is the most powerful marker of hope.',
+            middle: 'This passage shows Agency to Take Action — someone is actually doing something, not just talking about it. Each marker helps us read a different part of the story.',
             high: 'This passage demonstrates Agency — agentic thinking in hope theory. The transition from intention to action, and the measurable impact of that action, strongly aligns with this marker.'
         },
         partial: {
@@ -2429,7 +2434,7 @@ const matchPhrases = {
         { text: '"Something is wrong — the butterflies aren\'t coming anymore," whispered Leo.', marker: 'motivation', why: 'Leo notices something is wrong and it bothers him — that worry is the spark that makes people want to act.' },
         { text: '"If we work together, I know we can fix this!" said the teacher.', marker: 'belief', why: 'The teacher believes they CAN fix it — that confidence is what keeps hope alive.' },
         { text: 'They made a list: Step 1 — research. Step 2 — talk to the mayor. Step 3 — plant trees.', marker: 'plans', why: 'A numbered list of steps is a clear plan — they know exactly what to do first, second, and third.' },
-        { text: 'By June, the garden was full of flowers and bees were buzzing everywhere.', marker: 'agency', why: 'The results are real — flowers and bees! This shows what happens when people take action.' },
+        { text: 'The students planted and cared for the garden. By June, the garden was full of flowers and bees were buzzing everywhere.', marker: 'agency', why: 'The students planted and cared for the garden — those words show action, not just a positive outcome.' },
     ],
     middle: [
         { text: '"We can\'t just sit here while the creek gets worse every year," said Amara, her voice shaking.', marker: 'motivation', why: 'Amara\'s frustration and urgency — "can\'t just sit here" — is the emotional drive that sparks the desire for change.' },
@@ -2482,8 +2487,38 @@ const matchFeedbackMessages = {
             motivation: 'The affective catalyst — emotional response driving the desire for change.',
             belief: 'Evidence-based confidence — demonstrated efficacy or precedent.',
             plans: 'Pathways thinking — structured approaches to goals.',
-            agency: 'Agentic action — completed actions with measurable outcomes.'
+            agency: 'Look for people carrying out an action. A successful outcome is not required for agency.'
         }
+    }
+};
+
+const matchTransferExamples = {
+    elementary: {
+        story: 'The class wanted a shady reading corner. On Tuesday, Jo and Eli put soil in two pots and planted small trees. They hoped the trees would grow.',
+        marker: 'agency',
+        evidence: ['The class wanted a shady reading corner.', 'Jo and Eli put soil in two pots and planted small trees.', 'They hoped the trees would grow.'],
+        evidenceAnswer: 1,
+        reasons: ['It tells what people actually did, even though tree growth is uncertain.', 'It lists steps they will take next week.', 'It proves that the trees are already full grown.'],
+        reasonAnswer: 0,
+        why: '"Put soil" and "planted" describe action that happened. The trees do not have to grow successfully for this to show Agency to Take Action.'
+    },
+    middle: {
+        story: 'A neighborhood group wants to reduce litter by the bus stop. Their proposal assigns bag collection to one team next month and recycling research to another. The work has not started yet.',
+        marker: 'plans',
+        evidence: ['A neighborhood group wants to reduce litter.', 'Their proposal assigns bag collection to one team next month and recycling research to another.', 'The work has not started yet.'],
+        evidenceAnswer: 1,
+        reasons: ['It describes a completed cleanup.', 'The assigned tasks and timing specify intended work.', 'A desire for less litter proves the work is finished.'],
+        reasonAnswer: 1,
+        why: 'Assigned teams, tasks, and timing specify Plans for a Path Forward. Writing a proposal is an action too, but this question focuses on the intended work it organizes.'
+    },
+    high: {
+        story: 'A watershed coalition sought funds for filtration equipment. Members published baseline water samples and presented their findings at a public meeting. The authority deferred the funding decision; no filtration equipment has been installed.',
+        marker: 'agency',
+        evidence: ['A watershed coalition sought funds for filtration equipment.', 'Members published baseline water samples and presented their findings at a public meeting.', 'No filtration equipment has been installed.'],
+        evidenceAnswer: 1,
+        reasons: ['Only a funded intervention could count as action.', 'The absence of equipment means this passage contains only a plan.', 'Publishing and presenting are enacted work, even though the desired decision has not followed.'],
+        reasonAnswer: 2,
+        why: '"Published" and "presented" support Agency to Take Action. The lack of funding limits the outcome, not the fact that members acted.'
     }
 };
 
@@ -2492,6 +2527,9 @@ let matchIndex = 0;
 let matchAttempts = 0;
 let matchAnswered = false;
 let matchCompleted = false;
+let matchEvidenceNotes = [];
+let matchTransferAnswered = false;
+let matchTransferUsedFeedback = false;
 
 function initMatchActivity() {
     matchAnswered = false;
@@ -2501,6 +2539,14 @@ function initMatchActivity() {
     shuffleArray(matchQueue);
     matchIndex = 0;
     matchAttempts = 0;
+    matchEvidenceNotes = [];
+    matchTransferAnswered = false;
+    matchTransferUsedFeedback = false;
+    document.getElementById('match-transfer').classList.add('hidden');
+    document.getElementById('match-transfer-feedback').textContent = '';
+    document.getElementById('match-evidence-note').value = '';
+    document.getElementById('match-evidence-details').open = false;
+    document.getElementById('match-review-list').innerHTML = '';
 
     // Clear buckets
     ['motivation', 'belief', 'plans', 'agency'].forEach(m => {
@@ -2536,6 +2582,8 @@ function showMatchPhrase() {
     const feedbackEl = document.getElementById('match-feedback-msg');
 
     textEl.textContent = phrase.text;
+    document.getElementById('match-item-progress').textContent = `Phrase ${matchIndex + 1} of ${matchQueue.length}`;
+    document.getElementById('match-evidence-note').value = '';
     phraseEl.className = 'match-phrase'; // reset classes
     feedbackEl.classList.add('hidden');
     document.getElementById('btn-match-continue').classList.add('hidden');
@@ -2596,6 +2644,7 @@ function handleMatchChoice(chosenMarker) {
 
 function continueMatch() {
     if (!matchAnswered || matchCompleted) return;
+    matchEvidenceNotes[matchIndex] = document.getElementById('match-evidence-note').value.trim();
     matchAnswered = false;
     matchIndex++;
     showMatchPhrase();
@@ -2605,6 +2654,7 @@ function continueMatch() {
 function completeMatchActivity() {
     if (matchCompleted) return;
     matchCompleted = true;
+    renderMatchReview();
     // Hide workspace, show complete state
     document.querySelector('.match-workspace').style.display = 'none';
     document.getElementById('match-complete').classList.remove('hidden');
@@ -2620,7 +2670,67 @@ function completeMatchActivity() {
     triggerCelebration();
 }
 
+function renderMatchReview() {
+    const list = document.getElementById('match-review-list');
+    list.innerHTML = '';
+    matchQueue.forEach((phrase, index) => {
+        const item = document.createElement('li');
+        for (const text of [phrase.text, phrase.why, matchEvidenceNotes[index]]) {
+            if (!text) continue;
+            const paragraph = document.createElement('p');
+            paragraph.textContent = text;
+            item.appendChild(paragraph);
+        }
+        list.appendChild(item);
+    });
+}
+
+function renderMatchTransfer() {
+    const example = matchTransferExamples[currentAge];
+    matchTransferAnswered = false;
+    matchTransferUsedFeedback = false;
+    document.getElementById('match-transfer').classList.remove('hidden');
+    document.getElementById('match-transfer-story').textContent = example.story;
+    document.getElementById('match-transfer-feedback').textContent = '';
+    const groups = [
+        ['marker', 'Which marker best fits the enacted or intended work?', ['Plans for a Path Forward', 'Agency to Take Action'], ['plans', 'agency']],
+        ['evidence', 'Which words support your reading?', example.evidence],
+        ['reason', 'Why does that evidence fit?', example.reasons]
+    ];
+    document.getElementById('match-transfer-form').innerHTML = groups.map(([name, legend, choices, values]) =>
+        `<fieldset><legend>${legend}</legend>${choices.map((text, index) =>
+            `<label class="practice-option"><input type="radio" name="${name}" value="${values ? values[index] : index}" required> ${escapeHtml(text)}</label>`
+        ).join('')}</fieldset>`
+    ).join('') + '<button class="btn btn-primary" type="submit">Check evidence and reason</button>';
+    document.getElementById('match-transfer-title').tabIndex = -1;
+    document.getElementById('match-transfer-title').focus();
+}
+
+function submitMatchTransfer(event) {
+    event.preventDefault();
+    if (matchTransferAnswered) return;
+    const form = document.getElementById('match-transfer-form');
+    const selection = name => form.querySelector(`input[name="${name}"]:checked`)?.value;
+    const example = matchTransferExamples[currentAge];
+    const correct = selection('marker') === example.marker &&
+        selection('evidence') === String(example.evidenceAnswer) &&
+        selection('reason') === String(example.reasonAnswer);
+    const feedback = document.getElementById('match-transfer-feedback');
+    if (correct) {
+        matchTransferAnswered = true;
+        form.querySelectorAll('input, button').forEach(control => { control.disabled = true; });
+        feedback.textContent = `${matchTransferUsedFeedback ? 'Your revised evidence and reason fit.' : 'Your evidence and reason fit.'} ${example.why} This is practice, not a mastery score. Try explaining the example without the choices.`;
+        feedback.tabIndex = -1;
+        feedback.focus();
+    } else {
+        matchTransferUsedFeedback = true;
+        feedback.textContent = `Reconsider the marker, quoted evidence, and reason together. ${example.why} You can revise your choices and try again.`;
+    }
+}
+
 // Wire up choice buttons
+document.getElementById('btn-match-transfer').addEventListener('click', renderMatchTransfer);
+document.getElementById('match-transfer-form').addEventListener('submit', submitMatchTransfer);
 document.getElementById('btn-match-continue').addEventListener('click', continueMatch);
 document.querySelectorAll('.match-choice').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -2942,17 +3052,60 @@ const questAsciiArt = {
     ╚═════════════════════╝`
 };
 
-// Retro 8-bit sound effects for quest
-const questSFX = (function() {
-    let ctx = null;
-    function getCtx() {
-        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-        if (ctx.state === 'suspended') ctx.resume();
-        return ctx;
+const gameAudio = (() => {
+    let context = null;
+    let enabled = false;
+
+    function updateControls() {
+        document.querySelectorAll('[data-game-sound]').forEach(button => {
+            button.textContent = enabled ? 'Game sound: on' : 'Game sound: off';
+            button.setAttribute('aria-pressed', String(enabled));
+        });
     }
 
+    function reportError(error) {
+        console.error('Game audio unavailable:', error);
+        enabled = false;
+        updateControls();
+        showToast('Game sound is unavailable. You can keep playing silently.');
+    }
+
+    function suspend() {
+        if (context) context.suspend().catch(reportError);
+    }
+
+    function getContext() {
+        if (!enabled) return null;
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) {
+            reportError(new Error('Web Audio is not supported.'));
+            return null;
+        }
+        try {
+            if (!context) context = new AudioContext();
+        } catch (error) {
+            reportError(error);
+            return null;
+        }
+        if (context.state === 'suspended') context.resume().catch(reportError);
+        return context;
+    }
+
+    document.querySelectorAll('[data-game-sound]').forEach(button => {
+        button.addEventListener('click', () => {
+            enabled = !enabled;
+            updateControls();
+            if (enabled) getContext(); else suspend();
+        });
+    });
+    return { getContext, suspend };
+})();
+
+// Retro 8-bit sound effects for quest
+const questSFX = (function() {
     function beep(freq, dur, type, vol, delay) {
-        const c = getCtx();
+        const c = gameAudio.getContext();
+        if (!c) return;
         const o = c.createOscillator();
         const g = c.createGain();
         o.type = type || 'square';
@@ -3030,21 +3183,21 @@ const questScenarios = {
             location: '🔥 Ember Cave',
             marker: 'motivation',
             scene: 'You enter a dark cave lit by flickering orange light. On the walls, you see paintings of animals that used to live in the forest outside — deer, owls, foxes. But the forest is mostly gone now, replaced by a dusty parking lot. A small fox sits at the cave entrance, looking out at the empty land.',
-            prompt: 'The fox looks at you with sad eyes. What do you do?',
+            prompt: 'Which response shows a reason for wanting change for the fox?',
             choices: [
                 { text: 'Feel your heart ache for the fox and say, "This isn\'t right. These animals deserve their home back."', marker: 'motivation' },
                 { text: 'Look up facts about how other forests have been replanted successfully.', marker: 'belief' },
                 { text: 'Write down a list of steps to help the fox.', marker: 'plans' },
                 { text: 'Start picking up trash from the ground.', marker: 'agency' }
             ],
-            correct: 'That feeling in your heart — that ache, that "this isn\'t right" — is Motivation for Change. It\'s the spark that starts everything. Without feeling strongly, we\'d never want to act.',
-            wrong: 'That\'s a good idea, but in this cave, the most important thing is to FEEL something first. Before we plan or act, we need that spark — the feeling that something needs to change.'
+            correct: '"These animals deserve their home back" gives a reason for wanting change. That is the intended cue for Motivation for Change. You do not have to feel the same way as the character.',
+            wrong: 'For this question, look for the character\'s reason for wanting change. Which words reveal that reason? Other responses can also matter in this story.'
         },
         {
             location: '✨ Crystal Falls',
             marker: 'belief',
             scene: 'You follow a stream to a beautiful waterfall made of shimmering crystal-blue water. Behind the falls, you discover a hidden garden where trees are growing tall and strong. A sign reads: "This forest was planted by children ten years ago. It was once a bare, empty field."',
-            prompt: 'The sign gives you a warm feeling. What matters most here?',
+            prompt: 'Which response uses the sign as evidence that change is possible?',
             choices: [
                 { text: 'Feel upset that the field was ever bare in the first place.', marker: 'motivation' },
                 { text: 'Realize that if those kids could grow a whole forest, maybe you can too! Change really IS possible.', marker: 'belief' },
@@ -3052,18 +3205,18 @@ const questScenarios = {
                 { text: 'Start digging holes to plant new trees.', marker: 'agency' }
             ],
             correct: 'That\'s Belief that Change is Possible! Seeing proof that kids like you have already made a difference gives you confidence that YOU can do it too. Belief keeps hope alive.',
-            wrong: 'Good thinking! But this special place is showing you something important — PROOF that change works. The most powerful thing here is believing that if they did it, you can too.'
+            wrong: 'Look for the response that uses the earlier forest project as evidence for what might be possible. It does not guarantee that every project will have the same result.'
         },
         {
             location: '🗺️ Blueprint Summit',
             marker: 'plans',
             scene: 'You climb to the top of a mountain where an old treehouse serves as a planning station. Inside, there\'s a big table with maps, markers, and charts. A wise owl perches nearby and says, "Having a dream is wonderful. But dreams need a roadmap to come true."',
-            prompt: 'The owl is right — you need a plan! What\'s the best next step?',
+            prompt: 'Which response describes specific steps and when to take them?',
             choices: [
                 { text: 'Tell the owl how angry you are about deforestation.', marker: 'motivation' },
                 { text: 'Tell the owl you believe things can get better.', marker: 'belief' },
                 { text: 'Use the maps and markers to create a step-by-step plan: Week 1 — gather seeds, Week 2 — prepare the soil, Week 3 — plant!', marker: 'plans' },
-                { text: 'Jump out the window and start planting immediately.', marker: 'agency' }
+                { text: 'Walk outside with an adult and plant a seedling.', marker: 'agency' }
             ],
             correct: 'That\'s a Plan for a Path Forward! Step-by-step plans turn hope into something real. With a clear roadmap, you know exactly what to do and when.',
             wrong: 'Great energy! But the owl\'s wisdom is about PLANNING. Before you leap into action, you need a clear roadmap — specific steps that will guide your work.'
@@ -3072,7 +3225,7 @@ const questScenarios = {
             location: '💪 Action Valley',
             marker: 'agency',
             scene: 'You descend into a green valley buzzing with activity. Other kids are here — planting trees, building bird houses, and testing water from the stream. A girl runs up to you holding a seedling. "We\'ve been waiting for you! We have one last tree to plant to complete the forest corridor."',
-            prompt: 'The seedling is in your hands. What matters most right now?',
+            prompt: 'Which response describes carrying out an action?',
             choices: [
                 { text: 'Think about how sad it is that we need to replant forests.', marker: 'motivation' },
                 { text: 'Look at how well the other planted trees are growing.', marker: 'belief' },
@@ -3087,30 +3240,30 @@ const questScenarios = {
         {
             location: '🔥 Ember Cave',
             marker: 'motivation',
-            scene: 'You enter a cavern deep beneath an old-growth forest. Projected on the walls are images: a river choked with algae, a coral reef bleached white, a glacier retreating year by year. The air feels heavy. A monitor shows local data — your town\'s air quality has dropped 30% in five years.',
-            prompt: 'The data is real. It\'s YOUR town. What do you feel?',
+            scene: 'You enter a cavern in a fictional town. Projected on the walls are images of a polluted river and a damaged forest. A monitor shows a fictional air-quality report. A character says, "I want our community to have cleaner air."',
+            prompt: 'In this fictional story, which response is the intended cue for Motivation for Change?',
             choices: [
                 { text: 'A surge of frustration and urgency — "We can\'t just let this happen. Someone needs to do something, and it might as well be us."', marker: 'motivation' },
                 { text: 'Recall that a nearby city turned their air quality around with a green initiative.', marker: 'belief' },
                 { text: 'Start sketching out a proposal to present to the city council.', marker: 'plans' },
                 { text: 'Walk outside and plant a tree right now.', marker: 'agency' }
             ],
-            correct: 'That frustration, that urgency — that\'s Motivation for Change. It\'s the emotional response that makes you care enough to want to act. Without it, the data is just numbers.',
-            wrong: 'That\'s a valid response, but in this moment, the most important thing happening is the FEELING. Motivation is the emotional spark — frustration, urgency, grief — that makes you care enough to start.'
+            correct: '"We can\'t just let this happen" expresses a reason for wanting change. The question concerns the character\'s motivation, not how you personally should feel.',
+            wrong: 'Look for the response that expresses why the character wants change. Evidence of recovery, a proposal, and an action also matter, but answer different questions.'
         },
         {
             location: '✨ Crystal Falls',
             marker: 'belief',
-            scene: 'Behind the waterfall, a research station is carved into the rock. Screens display case studies from around the world: a river in South Korea restored from a concrete highway, a community forest in India grown from nothing, a reef in Australia beginning to recover through human intervention. Each with hard data.',
-            prompt: 'The evidence is overwhelming. What\'s the most important takeaway?',
+            scene: 'Behind the waterfall, a fictional research station displays reports from other fictional communities. Their monitoring shows recovery after restoration work. The researchers compare the conditions with those in the town rather than promising identical results.',
+            prompt: 'Which response uses earlier recovery as evidence for what might be possible?',
             choices: [
                 { text: 'Feel angry that we let things get so bad in the first place.', marker: 'motivation' },
-                { text: 'These success stories prove that environmental recovery is scientifically possible — if these communities did it, so can ours.', marker: 'belief' },
+                { text: 'The earlier recovery gives us a reason to think change may be possible here, while we check the local conditions.', marker: 'belief' },
                 { text: 'Begin outlining which approach would work best for your community.', marker: 'plans' },
-                { text: 'Start replicating what the Korean project did.', marker: 'agency' }
+                { text: 'Start carrying out a restoration activity.', marker: 'agency' }
             ],
-            correct: 'That\'s Belief that Change is Possible — grounded in evidence. These aren\'t empty promises; they\'re proven results. Belief backed by data is what transforms hope from wishful thinking into a realistic foundation for action.',
-            wrong: 'Good instinct, but what this research station is really offering you is EVIDENCE. Belief in the HOPE Framework means seeing proof that change actually works — and trusting that it can work for you too.'
+            correct: 'The response uses earlier recovery as evidence for Belief that Change is Possible. It also recognizes that a different place may have different conditions.',
+            wrong: 'Look for the response that explains how the earlier evidence supports a possibility, without treating it as a guarantee.'
         },
         {
             location: '🗺️ Blueprint Summit',
@@ -3130,22 +3283,22 @@ const questScenarios = {
             location: '💪 Action Valley',
             marker: 'agency',
             scene: 'In the valley, the plan is in motion. Teams are deployed, supplies are ready, and the community has gathered. Your team leader hands you the water quality testing kit and says, "The first samples are crucial — they\'ll be our baseline for measuring progress. It\'s time."',
-            prompt: 'Everything is aligned. What defines this moment?',
+            prompt: 'Which response describes people carrying out the work?',
             choices: [
                 { text: 'Reflect on the emotional journey that brought you here.', marker: 'motivation' },
                 { text: 'Feel confident because you know the science supports this approach.', marker: 'belief' },
                 { text: 'Double-check the testing protocol one more time.', marker: 'plans' },
                 { text: 'Wade into the creek, collect the first water sample, log the data, and begin. Months later, the results show a 40% improvement.', marker: 'agency' }
             ],
-            correct: 'That\'s Agency to Take Action — the culmination of the HOPE Framework. You didn\'t just feel, believe, and plan. You actually DID it, and the results are measurable. Agency is where hope becomes reality.',
-            wrong: 'Those all matter, but this moment is about DOING. Agency is the step where everything converges into real action with measurable impact. It\'s the most powerful marker.'
+            correct: 'Collecting and logging a water sample is Agency to Take Action. The action is the evidence; it does not depend on a successful outcome.',
+            wrong: 'This question focuses on Agency to Take Action. Look for what people are doing in the story, rather than only what they intend to do.'
         }
     ],
     high: [
         {
             location: '🔥 Ember Cave',
             marker: 'motivation',
-            scene: 'The cave walls display real-time global dashboards: atmospheric CO₂ at 427 ppm, ocean acidification rates increasing, and a scrolling feed of IPCC findings. A recording plays testimonies from Pacific Island communities facing displacement due to sea level rise. The emotional weight of the data is palpable.',
+            scene: 'In this fictional scenario, a local monitoring display describes habitat loss. A recorded fictional resident says, "This place matters to our community. I want to protect what remains." The testimony explains why this character wants change.',
             prompt: 'The convergence of data and human testimony creates a profound response. What is its primary function?',
             choices: [
                 { text: 'It generates the affective catalyst — eco-grief, moral distress, and urgency — that transforms passive awareness into active desire for change.', marker: 'motivation' },
@@ -3153,28 +3306,28 @@ const questScenarios = {
                 { text: 'It suggests a framework for systematic response.', marker: 'plans' },
                 { text: 'It demonstrates completed remediation efforts.', marker: 'agency' }
             ],
-            correct: 'Precisely. The affective response — eco-grief and moral distress — is the catalyst for Motivation. Hope theory positions emotional engagement as the necessary precondition for goal-directed behavior. Without feeling the weight of the problem, agency remains dormant.',
-            wrong: 'Consider the primary function of emotional testimony paired with alarming data. In hope theory, Motivation represents the affective catalyst — the emotional response that transforms awareness into desire for change.'
+            correct: 'This passage presents an emotional response as the intended cue for Motivation for Change. It does not mean everyone must experience the same emotion or follow a fixed sequence before acting.',
+            wrong: 'Look for the response explaining why the character wants change. This question analyzes the fictional testimony; it does not assess your own emotional response.'
         },
         {
             location: '✨ Crystal Falls',
             marker: 'belief',
-            scene: 'The research station archives decades of longitudinal environmental data. A meta-analysis demonstrates that community-led interventions achieve 2.3x greater biodiversity recovery than top-down mandates. Case studies from Costa Rica\'s reforestation, Rwanda\'s mountain gorilla recovery, and Denmark\'s wind energy transition are presented with full methodology.',
-            prompt: 'This evidence base serves a specific function in hope theory. What is it?',
+            scene: 'A fictional research station compares monitoring records from several fictional restoration projects. Some sites recovered after intervention; others faced continuing difficulties. Researchers explain which conditions may make an earlier success relevant to this town.',
+            prompt: 'Which response uses the evidence to support a qualified expectation of change?',
             choices: [
                 { text: 'It intensifies the emotional urgency of the crisis.', marker: 'motivation' },
                 { text: 'It establishes warranted optimism — evidence-based confidence that systemic change is achievable through demonstrated precedent and replicated outcomes.', marker: 'belief' },
                 { text: 'It provides a template for operational planning.', marker: 'plans' },
                 { text: 'It documents completed interventions.', marker: 'agency' }
             ],
-            correct: 'Correct. In Snyder\'s hope theory, Belief corresponds to the cognitive appraisal that goals are achievable. This isn\'t naive optimism — it\'s warranted confidence grounded in peer-reviewed evidence, demonstrated precedent, and replicable methodology.',
-            wrong: 'This evidence base primarily serves the cognitive function of establishing Belief — warranted optimism grounded in demonstrated precedent. It shows not just that change happened, but that it\'s replicable and measurable.'
+            correct: 'Earlier recovery can support Belief that Change is Possible when the evidence and conditions are relevant. It supports a reasoned possibility, not certainty about this project.',
+            wrong: 'Look for the response that connects evidence of earlier recovery with a reasoned possibility of change, rather than treating the report itself as the current team\'s action.'
         },
         {
             location: '🗺️ Blueprint Summit',
             marker: 'plans',
             scene: 'The systems modeling suite generates scenario projections based on variable inputs. You can model interventions against baseline trajectories, accounting for resource constraints, political feasibility, and ecological timelines. The interface prompts: "Define your theory of change."',
-            prompt: 'The modeling tools enable a critical cognitive process in hope theory. What is it?',
+            prompt: 'Which response describes structured routes toward the team\'s goal?',
             choices: [
                 { text: 'Emotional processing of environmental loss.', marker: 'motivation' },
                 { text: 'Validation that the proposed approach has precedent.', marker: 'belief' },
@@ -3182,21 +3335,21 @@ const questScenarios = {
                 { text: 'Direct implementation of remediation strategies.', marker: 'agency' }
             ],
             correct: 'Pathways thinking is the cognitive engine of hope. It\'s not merely listing steps — it\'s generating multiple contingent routes, modeling constraints, and building adaptive capacity. This is what distinguishes hope from wishful thinking: the ability to identify and navigate pathways to goals.',
-            wrong: 'The modeling suite\'s primary function is pathways thinking — the cognitive process of generating structured routes to goals. In hope theory, this is the bridge between motivation/belief and agency.'
+            wrong: 'The modeling suite organizes proposed routes, benchmarks, and adjustments. Those are the intended Plans cues. Building a model is also work, but this question focuses on the structure it proposes.'
         },
         {
             location: '💪 Action Valley',
             marker: 'agency',
             scene: 'The intervention is underway. Your team publishes baseline data, implements phase one of the restoration protocol, and presents preliminary findings to the municipal environmental commission. The commission allocates emergency funding. Six months later, biomarker analysis shows measurable ecosystem recovery.',
-            prompt: 'This sequence represents the culmination of the HOPE Framework. What marker does it demonstrate?',
+            prompt: 'Which response describes the enacted work in this sequence?',
             choices: [
                 { text: 'The emotional catalyst that initiated the project.', marker: 'motivation' },
                 { text: 'The evidence base that justified the approach.', marker: 'belief' },
                 { text: 'The strategic framework that guided implementation.', marker: 'plans' },
                 { text: 'Agentic action — the self-directed exercise of capability that produces measurable systemic change, demonstrating that individual and collective agency can translate intention into impact.', marker: 'agency' }
             ],
-            correct: 'Agency represents the full realization of hope as a lived practice. The HOPE Framework\'s power lies in this progression: from affective response to evidence-based confidence to structured pathways to measurable action. Hope is not passive — it is something you DO.',
-            wrong: 'This sequence demonstrates Agency — agentic thinking in its fullest expression. It\'s the moment where all three prior markers converge into action with measurable, systemic outcomes.'
+            correct: 'Publishing data, implementing the protocol, and presenting findings are enacted work: Agency to Take Action. The evidence is in those actions, whether or not the desired recovery follows.',
+            wrong: 'Look for the response naming work that people actually carry out. A reason, supporting evidence, and a strategy can appear in the same story without replacing this action cue.'
         }
     ]
 };
@@ -3224,6 +3377,7 @@ function initQuest() {
 function renderQuestStage() {
     const scenario = questScenarios[currentAge][questStage];
     questChoiceMade = false;
+    document.getElementById('quest-item-progress').textContent = `Stage ${questStage + 1} of ${questScenarios[currentAge].length}`;
 
     // Update map
     for (let i = 0; i < 4; i++) {
@@ -3278,6 +3432,8 @@ function renderQuestStage() {
         btn.addEventListener('click', () => handleQuestChoice(btn, scenario));
         btn.addEventListener('mouseenter', () => questSFX.hover());
     });
+    document.getElementById('quest-location').tabIndex = -1;
+    document.getElementById('quest-location').focus();
 }
 
 function handleQuestChoice(btn, scenario) {
@@ -3352,13 +3508,15 @@ function showQuestVictory() {
     }
 
     const msgs = {
-        elementary: 'You journeyed through all four lands and collected every Hope Fragment! You learned that hope starts with a feeling, grows with belief, gets a plan, and becomes real through action. You\'re a true Hope Hero! 🌟',
-        middle: 'You\'ve completed the quest and collected all four Hope Fragments. Each one taught you a different way hope shows up in stories about the environment — from the spark of motivation to the power of taking action.',
-        high: 'Quest complete. You\'ve engaged with all four markers of the HOPE Framework through narrative analysis. The progression from affective catalyst to agentic action mirrors hope theory\'s model of goal-directed behavior — a framework you can now apply to any environmental narrative.'
+        elementary: 'You practiced all four markers. They help us notice different parts of a story. They do not tell you how you must feel. Try explaining a new example in your own words.',
+        middle: 'You completed four practice questions. A story may contain several markers, and they need not appear in a fixed order. Try using textual evidence to explain a new example.',
+        high: 'Practice complete. These questions distinguish reasons for change, supporting evidence, structured plans, and enacted action. Completion is not a measure of mastery; test your reasoning on an unfamiliar narrative.'
     };
 
     document.getElementById('quest-victory-msg').textContent = msgs[currentAge];
     document.getElementById('quest-victory').classList.remove('hidden');
+    document.getElementById('quest-victory-title').tabIndex = -1;
+    document.getElementById('quest-victory-title').focus();
     questSFX.victory();
     triggerCelebration();
 }
@@ -4153,27 +4311,27 @@ const detectiveClues = {
         {
             story: 'The River Cleanup',
             clues: [
-                { text: '"I feel so sad when I see the fish can\'t swim here anymore," said Maya.', marker: 'motivation' },
-                { text: '"This isn\'t fair to the animals. We HAVE to do something!"', marker: 'motivation' },
-                { text: 'Maya remembered that the kids in the next town cleaned up THEIR river last year.', marker: 'belief' },
-                { text: '"If they could do it, so can we!" she told her friends.', marker: 'belief' },
-                { text: 'They made a list: Monday — bring bags, Tuesday — sort recycling, Wednesday — plant flowers along the bank.', marker: 'plans' },
-                { text: 'Maya drew a big chart showing each step of their plan.', marker: 'plans' },
-                { text: 'On Saturday, twenty kids showed up with gloves and trash bags.', marker: 'agency' },
-                { text: 'By the end of the day, they had filled 15 bags and the water was already clearer.', marker: 'agency' },
+                { text: '"I feel so sad when I see the fish can\'t swim here anymore," said Maya.', marker: 'motivation', why: '"So sad" about the fish is the intended Motivation cue in this case. Sadness alone does not always mean someone intends to act.' },
+                { text: '"This isn\'t fair to the animals. We HAVE to do something!"', marker: 'motivation', why: '"We HAVE to do something" expresses why the speaker wants change, rather than a specific plan or completed action.' },
+                { text: 'Maya remembered that the kids in the next town cleaned up THEIR river last year.', marker: 'belief', why: 'The other town\'s earlier cleanup offers evidence that change may be possible here. It is not Maya\'s current action.' },
+                { text: '"If they could do it, so can we!" she told her friends.', marker: 'belief', why: '"If they could do it" uses the earlier cleanup as a reason to believe change is possible; it does not yet describe new work.' },
+                { text: 'They made a list: Monday — bring bags, Tuesday — sort recycling, Wednesday — plant flowers along the bank.', marker: 'plans', why: 'The days and tasks describe intended steps: Plans for a Path Forward. Making the list is an action too, but the list\'s function is planning.' },
+                { text: 'Maya drew a big chart showing each step of their plan.', marker: 'plans', why: '"Each step" shows a route toward the goal. The chart is the intended Plans cue, not evidence that the cleanup has happened.' },
+                { text: 'On Saturday, twenty kids showed up with gloves and trash bags.', marker: 'agency', why: '"Showed up with gloves and trash bags" describes people beginning the work. Agency does not require waiting for a successful result.' },
+                { text: 'By the end of the day, they had filled 15 bags and the water was already clearer.', marker: 'agency', why: '"Had filled 15 bags" states completed cleanup work. The clearer water could also support Belief; the filled bags are the action cue.' },
             ]
         },
         {
             story: 'The School Garden',
             clues: [
-                { text: 'Leo looked at the empty dirt lot behind school and frowned. "Nothing grows here."', marker: 'motivation' },
-                { text: '"It makes me sad that we have nowhere green to play," said his friend.', marker: 'motivation' },
-                { text: 'Ms. Garcia showed them photos of another school that turned a parking lot into a beautiful garden.', marker: 'belief' },
-                { text: '"See? It really works! Their garden even grows food for the cafeteria now."', marker: 'belief' },
-                { text: 'The class voted on what to plant and made a timeline: seeds in March, transplant in April, harvest in June.', marker: 'plans' },
-                { text: 'They assigned jobs — waterers, weeders, seed planters — and put it all on a calendar.', marker: 'plans' },
-                { text: 'Every morning before school, two students watered the garden.', marker: 'agency' },
-                { text: 'By May, tomatoes, sunflowers, and lettuce were growing tall.', marker: 'agency' },
+                { text: 'Leo looked at the empty dirt lot behind school and frowned. "Nothing grows here."', marker: 'motivation', why: 'Leo\'s frown is the intended Motivation cue in this garden case. The excerpt alone leaves his desire to change things implicit; that is worth discussing.' },
+                { text: '"It makes me sad that we have nowhere green to play," said his friend.', marker: 'motivation', why: 'Wanting a green place to play is the reason for change in this case. It does not specify steps or show gardening work.' },
+                { text: 'Ms. Garcia showed them photos of another school that turned a parking lot into a beautiful garden.', marker: 'belief', why: 'Photos of an earlier garden project provide evidence that a similar change may be possible, without guaranteeing the same result.' },
+                { text: '"See? It really works! Their garden even grows food for the cafeteria now."', marker: 'belief', why: '"Their garden" points to the other school\'s result as evidence. This is Belief in the present class\'s story, not their own gardening action.' },
+                { text: 'The class voted on what to plant and made a timeline: seeds in March, transplant in April, harvest in June.', marker: 'plans', why: 'The months and stages specify a route to a goal. Voting is an action, but the intended cue is the planting timeline.' },
+                { text: 'They assigned jobs — waterers, weeders, seed planters — and put it all on a calendar.', marker: 'plans', why: 'Assigned roles and a calendar organize future work. They show Plans rather than confirming that the garden has been tended.' },
+                { text: 'Every morning before school, two students watered the garden.', marker: 'agency', why: '"Watered the garden" describes work students actually carried out. The repeated action, not just a watering schedule, shows Agency.' },
+                { text: 'By May, tomatoes, sunflowers, and lettuce were growing tall.', marker: 'agency', why: 'The case key uses this result as evidence of the students\' earlier gardening. Read alone, it could also support Belief; refer back to the watering clue to explain Agency.' },
             ]
         }
     ],
@@ -4181,27 +4339,27 @@ const detectiveClues = {
         {
             story: 'The Creek Investigation',
             clues: [
-                { text: 'When Amir saw the "No Swimming" sign at the creek where he grew up fishing, something inside him broke.', marker: 'motivation' },
-                { text: '"My grandma used to catch trout here. Now it smells like chemicals. This can\'t be normal."', marker: 'motivation' },
-                { text: 'The EPA database showed that three other communities in the state had successfully cleaned up contaminated waterways using bioremediation.', marker: 'belief' },
-                { text: '"If Riverside County\'s restoration brought back 12 fish species in three years, our creek has a chance too."', marker: 'belief' },
-                { text: 'The science club drafted a proposal: Phase 1 — water testing, Phase 2 — identify pollution source, Phase 3 — present findings to city council.', marker: 'plans' },
-                { text: 'They set a timeline of eight weeks with weekly checkpoints and a budget of $200 from the school activities fund.', marker: 'plans' },
-                { text: 'Amir and three classmates collected water samples every Tuesday for six weeks, documenting pH levels, dissolved oxygen, and bacteria counts.', marker: 'agency' },
-                { text: 'Their report was published in the school paper and cited by a city council member during a public hearing on water quality.', marker: 'agency' },
+                { text: 'When Amir saw the "No Swimming" sign at the creek where he grew up fishing, something inside him broke.', marker: 'motivation', why: 'Amir\'s response to losing access to a meaningful place is the intended Motivation cue. It is not yet a proposal or enacted restoration.' },
+                { text: '"My grandma used to catch trout here. Now it smells like chemicals. This can\'t be normal."', marker: 'motivation', why: '"This can\'t be normal" expresses concern about a valued place. The case treats this as motivation; the desire to act is implicit rather than directly stated.' },
+                { text: 'The EPA database showed that three other communities in the state had successfully cleaned up contaminated waterways using bioremediation.', marker: 'belief', why: 'Within this fictional case, other communities\' earlier cleanup is evidence for possibility. The named database is part of the invented scenario, not a verified citation.' },
+                { text: '"If Riverside County\'s restoration brought back 12 fish species in three years, our creek has a chance too."', marker: 'belief', why: '"Our creek has a chance too" uses an earlier result to support possibility, not certainty. The numbers are illustrative.' },
+                { text: 'The science club drafted a proposal: Phase 1 — water testing, Phase 2 — identify pollution source, Phase 3 — present findings to city council.', marker: 'plans', why: 'The proposed phases lay out intended steps. Drafting is an action, but the proposal\'s function is to define a path forward.' },
+                { text: 'They set a timeline of eight weeks with weekly checkpoints and a budget of $200 from the school activities fund.', marker: 'plans', why: 'A timeline, checkpoints, and budget organize future work: Plans. They do not establish that the water testing is complete.' },
+                { text: 'Amir and three classmates collected water samples every Tuesday for six weeks, documenting pH levels, dissolved oxygen, and bacteria counts.', marker: 'agency', why: '"Collected" and "documenting" describe enacted work, not only a testing schedule. These verbs support Agency.' },
+                { text: 'Their report was published in the school paper and cited by a city council member during a public hearing on water quality.', marker: 'agency', why: '"Was published" and "cited" describe work entering public discussion. Agency does not require a later policy victory.' },
             ]
         },
         {
             story: 'The Heat Island Project',
             clues: [
-                { text: 'During the third heat wave of the summer, Priya watched her elderly neighbor get taken away in an ambulance. "This keeps happening. It\'s not okay."', marker: 'motivation' },
-                { text: 'She looked up heat-related ER visits in her zip code and felt sick — a 40% increase over five years.', marker: 'motivation' },
-                { text: 'A case study from Phoenix showed that strategic tree planting reduced surface temperatures by 8°F in targeted neighborhoods.', marker: 'belief' },
-                { text: '"The data is clear — urban canopy coverage directly correlates with reduced heat mortality."', marker: 'belief' },
-                { text: 'Priya mapped every block in her neighborhood, marking heat-vulnerable households, existing shade, and potential planting sites.', marker: 'plans' },
-                { text: 'She wrote a three-phase proposal: immediate shade structures, medium-term tree planting, long-term cool roof incentives.', marker: 'plans' },
-                { text: 'The neighborhood association adopted her plan and planted 50 trees in the first month, focusing on bus stops and senior housing.', marker: 'agency' },
-                { text: 'Six months later, thermal imaging showed measurable cooling at every planting site.', marker: 'agency' },
+                { text: 'During the third heat wave of the summer, Priya watched her elderly neighbor get taken away in an ambulance. "This keeps happening. It\'s not okay."', marker: 'motivation', why: '"It\'s not okay" expresses why Priya wants change. Analyze the fictional character; no personal emotional disclosure is required.' },
+                { text: 'She looked up heat-related ER visits in her zip code and felt sick — a 40% increase over five years.', marker: 'motivation', why: '"Felt sick" identifies the intended emotional cue. Looking up data is also an action, but this clue focuses on her response. The statistic is fictional.' },
+                { text: 'A case study from Phoenix showed that strategic tree planting reduced surface temperatures by 8°F in targeted neighborhoods.', marker: 'belief', why: 'The fictional earlier project supplies evidence for possible cooling. It is not a verified Phoenix research finding or a guarantee for this neighborhood.' },
+                { text: '"The data is clear — urban canopy coverage directly correlates with reduced heat mortality."', marker: 'belief', why: 'The speaker uses a claimed relationship as supporting evidence. In this fictional case it serves Belief; a correlation alone would not prove causation.' },
+                { text: 'Priya mapped every block in her neighborhood, marking heat-vulnerable households, existing shade, and potential planting sites.', marker: 'plans', why: '"Potential planting sites" makes the map a planning tool. Mapping is enacted work too, so Agency is a reasonable discussion point; the key focuses on the map\'s purpose.' },
+                { text: 'She wrote a three-phase proposal: immediate shade structures, medium-term tree planting, long-term cool roof incentives.', marker: 'plans', why: 'The proposal sequences intended responses over time. That structure is Plans, even though writing the proposal is itself an action.' },
+                { text: 'The neighborhood association adopted her plan and planted 50 trees in the first month, focusing on bus stops and senior housing.', marker: 'agency', why: '"Planted 50 trees" describes enacted work. Adoption alone might concern planning; planting makes the intended action cue explicit.' },
+                { text: 'Six months later, thermal imaging showed measurable cooling at every planting site.', marker: 'agency', why: 'In this case, the monitoring result follows the association\'s planting work. Alone it could support Belief; connect it to the earlier action when explaining the stored Agency key.' },
             ]
         }
     ],
@@ -4209,27 +4367,27 @@ const detectiveClues = {
         {
             story: 'The Watershed Analysis',
             clues: [
-                { text: 'The longitudinal data was devastating: 60% wetland loss over two decades, migratory bird populations halved, dissolved oxygen at hypoxic levels.', marker: 'motivation' },
-                { text: '"We are witnessing the functional collapse of an ecosystem that took millennia to develop. The moral weight of this demands response."', marker: 'motivation' },
-                { text: 'A meta-analysis of 47 wetland restoration projects demonstrated mean biodiversity recovery of 86% within 15 years when using constructed wetland methodology.', marker: 'belief' },
-                { text: '"The precedent is robust and peer-reviewed. The question is not whether restoration works, but whether we have the will to implement it."', marker: 'belief' },
-                { text: 'The team developed a systems model integrating hydrological flow, nutrient cycling, and species reintroduction timelines with quarterly benchmarks and adaptive management triggers.', marker: 'plans' },
-                { text: 'Phase 1: baseline monitoring (3 months). Phase 2: constructed wetland installation (6 months). Phase 3: species reintroduction and monitoring (ongoing). Budget: $1.2M secured through EPA Clean Water Act grants.', marker: 'plans' },
-                { text: 'The research team published baseline data in the Journal of Environmental Management, which was subsequently cited in the regional EPA assessment, triggering a formal remediation order.', marker: 'agency' },
-                { text: 'At 18 months post-intervention, biomarker analysis demonstrated a 34% increase in macroinvertebrate diversity and the return of three previously extirpated bird species.', marker: 'agency' },
+                { text: 'The longitudinal data was devastating: 60% wetland loss over two decades, migratory bird populations halved, dissolved oxygen at hypoxic levels.', marker: 'motivation', why: '"Devastating" frames the intended motivating response. Data alone does not establish a desire to change conditions; the case supplies that context. The figures are invented.' },
+                { text: '"We are witnessing the functional collapse of an ecosystem that took millennia to develop. The moral weight of this demands response."', marker: 'motivation', why: '"Demands response" explicitly connects concern to a reason for wanting change. It does not yet specify the intervention.' },
+                { text: 'A meta-analysis of 47 wetland restoration projects demonstrated mean biodiversity recovery of 86% within 15 years when using constructed wetland methodology.', marker: 'belief', why: 'The case uses an earlier recovery claim to support possibility. This meta-analysis and its figures are fictional, not a research citation; real evidence would need appraisal.' },
+                { text: '"The precedent is robust and peer-reviewed. The question is not whether restoration works, but whether we have the will to implement it."', marker: 'belief', why: 'The speaker appeals to precedent as evidence for Belief. Their certainty is a claim within the fictional narrative, not proof that every intervention succeeds.' },
+                { text: 'The team developed a systems model integrating hydrological flow, nutrient cycling, and species reintroduction timelines with quarterly benchmarks and adaptive management triggers.', marker: 'plans', why: 'Timelines, benchmarks, and adjustment triggers define structured routes toward the goal. Model-building is also work; the intended key concerns the model\'s planning function.' },
+                { text: 'Phase 1: baseline monitoring (3 months). Phase 2: constructed wetland installation (6 months). Phase 3: species reintroduction and monitoring (ongoing). Budget: $1.2M secured through EPA Clean Water Act grants.', marker: 'plans', why: 'The phases, durations, and budget specify a route and resources. They do not say installation has happened. Funding details are illustrative, not a verified grant.' },
+                { text: 'The research team published baseline data in the Journal of Environmental Management, which was subsequently cited in the regional EPA assessment, triggering a formal remediation order.', marker: 'agency', why: '"Published" and "cited" describe enacted work and its use. The named publication and assessment are fictional case details, not verified references.' },
+                { text: 'At 18 months post-intervention, biomarker analysis demonstrated a 34% increase in macroinvertebrate diversity and the return of three previously extirpated bird species.', marker: 'agency', why: '"Post-intervention" links the result to work in this case. The result could also support Belief elsewhere; explain Agency through the preceding intervention, not success alone.' },
             ]
         },
         {
             story: 'The Environmental Justice Campaign',
             clues: [
-                { text: 'Epidemiological data revealed that childhood asthma rates in the industrial corridor were 3.2x the county average, with the burden falling disproportionately on communities of color.', marker: 'motivation' },
-                { text: '"This isn\'t a technical problem — it\'s a moral one. The distribution of environmental harm tracks precisely with historical patterns of racial and economic marginalization."', marker: 'motivation' },
-                { text: 'The Richmond, California precedent demonstrated that community-led air monitoring networks, combined with legal advocacy, achieved a 20% reduction in refinery emissions over five years.', marker: 'belief' },
-                { text: '"The evidence from environmental justice movements globally confirms that organized community action can shift the calculus of power."', marker: 'belief' },
-                { text: 'The coalition developed a four-phase strategy: citizen science air monitoring network, legal challenge through the Environmental Law Clinic, legislative advocacy for emission caps, and a community health fund.', marker: 'plans' },
-                { text: 'Each phase included specific milestones, responsible parties, funding mechanisms, and contingency plans for political resistance.', marker: 'plans' },
-                { text: 'Youth organizers deployed 40 air quality sensors across the district and presented data at three consecutive city council meetings, building an irrefutable public record.', marker: 'agency' },
-                { text: 'The campaign resulted in new emission standards, a $5M community health investment, and a precedent-setting environmental justice ordinance adopted by two neighboring municipalities.', marker: 'agency' },
+                { text: 'Epidemiological data revealed that childhood asthma rates in the industrial corridor were 3.2x the county average, with the burden falling disproportionately on communities of color.', marker: 'motivation', why: 'The case treats concern about unequal harm as Motivation. The excerpt itself states a fictional disparity, not the character\'s desire to act; that inference should be explained, not assumed universal.' },
+                { text: '"This isn\'t a technical problem — it\'s a moral one. The distribution of environmental harm tracks precisely with historical patterns of racial and economic marginalization."', marker: 'motivation', why: 'The speaker\'s moral concern supplies the intended reason for wanting change. It does not specify a sequence of actions or report enacted advocacy.' },
+                { text: 'The Richmond, California precedent demonstrated that community-led air monitoring networks, combined with legal advocacy, achieved a 20% reduction in refinery emissions over five years.', marker: 'belief', why: 'An earlier claimed outcome supports possibility in this fictional case. The named place and percentage are illustrative, not a verified account of Richmond.' },
+                { text: '"The evidence from environmental justice movements globally confirms that organized community action can shift the calculus of power."', marker: 'belief', why: 'The speaker invokes earlier evidence to support confidence. That is the intended Belief cue, but real analysis would still ask what evidence supports the claim.' },
+                { text: 'The coalition developed a four-phase strategy: citizen science air monitoring network, legal challenge through the Environmental Law Clinic, legislative advocacy for emission caps, and a community health fund.', marker: 'plans', why: 'The four-part strategy describes routes toward a goal. The intended cue is its structure, rather than proof that each proposed activity has occurred.' },
+                { text: 'Each phase included specific milestones, responsible parties, funding mechanisms, and contingency plans for political resistance.', marker: 'plans', why: 'Milestones, assigned responsibility, resources, and contingencies organize future work. Those details distinguish a plan from a general wish.' },
+                { text: 'Youth organizers deployed 40 air quality sensors across the district and presented data at three consecutive city council meetings, building an irrefutable public record.', marker: 'agency', why: '"Deployed" and "presented" name enacted work. Agency follows from those actions; calling a record irrefutable is the fictional narrator\'s characterization, not a scientific guarantee.' },
+                { text: 'The campaign resulted in new emission standards, a $5M community health investment, and a precedent-setting environmental justice ordinance adopted by two neighboring municipalities.', marker: 'agency', why: 'The case connects adopted measures with the organizers\' preceding advocacy. Results alone could support Belief; explain the Agency key through the campaign\'s enacted work.' },
             ]
         }
     ]
@@ -4247,8 +4405,11 @@ function initDetective() {
     detectiveCorrect = 0;
     detectiveSolved = false;
     const clueData = cases[detectiveCase];
+    document.getElementById('detective-case-progress').textContent = `Case ${detectiveCase + 1} of ${cases.length}`;
+    document.getElementById('btn-detective-next').textContent = detectiveCase === cases.length - 1 ? 'Replay cases' : 'Next Case →';
     detectiveTotal = clueData.clues.length;
     selectedClue = null;
+    document.getElementById('detective-feedback').textContent = '';
     document.querySelector('.detective-board').style.display = '';
     document.querySelector('.detective-header').style.display = '';
 
@@ -4278,9 +4439,13 @@ function initDetective() {
             "${escapeHtml(clue.text)}"
         </div>
     `).join('');
+    list.querySelectorAll('.detective-clue').forEach((clue, index) => {
+        clue.dataset.why = shuffled[index].why;
+    });
 
     // Setup drag/drop and tap-to-place
     setupDetectiveDragDrop();
+    document.querySelector('.detective-clue:not(.placed)')?.focus();
 }
 
 function setupDetectiveDragDrop() {
@@ -4366,6 +4531,7 @@ function handleClueDrop(clue, zone) {
     if (clue.classList.contains('placed') || detectiveSolved) return;
     const clueMarker = clue.dataset.marker;
     const zoneMarker = zone.dataset.marker;
+    document.getElementById('detective-feedback').textContent = clue.dataset.why;
 
     if (clueMarker === zoneMarker) {
         // Correct!
@@ -4416,9 +4582,9 @@ function solveDetective() {
     document.querySelector('.detective-header').style.display = 'none';
 
     const msgs = {
-        elementary: 'Amazing detective work! You pinned every clue to the right marker. You can spot Motivation, Belief, Plans, and Agency like a pro! 🌟',
-        middle: 'Case closed! You correctly identified all four HOPE markers in the evidence. Each clue connected to a specific type of hope — and together, they tell the full story.',
-        high: 'Investigation complete. You\'ve demonstrated the ability to deconstruct a narrative and classify textual evidence against the four markers of hope theory. This analytical skill transfers directly to literary analysis and critical reading of climate narratives.'
+        elementary: 'You completed the case with practice and feedback. Try explaining one clue in your own words, then explore the next case.',
+        middle: 'Case practice complete. Some clues support more than one reading in context. Explain the intended cue and discuss a plausible alternative before trying a new story.',
+        high: 'Case practice complete, not a certification of mastery. Explain a classification using textual evidence and consider how context could support a different marker.'
     };
 
     document.getElementById('detective-solved-msg').textContent = msgs[currentAge];
@@ -4449,15 +4615,9 @@ document.getElementById('btn-detective-home').addEventListener('click', () => {
 
 // ===== Hope Walk Sound Effects (Web Audio API) =====
 const walkSFX = (function() {
-    let ctx = null;
-    function getCtx() {
-        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-        if (ctx.state === 'suspended') ctx.resume();
-        return ctx;
-    }
-
     function playTone(freq, duration, type, vol, delay) {
-        const c = getCtx();
+        const c = gameAudio.getContext();
+        if (!c) return;
         const o = c.createOscillator();
         const g = c.createGain();
         o.type = type || 'sine';
@@ -4470,7 +4630,8 @@ const walkSFX = (function() {
     }
 
     function noise(duration, vol) {
-        const c = getCtx();
+        const c = gameAudio.getContext();
+        if (!c) return;
         const bufSize = c.sampleRate * duration;
         const buf = c.createBuffer(1, bufSize, c.sampleRate);
         const data = buf.getChannelData(0);
@@ -4688,7 +4849,7 @@ const walkScenes = {
         },
         {
             distressText: 'You pass <span class="walk-distress">a farm where the soil is grey and dusty. Nothing is growing. A farmer sits on his porch looking worried</span>.',
-            hopeText: 'But next to the barn, <span class="walk-hope">a group of kids from the school are building a compost bin. A teacher holds up a chart: "Step 1: Collect food scraps. Step 2: Build compost. Step 3: Feed the soil. Step 4: Plant seeds!"</span>',
+            hopeText: 'But next to the barn, <span class="walk-hope">a group of kids from the school are preparing a step-by-step plan for a compost bin. A teacher holds up a chart: "Step 1: Collect food scraps. Step 2: Build compost. Step 3: Feed the soil. Step 4: Plant seeds!"</span>',
             marker: 'plans',
             explain: 'A clear, step-by-step plan to fix the soil — that\'s Plans for a Path Forward!',
             sky: 'gloomy', skyAfter: 'hopeful',
@@ -4927,7 +5088,7 @@ const walkScenes = {
             distressText: 'The path ends at <span class="walk-distress">a clear-cut hillside. Erosion channels scar the exposed soil. A watershed that once supported an entire ecosystem is functionally degraded.</span>',
             hopeText: 'But carved into a remaining tree: <span class="walk-hope">"This isn\'t right." Below it, hundreds of handwritten notes from community members: their grief, their anger, their refusal to accept this as inevitable.</span>',
             marker: 'motivation',
-            explain: 'Collective eco-grief and moral outrage as affective catalyst — the emotional foundation of hope theory. Without this response, agency never activates.',
+            explain: 'In this scene, grief and outrage are the intended cues for Motivation for Change.',
             sky: 'gloomy', skyAfter: 'dawn',
             ground: 'barren', groundAfter: 'growing',
             elements: [
@@ -4982,7 +5143,7 @@ const walkScenes = {
             distressText: 'A low-income neighborhood sits in a <span class="walk-distress">heat island — no shade, black asphalt everywhere, temperatures 8°F higher than surrounding areas. Emergency rooms fill up every summer.</span>',
             hopeText: 'On a rooftop, <span class="walk-hope">a youth-led organization has installed a community solar array and cool roof. A teenager explains: "We mapped every heat-vulnerable household on our block. We\'re not waiting for the city — we\'re doing it ourselves."</span>',
             marker: 'agency',
-            explain: 'Youth-led, data-driven, community-scale direct action addressing environmental injustice. Agency at its most powerful.',
+            explain: 'The youth organization installed equipment and mapped households. Those enacted actions show Agency to Take Action; the desired outcome is not a prerequisite for this marker.',
             sky: 'gloomy', skyAfter: 'hopeful',
             ground: 'barren', groundAfter: 'growing',
             elements: [],
@@ -5052,6 +5213,7 @@ function renderWalkScene() {
     const scene = walkSceneData[walkStage];
     walkSparkFound = false;
     walkAnswered = false;
+    document.getElementById('walk-item-progress').textContent = `Scene ${walkStage + 1} of ${walkSceneData.length}`;
     const viewport = document.getElementById('walk-viewport');
     const sky = document.getElementById('walk-sky');
     const ground = document.getElementById('walk-ground');
@@ -5171,7 +5333,7 @@ function renderWalkScene() {
 
     // Place sparks
     sparksEl.innerHTML = scene.sparks.map((s, i) => `
-        <button class="walk-spark" aria-label="Find the hope in this scene" data-marker="${s.marker}" style="left:${s.x};top:${s.y}" id="walk-spark-${i}">✨</button>
+        <button class="walk-spark" aria-label="Find the hope in this scene" style="left:${s.x};top:${s.y}" id="walk-spark-${i}">✨</button>
     `).join('');
 
     // Narrative — start with distress
@@ -5203,6 +5365,8 @@ function renderWalkScene() {
     sparksEl.querySelectorAll('.walk-spark').forEach(spark => {
         spark.addEventListener('click', () => handleSparkClick(spark, scene));
     });
+    narrative.tabIndex = -1;
+    narrative.focus();
 }
 
 function handleSparkClick(spark, scene) {
@@ -5212,108 +5376,15 @@ function handleSparkClick(spark, scene) {
     spark.classList.add('found');
     walkSFX.sparkFound();
 
-    // Transform the scene visually
-    const sky = document.getElementById('walk-sky');
-    const ground = document.querySelector('#walk-scene .walk-ground');
-    sky.className = `walk-sky ${scene.skyAfter}`;
-    if (ground) ground.className = `walk-ground ${scene.groundAfter}`;
-
-    // Light up the trail
-    document.querySelectorAll('.scene-trail').forEach(t => t.classList.add('lit'));
-
-    // Clean up puddles
-    document.querySelectorAll('.scene-puddle').forEach(p => {
-        p.classList.remove('polluted');
-        p.classList.add('clean');
-    });
-
-    // Fade out stars if sky is brightening
-    if (scene.skyAfter === 'hopeful') {
-        document.querySelectorAll('.scene-star').forEach(s => s.classList.remove('visible'));
-    }
-
-    const t = scene.transforms;
-    if (t.clearTrash) {
-        document.querySelectorAll('.scene-trash').forEach(el => el.classList.add('cleared'));
-    }
-    if (t.healTrees) {
-        document.querySelectorAll('.scene-tree-leaves.dead').forEach(el => { el.classList.remove('dead'); el.classList.add('alive'); });
-    }
-    if (t.showTrees) {
-        // Convert stumps to trees
-        document.querySelectorAll('.scene-stump').forEach((stump, i) => {
-            const tree = document.createElement('div');
-            tree.className = 'scene-element scene-tree';
-            tree.style.cssText = stump.style.cssText;
-            tree.innerHTML = '<div class="scene-tree-leaves alive"></div><div class="scene-tree-trunk"></div>';
-            stump.parentNode.replaceChild(tree, stump);
-        });
-    }
-    if (t.showSun) {
-        const sun = document.getElementById('walk-sun');
-        if (sun) sun.classList.add('visible');
-    }
-    if (t.showBirds) {
-        walkSFX.birds();
-        const b1 = document.getElementById('walk-bird-1');
-        const b2 = document.getElementById('walk-bird-2');
-        const b3 = document.getElementById('walk-bird-3');
-        if (b1) b1.classList.add('visible');
-        if (b2) walkDelay(() => b2.classList.add('visible'), 500);
-        if (b3) walkDelay(() => b3.classList.add('visible'), 900);
-    }
-    if (t.showFlowers) {
-        ['walk-flower-1', 'walk-flower-2', 'walk-flower-3', 'walk-flower-4', 'walk-flower-5'].forEach((id, i) => {
-            const fl = document.getElementById(id);
-            if (fl) walkDelay(() => fl.classList.add('bloomed'), i * 150);
-        });
-    }
-
-    // Always show grass, fireflies, and butterflies on hope
-    for (let i = 1; i <= 6; i++) {
-        const g = document.getElementById(`walk-grass-${i}`);
-        if (g) walkDelay(() => g.classList.add('visible'), i * 100);
-    }
-    for (let i = 1; i <= 5; i++) {
-        const f = document.getElementById(`walk-firefly-${i}`);
-        if (f) walkDelay(() => f.classList.add('visible'), 600 + i * 150);
-    }
-    walkDelay(() => {
-        const bt1 = document.getElementById('walk-butterfly-1');
-        const bt2 = document.getElementById('walk-butterfly-2');
-        if (bt1) bt1.classList.add('visible');
-        if (bt2) walkDelay(() => bt2.classList.add('visible'), 400);
-    }, 1000);
-
-    // Update water
-    scene.elements.forEach((el, i) => {
-        if (el.type === 'water' && el.afterClass) {
-            const waterEl = document.getElementById(`walk-el-${i}`);
-            if (waterEl) { waterEl.classList.remove(el.class); waterEl.classList.add(el.afterClass); }
-        }
-    });
-
-    // Update narrative
     const narrative = document.getElementById('walk-narrative');
-    narrative.innerHTML = scene.hopeText;
-    walkSFX.transform();
-
-    // Reveal hidden-hope custom elements with staggered animation
-    document.querySelectorAll('.hidden-hope').forEach((el, i) => {
-        walkDelay(() => {
-            el.classList.remove('hidden-hope');
-            el.classList.add('revealed-hope');
-        }, 400 + i * 250);
-    });
-
-    // Clear smog if present
-    document.querySelectorAll('.scene-smog').forEach(el => {
-        el.classList.add('clearing');
-    });
+    narrative.innerHTML = `<p>${scene.distressText}</p><p>${scene.hopeText}</p>`;
 
     // Show marker pick
     walkDelay(() => {
         document.getElementById('walk-marker-pick').classList.remove('hidden');
+        if (document.querySelector('.screen.active').id === 'walk-screen') {
+            document.querySelector('.walk-marker-btn').focus();
+        }
     }, 800);
 
     // Wire marker buttons
@@ -5338,6 +5409,8 @@ function handleWalkMarker(chosen, scene) {
         feedback.innerHTML = `<strong>That's right!</strong> ${scene.explain}`;
         feedback.classList.remove('hidden');
         document.getElementById('walk-marker-pick').classList.add('hidden');
+        feedback.tabIndex = -1;
+        feedback.focus();
 
         // Character walks off screen to the right
         character.classList.add('walking');
@@ -5349,6 +5422,7 @@ function handleWalkMarker(chosen, scene) {
         walkDelay(() => {
             character.classList.remove('walking');
             nextBtn.classList.remove('hidden');
+            if (document.activeElement === feedback) nextBtn.focus();
         }, 2000);
     } else {
         walkSFX.wrong();
@@ -5375,13 +5449,15 @@ function showWalkVictory() {
     document.getElementById('walk-panel').style.display = 'none';
 
     const msgs = {
-        elementary: 'You walked the whole path and found hope in every scene! Even when things looked sad, there was always a spark of hope — a feeling, a proof, a plan, or an action. You\'re a Hope Walker! 🌅',
-        middle: 'You completed the Hope Walk and discovered that even in distressing environmental situations, there are signs of hope. Each spark you found connected to a different HOPE marker — motivation, belief, plans, and agency working together.',
-        high: 'Walk complete. Each scene demonstrated that environmental distress and hope coexist. The HOPE Framework reveals that within every crisis narrative, the four markers — affective catalyst, warranted optimism, pathways thinking, and agentic action — provide a structure for moving from grief to agency.'
+        elementary: 'You explored the story clues. Finding a clue does not repair the place, and you do not have to feel cheerful. Try telling someone which words helped you choose a marker.',
+        middle: 'You practiced finding textual markers in fictional scenes. Discovering evidence is different from changing the environment. Explain one choice using the story\'s words.',
+        high: 'Walk practice complete. The scenes invite textual analysis, not a required emotional response. Explain how a specific cue supports a marker, and consider a plausible alternative reading.'
     };
 
     document.getElementById('walk-victory-msg').textContent = msgs[currentAge];
     document.getElementById('walk-victory').classList.remove('hidden');
+    document.getElementById('walk-victory-title').tabIndex = -1;
+    document.getElementById('walk-victory-title').focus();
     walkSFX.victory();
     triggerCelebration();
 }
@@ -5397,19 +5473,33 @@ document.getElementById('btn-back-walk').addEventListener('click', () => {
 // Hope Trail — embedded iframe
 function initTrail() {
     const iframe = document.getElementById('trail-iframe');
-    // Reload game each time so it starts fresh
-    iframe.src = 'hope-trail/index.html';
+    iframe.src = `hope-trail/index.html?grade=${encodeURIComponent(currentAge)}`;
 }
 
 document.getElementById('btn-back-trail').addEventListener('click', () => {
     goBack();
 });
+document.getElementById('btn-trail-pause').addEventListener('click', () => showScreen('welcome-screen'));
+
+document.querySelectorAll('[data-game-restart]').forEach(button => {
+    button.addEventListener('click', () => {
+        if (!window.confirm('Restart this activity? Your progress in this activity will be cleared.')) return;
+        const initializers = { match: initMatchActivity, detective: initDetective, quest: initQuest, walk: initWalk };
+        initializers[button.dataset.gameRestart]();
+        const heading = button.closest('section').querySelector('h2, h3');
+        heading.tabIndex = -1;
+        heading.focus();
+    });
+});
 
 // Listen for the game's "exit" message
 window.addEventListener('message', (e) => {
     const iframe = document.getElementById('trail-iframe');
-    if (e.source === iframe.contentWindow && e.origin === window.location.origin &&
-        e.data && e.data.type === 'hope-trail-exit') {
+    if (e.source !== iframe.contentWindow || e.origin !== window.location.origin || !e.data) return;
+    if (e.data.type === 'hope-trail-size' && Number.isFinite(e.data.height) &&
+        e.data.height >= 100 && e.data.height <= 20000) {
+        iframe.style.height = `${Math.ceil(e.data.height)}px`;
+    } else if (e.data.type === 'hope-trail-exit') {
         showScreen('welcome-screen');
     }
 });

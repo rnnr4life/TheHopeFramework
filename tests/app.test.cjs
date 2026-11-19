@@ -21,10 +21,12 @@ function element() {
         listeners,
         textContent: '',
         innerHTML: '',
+        value: '',
         style: {},
         disabled: false,
+        focused: false,
         children: [],
-        focus() {},
+        focus() { this.focused = true; },
         setAttribute(name, value) { this[name] = value; },
         removeAttribute(name) { delete this[name]; },
         addEventListener(name, callback) {
@@ -240,6 +242,7 @@ test('screen history ignores duplicate destinations and restores browser Back wi
         },
         screens: [...elements.values()],
         prepareScreen() {}, stopStoryNarration() {},
+        gameAudio: { suspend() {} },
         window: {
             location: { origin: 'https://fixture.test' }, scrollTo() {},
             history: {
@@ -529,6 +532,7 @@ function matchFixture(grade = 'middle') {
             querySelectorAll: () => choices
         },
         currentAge: grade,
+        escapeHtml: String,
         HopeMetrics: { trackCompletion: () => completions++ },
         triggerCelebration() {},
         setTimeout(callback) { timers.set(++timerId, callback); return timerId; },
@@ -540,7 +544,7 @@ function matchFixture(grade = 'middle') {
     const run = code => vm.runInContext(code, context);
     const advance = () => run('continueMatch()');
     run('initMatchActivity()');
-    return { run, advance, timers, choices, get completions() { return completions; } };
+    return { run, advance, timers, choices, elements, get completions() { return completions; } };
 }
 
 test('matching waits for explicit Continue and accepts each answer only once', () => {
@@ -583,6 +587,57 @@ test('an incorrect matching answer can be retried without advancing', () => {
     assert.equal(fixture.run('matchIndex'), 1);
 });
 
+test('Match keeps optional notes for review without treating them as answers and clears them on restart', () => {
+    const fixture = matchFixture();
+    fixture.elements.get('match-evidence-note').value = '<b>My evidence</b>';
+    fixture.run('continueMatch()');
+    assert.equal(fixture.run('matchIndex'), 0);
+    fixture.run('handleMatchChoice(matchQueue[matchIndex].marker); continueMatch()');
+    assert.equal(fixture.run('matchEvidenceNotes[0]'), '<b>My evidence</b>');
+    assert.equal(fixture.elements.get('match-evidence-note').value, '');
+    for (let i = 1; i < 8; i++) fixture.run('handleMatchChoice(matchQueue[matchIndex].marker); continueMatch()');
+    const review = fixture.elements.get('match-review-list').children;
+    assert.equal(review.length, 8);
+    assert.equal(review[0].children[2].textContent, '<b>My evidence</b>');
+    assert.equal(review[0].children[2].innerHTML, '');
+    fixture.run('initMatchActivity()');
+    assert.equal(fixture.run('matchEvidenceNotes.length'), 0);
+    assert.equal(fixture.elements.get('match-evidence-note').value, '');
+});
+
+test('all grades require marker, evidence, and reason on the unfamiliar Match example and can revise safely', () => {
+    for (const grade of ['elementary', 'middle', 'high']) {
+        const fixture = matchFixture(grade);
+        fixture.run('renderMatchTransfer()');
+        const example = fixture.run('matchTransferExamples[currentAge]');
+        const form = fixture.elements.get('match-transfer-form');
+        const controls = [element(), element()];
+        const answer = { marker: example.marker, evidence: '0', reason: String(example.reasonAnswer) };
+        form.querySelector = selector => ({ value: answer[selector.match(/name="([^"]+)"/)[1]] });
+        form.querySelectorAll = () => controls;
+        const submit = () => fixture.run('submitMatchTransfer({ preventDefault() {} })');
+        submit();
+        assert.equal(fixture.run('matchTransferAnswered'), false);
+        assert.match(fixture.elements.get('match-transfer-feedback').textContent, /revise/);
+        answer.evidence = String(example.evidenceAnswer);
+        answer.reason = String((example.reasonAnswer + 1) % 3);
+        submit();
+        assert.equal(fixture.run('matchTransferAnswered'), false);
+        answer.reason = String(example.reasonAnswer);
+        submit();
+        assert.equal(fixture.run('matchTransferAnswered'), true);
+        assert.ok(controls.every(control => control.disabled));
+        assert.match(fixture.elements.get('match-transfer-feedback').textContent, /revised evidence/);
+        const feedback = fixture.elements.get('match-transfer-feedback').textContent;
+        submit();
+        assert.equal(fixture.elements.get('match-transfer-feedback').textContent, feedback);
+        assert.equal(fixture.completions, 0);
+        fixture.run('initMatchActivity()');
+        assert.equal(fixture.run('matchTransferAnswered'), false);
+        assert.equal(fixture.elements.get('match-transfer').classList.contains('hidden'), true);
+    }
+});
+
 test('Quest keeps outcomes stable until Continue, prevents duplicate transitions, and completes every grade', () => {
     for (const grade of ['elementary', 'middle', 'high']) {
         const elements = new Map();
@@ -617,9 +672,36 @@ test('Quest keeps outcomes stable until Continue, prevents duplicate transitions
             assert.equal(run('questStage'), stage + 1);
         }
         assert.equal(completions, 1);
+        assert.equal(elements.get('quest-victory-title').focused, true);
         run('initQuest()');
         assert.equal(run('questStage'), 0);
     }
+});
+
+test('game audio is quiet by default, shares its toggle, and reports unsupported playback without blocking play', () => {
+    const toggles = [element(), element(), element()];
+    const messages = [];
+    const context = vm.createContext({
+        window: {}, document: { querySelectorAll: () => toggles },
+        showToast: message => messages.push(message), console: { error() {} }
+    });
+    const start = source.indexOf('const gameAudio =');
+    vm.runInContext(source.slice(start, source.indexOf('// Retro 8-bit', start)), context);
+    assert.equal(vm.runInContext('gameAudio.getContext()', context), null);
+    assert.equal(messages.length, 0);
+    toggles[0].click();
+    assert.equal(messages.length, 1);
+    assert.ok(toggles.every(toggle => toggle['aria-pressed'] === 'false'));
+    let suspended = 0;
+    context.window.AudioContext = class {
+        constructor() { this.state = 'running'; }
+        suspend() { suspended++; return Promise.resolve(); }
+    };
+    toggles[1].click();
+    assert.ok(toggles.every(toggle => toggle['aria-pressed'] === 'true'));
+    toggles[2].click();
+    assert.equal(suspended, 1);
+    assert.ok(toggles.every(toggle => toggle['aria-pressed'] === 'false'));
 });
 
 test('Detective binds zones once and requires every distinct clue in all grade-specific cases', () => {
@@ -661,6 +743,7 @@ test('Detective binds zones once and requires every distinct clue in all grade-s
             clues = Array.from(run(`detectiveClues[currentAge][${caseIndex}].clues`), (data, i) => {
                 const clue = element();
                 clue.dataset.marker = data.marker;
+                clue.dataset.why = data.why;
                 clue.id = `clue-${i}`;
                 elements.set(clue.id, clue);
                 return clue;
@@ -675,14 +758,72 @@ test('Detective binds zones once and requires every distinct clue in all grade-s
             assert.equal(run('selectedClue === clues[0]'), true);
             run("handleClueDrop(clues[0], zones.find(zone => zone.dataset.marker !== clues[0].dataset.marker))");
             assert.equal(run('detectiveCorrect'), 0);
+            assert.equal(elements.get('detective-feedback').textContent, clues[0].dataset.why);
             for (let i = 0; i < clues.length; i++) {
                 run(`handleClueDrop(clues[${i}], zones.find(zone => zone.dataset.marker === clues[${i}].dataset.marker)); handleClueDrop(clues[${i}], zones.find(zone => zone.dataset.marker === clues[${i}].dataset.marker))`);
                 assert.equal(run('detectiveCorrect'), i + 1);
+                assert.equal(elements.get('detective-feedback').textContent, clues[i].dataset.why);
                 assert.equal(completions, caseIndex + (i === clues.length - 1 ? 1 : 0));
             }
             run('solveDetective()');
             assert.equal(completions, caseIndex + 1);
         }
+    }
+});
+
+test('Walk discovery reveals evidence without changing the environment or removing distress context', () => {
+    const narrative = element();
+    const picker = element();
+    picker.classList.add('hidden');
+    let chimes = 0;
+    const context = vm.createContext({
+        walkSparkFound: false,
+        walkSFX: { sparkFound() { chimes++; } },
+        walkDelay(callback) { callback(); },
+        document: {
+            getElementById(id) {
+                assert.ok(['walk-narrative', 'walk-marker-pick'].includes(id), `Discovery must not modify scenery: ${id}`);
+                return id === 'walk-narrative' ? narrative : picker;
+            },
+            querySelector: () => ({ id: 'walk-screen', focus() {} }),
+            querySelectorAll: () => []
+        },
+        spark: element(),
+        scene: { distressText: 'Existing problem.', hopeText: 'Evidence of a possible response.', transforms: { clearTrash: true, showTrees: true } }
+    });
+    vm.runInContext(functionSource('handleSparkClick'), context);
+    vm.runInContext('handleSparkClick(spark, scene); handleSparkClick(spark, scene)', context);
+    assert.equal(chimes, 1);
+    assert.match(narrative.innerHTML, /Existing problem/);
+    assert.match(narrative.innerHTML, /Evidence of a possible response/);
+    assert.equal(picker.classList.contains('hidden'), false);
+});
+
+test('Walk moves focus from an answered marker to feedback and Continue without stealing focus after navigation', () => {
+    for (const moveAway of [false, true]) {
+        const elements = new Map();
+        const get = id => {
+            if (!elements.has(id)) elements.set(id, element());
+            return elements.get(id);
+        };
+        const pending = [];
+        const document = { getElementById: get, activeElement: null };
+        get('walk-feedback').focus = () => { document.activeElement = get('walk-feedback'); };
+        get('btn-walk-next').classList.add('hidden');
+        const context = vm.createContext({
+            document, walkSparkFound: true, walkAnswered: false,
+            walkSFX: { correct() {}, wrong() {}, footsteps() {} },
+            walkDelay: callback => pending.push(callback)
+        });
+        vm.runInContext(functionSource('handleWalkMarker'), context);
+        vm.runInContext("handleWalkMarker('plans', { marker: 'agency', explain: 'Existing explanation.' })", context);
+        assert.equal(context.walkAnswered, false);
+        vm.runInContext("handleWalkMarker('agency', { marker: 'agency', explain: 'Existing explanation.' })", context);
+        assert.equal(document.activeElement, get('walk-feedback'));
+        if (moveAway) document.activeElement = element();
+        pending.forEach(callback => callback());
+        assert.equal(get('btn-walk-next').classList.contains('hidden'), false);
+        assert.equal(get('btn-walk-next').focused, !moveAway);
     }
 });
 

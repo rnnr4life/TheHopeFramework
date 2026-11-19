@@ -4139,10 +4139,6 @@ button.resource-card-action {
     animation: spark-pulse 1.5s infinite ease-in-out;
 }
 
-.walk-spark[data-marker="motivation"]::before { background: var(--color-motivation-glow); }
-.walk-spark[data-marker="belief"]::before { background: var(--color-belief-glow); }
-.walk-spark[data-marker="plans"]::before { background: var(--color-plans-glow); }
-.walk-spark[data-marker="agency"]::before { background: var(--color-agency-glow); }
 
 @keyframes spark-pulse {
     0%, 100% { transform: scale(1); opacity: 0.5; }
@@ -4343,12 +4339,47 @@ button.resource-card-action {
 /* ================================================
    HOPE TRAIL (embedded iframe)
    ================================================ */
+.game-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.game-toolbar span {
+    flex: 1 1 240px;
+    color: var(--color-text-light);
+    font-size: 0.9rem;
+}
+
+.game-review {
+    text-align: left;
+    margin: 16px 0;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--card-radius);
+}
+
+.game-review summary { cursor: pointer; padding: 8px 0; }
+.game-review label { display: block; margin: 12px 0 8px; }
+.game-review textarea {
+    width: 100%;
+    padding: 12px;
+    font: inherit;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--card-radius);
+}
+.game-review ol { padding-left: 24px; }
+.game-review li { margin: 16px 0; }
+
 .trail-iframe-wrap {
     position: relative;
     width: 100%;
     max-width: 660px;
     margin: 0 auto;
-    aspect-ratio: 620 / 800;
     border-radius: var(--card-radius);
     overflow: hidden;
     border: 1px solid var(--color-border);
@@ -4357,18 +4388,10 @@ button.resource-card-action {
 }
 
 .trail-iframe-wrap iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
+    display: block;
     width: 100%;
-    height: 100%;
+    height: 900px;
     border: none;
-}
-
-@media (max-width: 768px) {
-    .trail-iframe-wrap {
-        aspect-ratio: 620 / 900;
-    }
 }
 
 /* --- VERSION LABEL --- */
@@ -6076,3 +6099,15 @@ body { padding-top: 28px; }
 }
 .narration-controls summary { cursor: pointer; }
 .narration-controls [data-reading-status] { margin-block: 0.5rem; }
+.practice-option {
+    display: block;
+    padding: 0.75rem;
+    line-height: 1.5;
+    cursor: pointer;
+}
+
+#match-transfer-form fieldset {
+    margin: 1rem 0;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color, #64748b);
+}

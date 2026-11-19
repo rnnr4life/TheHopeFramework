@@ -20,15 +20,14 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    font-family: 'Press Start 2P', monospace;
+    font-family: 'Segoe UI', Arial, sans-serif;
     background: var(--bg);
     color: var(--text);
     display: flex;
     justify-content: center;
     padding: 10px;
-    font-size: 11px;
-    line-height: 2;
-    min-height: 100vh;
+    font-size: 16px;
+    line-height: 1.6;
 }
 
 #game-container {
@@ -40,6 +39,7 @@ body {
 .screen.active { display: block; }
 
 .title {
+    font-family: 'Press Start 2P', monospace;
     text-align: center;
     font-size: 22px;
     color: var(--hope-green);
@@ -49,15 +49,15 @@ body {
 
 .subtitle {
     text-align: center;
-    font-size: 9px;
+    font-size: 0.95rem;
     color: var(--hope-blue);
     margin-bottom: 8px;
 }
 
 .hope-credit {
     text-align: center;
-    font-size: 7px;
-    color: #5a8a5a;
+    font-size: 0.875rem;
+    color: var(--text);
     margin-top: 12px;
     line-height: 2.2;
 }
@@ -72,16 +72,29 @@ body {
 
 h2 {
     text-align: center;
-    font-size: 14px;
+    font-size: 1.25rem;
     color: var(--hope-green);
     margin: 12px 0 4px;
 }
 
 .text-body, .menu-body {
     padding: 8px 12px;
-    font-size: 10px;
-    line-height: 2.2;
+    font-size: 1rem;
+    line-height: 1.6;
 }
+
+.text-body p + p { margin-top: 12px; }
+
+.game-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    font-size: 0.875rem;
+    margin-bottom: 12px;
+}
+
+.game-toolbar span { flex: 1 1 180px; }
 
 .menu-list {
     list-style: decimal;
@@ -95,6 +108,16 @@ h2 {
 }
 
 .menu-option {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    max-width: 100%;
+    padding: 6px 4px;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    text-align: left;
+    overflow-wrap: anywhere;
     cursor: pointer;
     color: var(--hope-green-light);
     transition: color 0.15s;
@@ -105,7 +128,7 @@ h2 {
     text-shadow: 0 0 8px var(--hope-green);
 }
 
-.menu-option[role="button"] { display: inline-block; }
+.menu-option[aria-disabled="true"] { cursor: default; }
 .menu-option:focus-visible {
     outline: 2px solid var(--hope-green-light);
     outline-offset: 4px;
@@ -117,15 +140,15 @@ h2 {
 
 .prompt {
     text-align: center;
-    font-size: 10px;
-    color: var(--hope-green-dark);
+    font-size: 1rem;
+    color: var(--hope-green-light);
     margin: 8px 0;
 }
 
 .action-prompt {
     text-align: center;
-    font-size: 10px;
-    color: var(--hope-green-dark);
+    font-size: 1rem;
+    color: var(--hope-green-light);
     margin: 6px 0;
 }
 
@@ -152,10 +175,11 @@ input[type="text"] {
     border: none;
     border-bottom: 2px solid var(--hope-green-dark);
     color: var(--text);
-    font-family: 'Press Start 2P', monospace;
-    font-size: 10px;
+    font-family: inherit;
+    font-size: 1rem;
     padding: 4px 2px;
-    width: 140px;
+    width: min(240px, 100%);
+    min-height: 44px;
     outline: none;
 }
 
@@ -198,7 +222,7 @@ canvas {
     border: 1px solid var(--hope-green-dark);
     border-radius: 3px;
     margin: 4px 0 2px;
-    font-size: 8px;
+    font-size: 0.875rem;
     line-height: 1.8;
 }
 
@@ -208,7 +232,7 @@ canvas {
 
 .location-now {
     color: var(--hope-green);
-    font-size: 9px;
+    font-size: 0.95rem;
     font-weight: bold;
 }
 
@@ -222,7 +246,7 @@ canvas {
     padding: 8px 12px;
     margin: 4px 0;
     min-height: 50px;
-    font-size: 10px;
+    font-size: 1rem;
     line-height: 2;
     color: var(--text);
 }
@@ -240,7 +264,7 @@ canvas {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2px 16px;
-    font-size: 9px;
+    font-size: 0.95rem;
     line-height: 2;
     border: 2px solid var(--hope-green-dark);
 }
@@ -252,7 +276,7 @@ canvas {
 }
 
 #actions .menu-list {
-    font-size: 10px;
+    font-size: 1rem;
 }
 
 #supply-party-bar {
@@ -260,14 +284,14 @@ canvas {
     flex-wrap: wrap;
     gap: 8px 16px;
     padding: 4px 12px;
-    font-size: 8px;
-    color: #6a9a6a;
+    font-size: 0.95rem;
+    color: var(--text);
     border-top: 1px solid #1a3a1a;
 }
 
 #party-list { display: flex; gap: 8px; flex-wrap: wrap; }
 
-.party-member { font-size: 8px; white-space: nowrap; }
+.party-member { font-size: 0.95rem; white-space: nowrap; }
 .party-member.healthy { color: var(--hope-green); }
 .party-member.worried { color: var(--hope-yellow); }
 .party-member.struggling { color: var(--hope-red); }
@@ -276,9 +300,10 @@ canvas {
 #hope-score-bar {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
     gap: 20px;
     padding: 6px 12px;
-    font-size: 9px;
+    font-size: 0.95rem;
     background: rgba(52, 211, 153, 0.08);
     border: 1px solid var(--hope-green-dark);
     border-radius: 4px;
@@ -302,7 +327,7 @@ canvas {
 .challenge-question {
     color: var(--hope-blue);
     margin: 12px 0 8px;
-    font-size: 10px;
+    font-size: 1rem;
 }
 
 #challenge-options li {
@@ -313,13 +338,13 @@ canvas {
 #end-hope-summary {
     text-align: center;
     padding: 12px;
-    font-size: 9px;
+    font-size: 1rem;
     line-height: 2.4;
 }
 
 #end-message {
     text-align: center;
-    font-size: 10px;
+    font-size: 1rem;
     line-height: 2.4;
 }
 
@@ -332,8 +357,8 @@ canvas {
 
 /* --- VEHICLE --- */
 .vehicle-desc {
-    font-size: 8px;
-    color: #6a9a6a;
+    font-size: 0.95rem;
+    color: var(--text);
     margin: 2px 0 8px 24px;
 }
 
@@ -367,4 +392,13 @@ canvas {
 
 #map-info strong {
     color: var(--hope-green);
+}
+
+#game-container [style*="font-size"] {
+    font-size: 0.95rem !important;
+}
+
+@media (max-width: 420px) {
+    #status-panel { grid-template-columns: 1fr; }
+    #location-bar { flex-wrap: wrap; gap: 8px; }
 }

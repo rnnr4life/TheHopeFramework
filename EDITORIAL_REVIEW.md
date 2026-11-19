@@ -1,8 +1,69 @@
 # HOPE Framework: editorial and product review
 
-These are drafts, not researcher-approved changes. No story text, scholarly
-terminology, ownership claim, resource heading, or logo has been replaced on
-the basis of these proposals.
+Except for the separately approved game redesign below, these are drafts, not researcher-approved changes. No story text, scholarly
+terminology, ownership claim, resource heading, or logo outside that approved
+game section has been replaced on the basis of these proposals.
+
+## Game redesign approval queue
+
+The [phased implementation plan](GAME_REDESIGN_PLAN.md) distinguishes shipped
+technical corrections from the instructional proposals below. After their
+presentation, the user reported **"All are approved by Colleen."** This
+authorizes this game section, not unrelated historical proposals below.
+The [implementation plan](GAME_REDESIGN_PLAN.md#phase-4---author-approved-instructional-redesign)
+records the concrete choices. Existing answer keys are preserved.
+
+### Approved game wording - implementation record
+
+The replacements in this table are now applied. The compost decision uses the
+explicit planning wording, not a key change. Counseling is free and does not
+change fatigue or promise emotional improvement. The former descriptions in
+the table are retained as review history.
+
+| Game / grade | Existing wording or cue | Proposed wording / decision | Rationale and required check |
+|---|---|---|---|
+| Quest / Elementary, first-stage incorrect feedback | "the most important thing is to FEEL something first" and the rest of that feedback | Replace the full feedback with: "For this question, look for the character's reason for wanting change. Which words reveal that reason? Other responses can also matter in this story." | Preserve the Motivation key; approve the prompt/choice/feedback set together so a valid action is not called a wrong personal response. Test all four choices. |
+| Quest / Middle, first-stage prompt | "The data is real. It's YOUR town. What do you feel?" | "In this fictional story, which response is the intended cue for Motivation for Change?" | Avoid asserting verified personal reality or requiring the learner's own feelings. Approve with the existing choices and stage feedback. |
+| Quest / High, first-stage correct explanation | The explanation describes an emotional response as a necessary precondition for agency | Replace the full explanation with: "This passage presents an emotional response as the intended cue for Motivation for Change. It does not mean everyone must experience the same emotion or follow a fixed sequence before acting." | Researcher must approve the interpretation and terminology. Check the stage, victory summary, and related Guided copy for consistency before release. |
+| Walk / High, Motivation explanation | "Collective eco-grief and moral outrage as affective catalyst ... Without this response, agency never activates." | Replace the full explanation with: "In this scene, grief and outrage are the intended cues for Motivation for Change." | Do not imply a universal emotional prerequisite. Test this exact scene/key after approval. |
+| Quest / Middle, Agency incorrect feedback | Calls Agency "the most powerful marker" | Replace the full feedback with: "This question focuses on Agency to Take Action. Look for what people are doing in the story, rather than only what they intend to do." | Remove a hierarchy without changing the Agency key. Author must review related hierarchy claims across Guided and Walk too. |
+| Match / Elementary, outcome-only Agency excerpt | "By June, the garden was full of flowers and bees were buzzing everywhere." | "The students planted and cared for the garden. By June, the garden was full of flowers and bees were buzzing everywhere." | Proposal keeps Agency but makes enacted action explicit. Approve the stored rationale and any corresponding narrative/narration changes together; do not silently relabel the current excerpt. |
+| Walk / Elementary, compost scene keyed Plans | Children "are building a compost bin" beside a chart of steps | Replace only "are building a compost bin" with "are preparing a step-by-step plan for a compost bin" **or** explicitly approve an alternative Agency reading | Existing text supports both enacted Agency and Plans. Author must choose the intended evidence and approve the whole scene/explanation before testing the mapping. |
+| Trail / Shared, counseling feedback | A character "talked with a counselor and feels hopeful again." | Feedback proposal: "{name} talked with a counselor." Separately review the automatic `healthy` status and related spirit/reward logic | Do not imply a guaranteed therapeutic outcome. Approval of the sentence alone does not approve status/reward redesign. |
+
+These approved game revisions are not new framework definitions. The full
+H/O/P/E expansion remains a separate terminology decision; none is inferred
+from the textual marker names.
+
+### Approved decisions applied
+
+- **Detective:** 48 cue-specific rationales preserve the six cases' original
+  keys and explicitly discuss plausible alternative readings where needed.
+- **Transfer:** one unfamiliar Match example per grade requires a marker,
+  quotation, and reason, with revision after feedback. This is formative
+  practice, not a validated mastery assessment.
+- **Walk visuals:** every scene uses evidence discovery, not automatic
+  restoration. Problem text remains alongside the revealed response.
+- **Trail assessment:** only first-answer story matches affect literacy
+  counters. Vehicle/passive/donation rewards and hope ranks are removed;
+  resources, community trust, and physical travel fatigue remain separate.
+- **Trail safeguarding/fairness:** public staffed-center conversation replaces
+  hitchhiking; donations preserve food reserves; declining is not penalized;
+  basic aid is unconditional; volunteer costs match actual day/meal effects.
+- **Claims:** Quest's unsupported empirical assertions are replaced with
+  fictional, qualified accounts. All games disclose illustrative examples;
+  named-place Trail statistics are not presented as verified research.
+  No independent fact-check or new research citation is claimed.
+- **Grade adaptation/session length:** grade-specific reading scaffolds retain
+  shared Trail narratives and keys. Both routes support two-question sessions
+  and in-memory pause/checkpoint/resume. No persistent student storage or
+  narration transcript changes are introduced.
+
+User-reported approver: Colleen Redmond, PhD. Narration implications: recorded
+Guided/sample-story text and mappings are untouched. Acceptance evidence is in
+[the validation report](VALIDATION_REPORT.md#approved-instructional-game-redesign).
+A non-identifying learner pilot remains necessary; no mastery or mental-health
+benefit is established by implementation.
 
 ## Prompt 04: educational examples
 

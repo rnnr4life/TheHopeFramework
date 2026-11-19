@@ -2,6 +2,124 @@
 
 ## Outcome and boundaries
 
+### Approved instructional game redesign
+
+The user reported Colleen's approval of the documented game proposals after
+the technical phases below. The implementation and decision record is in the
+[phased plan](GAME_REDESIGN_PLAN.md#phase-4---author-approved-instructional-redesign).
+This supersedes the earlier game-content approval holds, not unrelated
+historical editorial proposals or release authorization.
+
+**58 Node tests pass, 0 fail.** Run: `node --test`. Syntax checks pass for
+`js/app.js`, `hope-trail/game.js`, `tests/app.test.cjs`, and
+`tests/trail.test.cjs`; `git diff --check` passes.
+
+New/updated regression coverage verifies:
+
+- All three fresh Match examples require a marker, evidence, and reason,
+  permit revision, reject repeated completion, and reset without changing the
+  original game completion.
+- All 48 Detective placements expose their clue rationale on both branches.
+- Walk discovery preserves scenery and retains the problem alongside response
+  evidence; discovery is not ecological restoration.
+- Trail awards only one correct-first-answer match, never a vehicle/passive
+  reward; donations retain food reserves, volunteer costs match calendar/food
+  effects, and repeated dilemma activation cannot repeat consequences.
+- Both short routes stop after two questions without claiming route victory,
+  continue with their answers retained, and support in-memory pause/resume.
+- Grade scaffolds update without resetting the shared journey. Counseling,
+  community aid, literacy answers, and travel fatigue remain separate.
+- Parent visibility changes cannot resume internally checkpointed travel.
+
+Fresh local headless Edge verification, with third-party requests blocked,
+reloaded the app and exercised:
+
+- **24 Match excerpts, 3 fresh transfer examples, 48 Detective clues, 12 Quest
+  stages, and 22 Walk scenes**, including wrong/correct responses and completion.
+  Detective used native Enter/Space selection and marker-place buttons.
+  Transfer used native form controls, revision, and keyboard submission.
+- All Walk scenes retained their exact sky/ground/scene DOM across discovery.
+- Both Trail short sessions, keyboard answer selection, checkpoints, native
+  pause/resume, grade changes, retained answers, and guarded repeated answers.
+- Both routes' **17 challenge entries**, reached through controlled state,
+  plus food-reserve denial, actual cleanup cost, and unconditional shelter aid.
+- Native normal-motion travel pause/resume, including a simulated parent
+  hide/show while checkpointed; controlled-state win/loss endings.
+- Representative **1280px and 390px** layouts without document-level horizontal
+  overflow. Trail text measured 16px and answer buttons at least 44px tall.
+  Desktop/mobile screenshots were inspected.
+
+The browser pass found and corrected quote truncation in Detective rationale
+attributes: rationales are now assigned through the DOM dataset API, not
+interpolated into HTML attributes. Successful final runs had **no uncaught
+page exceptions**.
+
+Read-only comparison against the published Git baseline confirmed all original
+game marker keys, Quest choice-marker mappings, Detective clue text, Trail
+correct-answer indices/options, and recorded-narration files are preserved.
+Approved game prompts, explanations, ambiguity cues, and the professor's
+Motivation cue change intentionally. Narration integrity also passes its
+existing exact-transcript/provenance/audio tests.
+
+Not performed: a learner/educator pilot, actual screen-reader or physical-touch
+evaluation, cross-browser/audio-listening certification, comprehensive contrast
+measurement, or organic 2,000-mile route-balance playthroughs. Technical passes
+do not establish learning effectiveness, reading-level suitability, or emotional
+benefits. Trail scaffolds differ by grade, but route narratives/keys are shared.
+
+No new persistent student storage, analytics, network services, or production
+dependencies were introduced. The temporary browser driver lived outside the
+repository. **Commit, publication, and deployment were not performed.**
+
+### Phased game improvements
+
+Historical verification before the subsequent author-approved phase above:
+
+Implemented on 2026-11-19 under the
+[phased game plan](GAME_REDESIGN_PLAN.md). Phases 1-3 cover technical fixes and
+content-preserving supports; instructional redesign and learner evaluation
+remain approval-gated, not completed by these changes.
+
+**52 Node tests pass, 0 fail**, including nine added regressions covering
+one-time Trail answers/vehicle bonuses, repeat continuation, preserved center
+messages, transit packing, disabled keyboard controls, hidden/muted effects,
+Walk focus recovery, optional Match notes, and shared/unsupported game audio.
+JavaScript syntax checks and `git diff --check` pass.
+
+Automated local headless Edge verification (not a student study) covered:
+
+- All three grades: 24 Match excerpts, 48 Detective clue placements, 12 Quest
+  stages, and 22 Walk scenes, with incorrect/correct branches and completion.
+- Optional notes safely rendered as literal text; existing explanations in
+  the completion review; restart cancellation/confirmation and note reset.
+- Detective keyboard selection/placement, case counts, and replay labeling.
+- Quest/Walk focused continuation and completion; shared main-game audio
+  controls and actual AudioContext running/suspended transitions.
+- Representative 1280px/390px layouts without document-level horizontal
+  overflow. Trail prose measured 16px and answer controls at least 44px high;
+  its iframe resized to content rather than imposing the old inner viewport.
+- Native Trail name-input typing, no-gas transit, fuel-vehicle recovery,
+  repeated answers and revisits without extra awards, bounded vehicle bonuses,
+  preserved purchase confirmation, normal-motion pause/resume, and new-game
+  reset. Both routes' 17 challenge entries exercised alternating correct and
+  incorrect answers and guarded repeat calls.
+- Controlled-state Trail win/loss branches. These were not organic full-route
+  playthroughs and do not establish random-event balance.
+- Game curriculum data blocks compared unchanged against the pre-change Git
+  baseline, normalizing Windows line endings. Recorded-narration transcript
+  integrity remains covered by the existing Node suite.
+
+No uncaught page exceptions occurred in successful browser runs. Actual
+screen-reader use, physical touch devices, cross-browser/audio listening
+certification, full contrast measurement, classroom evaluation, and organic
+Trail route balance remain unverified.
+
+Existing end ratings, emotional-state rewards, clue explanations, answer keys,
+story wording, and Walk restoration narrative were not rewritten. See the
+[specific author decisions](EDITORIAL_REVIEW.md#game-redesign-approval-queue).
+No new persistent student storage, analytics, services, or production
+dependencies were added. Commit/publication/deployment were not performed.
+
 ### Independent Guided reading
 
 The read-only analysis found that story narration and marker explanations were

@@ -1340,10 +1340,16 @@
 
             <div class="match-header">
                 <h2 id="match-title">Marker Match</h2>
+                <p class="section-intro">Fictional practice stories. Case statistics and named examples are illustrative, not verified research findings.</p>
                 <p class="section-intro" id="match-intro">
                     Read each phrase and decide which HOPE marker it belongs to. Tap the phrase, then tap the marker.
                 </p>
             </div>
+            <div class="game-toolbar">
+                <button class="btn btn-small" data-game-restart="match">Restart activity</button>
+                <span>Progress stays in this grade until you restart or refresh. Changing grades can restart the activity.</span>
+            </div>
+            <p id="match-item-progress" role="status"></p>
 
             <div class="match-workspace">
                 <!-- Phrase queue -->
@@ -1354,6 +1360,12 @@
                     <div id="match-phrase" class="match-phrase">
                         <p class="match-phrase-text" id="match-phrase-text"></p>
                     </div>
+                    <details id="match-evidence-details" class="game-review">
+                        <summary>Evidence notes (optional)</summary>
+                        <label for="match-evidence-note">Your evidence notes</label>
+                        <textarea id="match-evidence-note" rows="3" maxlength="2000" aria-describedby="match-note-help"></textarea>
+                        <p id="match-note-help">Unscored notes stay in this activity until restart, grade change, or refresh.</p>
+                    </details>
                     <div class="match-choices">
                         <button class="match-choice" data-marker="motivation">
                             <span class="match-choice-icon">🔥</span>
@@ -1418,6 +1430,17 @@
                 <div class="match-complete-icon">🌟</div>
                 <h3 id="match-complete-title">Great work!</h3>
                 <p id="match-complete-msg">You matched all the phrases. Now try finding these markers in a real story!</p>
+                <details class="game-review">
+                    <summary>Review phrases, explanations, and your notes</summary>
+                    <ol id="match-review-list"></ol>
+                </details>
+                <button class="btn btn-primary" id="btn-match-transfer">Try an unfamiliar example</button>
+                <section id="match-transfer" class="hidden game-review" aria-labelledby="match-transfer-title">
+                    <h3 id="match-transfer-title">Evidence and reasoning practice</h3>
+                    <p id="match-transfer-story"></p>
+                    <form id="match-transfer-form"></form>
+                    <p id="match-transfer-feedback" role="status" aria-atomic="true"></p>
+                </section>
                 <button class="btn btn-primary btn-lg" id="btn-to-find-hope">
                     <span id="btn-find-hope-text">Find the Hope</span>
                     <span class="btn-arrow">&rarr;</span>
@@ -1591,14 +1614,23 @@
 
             <div class="detective-header">
                 <h2 id="detective-title">🔍 Case Board</h2>
+                <p class="section-intro">These cases are fictional. Named studies, places, organizations, and statistics are illustrative, not verified research citations. Some clues invite more than one reading; discuss the intended cue in context.</p>
                 <p class="section-intro" id="detective-intro">Drag each clue to the HOPE marker it belongs to. Can you crack the case?</p>
+                <p>Select a clue, then choose Place Clue under a marker. Keyboard: use Enter or Space to select a clue, then Tab or Shift+Tab to reach Place Clue. Dragging also works.</p>
+                <p id="detective-case-progress" role="status"></p>
                 <div class="detective-progress">
                     <span id="detective-score">0</span> / <span id="detective-total">0</span> clues solved
                     <div class="detective-progress-bar"><div class="detective-progress-fill" id="detective-fill"></div></div>
                 </div>
+                <div class="game-toolbar">
+                    <button class="btn btn-small" data-game-sound aria-pressed="false">Game sound: off</button>
+                    <button class="btn btn-small" data-game-restart="detective">Restart case</button>
+                    <span>Changing grades or refreshing can restart this activity.</span>
+                </div>
                 <p id="detective-remaining" role="status">Place every clue correctly to complete this case.</p>
             </div>
 
+            <p id="detective-feedback" role="status" aria-atomic="true"></p>
             <div class="detective-board">
                 <!-- Marker drop zones -->
                 <div class="detective-zones">
@@ -1658,7 +1690,7 @@
                 <p id="detective-solved-msg"></p>
                 <div class="detective-solved-actions">
                     <button class="btn btn-primary" id="btn-detective-next">Next Case →</button>
-                    <button class="btn btn-small" id="btn-detective-home">← Back to Home</button>
+                    <button class="btn btn-small" id="btn-detective-home">← Grade activities</button>
                 </div>
             </div>
         </div>
@@ -1671,6 +1703,13 @@
                 <button class="btn-back" id="btn-back-quest">&larr; Back</button>
                 <div class="step-indicator">🎮 Hope Quest</div>
             </div>
+            <div class="game-toolbar">
+                <button class="btn btn-small" data-game-sound aria-pressed="false">Game sound: off</button>
+                <button class="btn btn-small" data-game-restart="quest">Restart activity</button>
+                <span>Changing grades or refreshing can restart this activity.</span>
+            </div>
+            <p id="quest-item-progress" role="status"></p>
+            <p class="section-intro">Analyze fictional characters and evidence, not your own feelings. Examples and figures are illustrative. This practice order is not a required emotional journey or a ranking of the markers.</p>
 
             <!-- Journey Map -->
             <div class="quest-map" id="quest-map">
@@ -1740,7 +1779,7 @@
                 </div>
                 <div class="quest-victory-actions">
                     <button class="btn btn-primary btn-lg" id="btn-quest-restart">🎮 Play Again</button>
-                    <button class="btn btn-small" id="btn-quest-home">← Back to Home</button>
+                    <button class="btn btn-small" id="btn-quest-home">← Grade activities</button>
                 </div>
             </div>
         </div>
@@ -1753,6 +1792,13 @@
                 <button class="btn-back" id="btn-back-walk">&larr; Back</button>
                 <div class="step-indicator">🚶 Hope Walk</div>
             </div>
+            <div class="game-toolbar">
+                <button class="btn btn-small" data-game-sound aria-pressed="false">Game sound: off</button>
+                <button class="btn btn-small" data-game-restart="walk">Restart activity</button>
+                <span>Changing grades or refreshing can restart this activity.</span>
+            </div>
+            <p id="walk-item-progress" role="status"></p>
+            <p class="section-intro">These scenes are fictional. Finding a spark reveals textual evidence; it does not repair an ecosystem. You do not have to change or disclose your feelings.</p>
 
             <!-- Scene viewport -->
             <div class="walk-viewport" id="walk-viewport">
@@ -1798,7 +1844,7 @@
                         <button class="walk-marker-btn" data-marker="agency">💪 Agency</button>
                     </div>
                 </div>
-                <div class="walk-feedback hidden" id="walk-feedback"></div>
+                <div class="walk-feedback hidden" id="walk-feedback" role="status" aria-atomic="true"></div>
                 <div class="walk-progress">
                     <div class="walk-progress-dots" id="walk-progress-dots"></div>
                     <button class="btn btn-primary btn-small hidden" id="btn-walk-next">Keep Walking →</button>
@@ -1808,10 +1854,10 @@
             <!-- Walk victory -->
             <div class="walk-victory hidden" id="walk-victory">
                 <div class="walk-victory-icon">🌅</div>
-                <h3>You Found the Hope</h3>
+                <h3 id="walk-victory-title">You Found the Hope</h3>
                 <p id="walk-victory-msg"></p>
                 <button class="btn btn-primary btn-lg" id="btn-walk-restart">Walk Again</button>
-                <button class="btn btn-lg" id="btn-walk-to-home" aria-label="Return to main menu">← Back to Main Menu</button>
+                <button class="btn btn-lg" id="btn-walk-to-home">← Grade activities</button>
             </div>
         </div>
     </section>
@@ -1822,6 +1868,10 @@
             <div class="screen-nav">
                 <button class="btn-back" id="btn-back-trail">&larr; Back</button>
                 <div class="step-indicator">🚐 Hope Trail</div>
+            </div>
+            <div class="game-toolbar">
+                <button class="btn btn-small" id="btn-trail-pause">Pause and return to grade activities</button>
+                <span>One shared journey across grades. Leaving pauses travel; refreshing or Play Again clears the journey.</span>
             </div>
             <div class="trail-iframe-wrap">
                 <iframe id="trail-iframe" src="" title="Hope Trail Game" allowfullscreen></iframe>

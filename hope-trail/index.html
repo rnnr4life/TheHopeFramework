@@ -10,6 +10,16 @@
 </head>
 <body>
     <div id="game-container">
+        <div class="game-toolbar" aria-label="Game controls">
+            <button type="button" class="menu-option" id="trail-sound-toggle" aria-pressed="false">Game sound: off</button>
+            <button type="button" class="menu-option" id="trail-restart">Restart journey</button>
+            <button type="button" class="menu-option" id="trail-pause" disabled onclick="pauseTrailSession()">Pause session</button>
+            <span>Progress lasts until this page is refreshed or restarted.</span>
+        </div>
+        <p id="trail-audio-status" role="status"></p>
+        <p id="trail-challenge-progress" role="status"></p>
+        <p>Fictional practice and simplified travel simulation. Named places, projects, and statistics are illustrative, not verified research claims. Community trust is a simulation resource, not a rating of you or your feelings.</p>
+        <p id="trail-grade-label" role="status"></p>
 
         <!-- MAIN MENU -->
         <div id="menu-screen" class="screen active">
@@ -18,10 +28,13 @@
             <div class="ornament">───────✿───────</div>
             <div class="menu-body">
                 <p>You may:</p>
+                <p>Recommended short session: two story questions, no packing or travel grind.</p>
+                <button type="button" class="menu-option" onclick="startShortSession('south')">Two stories: southern route</button>
+                <button type="button" class="menu-option" onclick="startShortSession('north')">Two stories: northern route</button>
                 <ol class="menu-list">
-                    <li><span class="menu-option" data-choice="1" onclick="menuChoice(1)">Travel the Hope Trail</span></li>
+                    <li><span class="menu-option" data-choice="1" onclick="menuChoice(1)">Full 2,000-mile journey (longer resource simulation)</span></li>
                     <li><span class="menu-option" data-choice="2" onclick="menuChoice(2)">Learn about HOPE</span></li>
-                    <li><span class="menu-option" data-choice="3" onclick="menuChoice(3)">Turn sound <span id="sound-toggle-label">off</span></span></li>
+                    <li><span class="menu-option" data-choice="3" onclick="menuChoice(3)">Turn sound <span id="sound-toggle-label">on</span></span></li>
                 </ol>
                 <p class="prompt">What is your choice? <span class="blink">_</span></p>
             </div>
@@ -31,6 +44,12 @@
         </div>
 
         <!-- LEARN SCREEN -->
+        <div id="checkpoint-screen" class="screen">
+            <h2>Session checkpoint</h2>
+            <p id="checkpoint-message"></p>
+            <button type="button" class="menu-option" id="trail-resume" onclick="resumeTrailSession()">Resume</button>
+            <button type="button" class="menu-option" onclick="goBackToHOPE()">Return to grade activities</button>
+        </div>
         <div id="learn-screen" class="screen">
             <h2>The HOPE Framework</h2>
             <div class="ornament">───────✿───────</div>
@@ -44,13 +63,14 @@
             <h2>Who's in your family?</h2>
             <div class="ornament">───────✿───────</div>
             <div class="text-body">
-                <p>What is the family leader's name?</p>
+                <p>Use fictional names only. Names and progress are not saved after refresh.</p>
+                <p><label for="name-0">What is the family leader's name?</label></p>
                 <div class="input-row"><span class="prompt-char">></span><input id="name-0" type="text" placeholder="(your name)" maxlength="12"></div>
-                <p>What is your partner's name?</p>
+                <p><label for="name-1">What is your partner's name?</label></p>
                 <div class="input-row"><span class="prompt-char">></span><input id="name-1" type="text" placeholder="(partner)" maxlength="12"></div>
-                <p>What is your child's name?</p>
+                <p><label for="name-2">What is your child's name?</label></p>
                 <div class="input-row"><span class="prompt-char">></span><input id="name-2" type="text" placeholder="(child)" maxlength="12"></div>
-                <p>What is your pet's name?</p>
+                <p><label for="name-3">What is your pet's name?</label></p>
                 <div class="input-row"><span class="prompt-char">></span><input id="name-3" type="text" placeholder="(pet)" maxlength="12"></div>
             </div>
             <div class="ornament">───────✿───────</div>
@@ -80,7 +100,7 @@
                 </ol>
             </div>
             <div class="ornament">───────✿───────</div>
-            <p class="prompt" id="store-msg">&nbsp;</p>
+            <p class="prompt" id="store-msg" role="status">&nbsp;</p>
         </div>
 
         <!-- CHOOSE SEASON -->
@@ -94,7 +114,7 @@
                     <li><span class="menu-option" onclick="setSeason(5)">Summer (June)</span></li>
                     <li><span class="menu-option" onclick="setSeason(8)">Fall (September)</span></li>
                 </ol>
-                <p>Each season brings different weather and challenges.</p>
+                <p>Choose the starting month. Weather is randomized during travel.</p>
             </div>
             <div class="ornament">───────✿───────</div>
         </div>
@@ -128,12 +148,14 @@
                         <p class="vehicle-desc">Reliable and familiar, but burns fossil fuels.</p>
                     </li>
                     <li><span class="menu-option" onclick="setVehicle('ev')">⚡🚗 Electric Vehicle</span>
-                        <p class="vehicle-desc">Zero emissions! But you need to find chargers.</p>
+                        <p class="vehicle-desc">No tailpipe emissions; electricity and manufacturing still have impacts. You need chargers.</p>
                     </li>
                     <li><span class="menu-option" onclick="setVehicle('transit')">🚌 Public Transit</span>
                         <p class="vehicle-desc">Cheapest option but slower. Meet people along the way!</p>
                     </li>
                 </ol>
+                <p id="vehicle-msg" role="status"></p>
+                <button type="button" class="menu-option" id="back-to-packing">Return to packing</button>
             </div>
             <div class="ornament">───────✿───────</div>
         </div>
@@ -164,11 +186,16 @@
             <div class="ornament">───────✿───────</div>
             <div class="text-body">
                 <p id="challenge-story"></p>
+                <details id="trail-reading-support">
+                    <summary>Reading support and marker guide</summary>
+                    <p id="trail-grade-prompt"></p>
+                    <p>Motivation for Change: a reason for wanting change. Belief that Change is Possible: evidence supporting possibility. Plans for a Path Forward: intended steps. Agency to Take Action: enacted work, whether or not it succeeds.</p>
+                </details>
                 <p class="challenge-question" id="challenge-question">Which HOPE marker does this show?</p>
                 <ol class="menu-list" id="challenge-options"></ol>
             </div>
             <div class="ornament">───────✿───────</div>
-            <p class="prompt" id="challenge-feedback">&nbsp;</p>
+            <div class="prompt" id="challenge-feedback" role="status" aria-atomic="true">&nbsp;</div>
         </div>
 
         <!-- GAME SCREEN -->
@@ -188,7 +215,7 @@
             <div id="status-panel">
                 <div class="status-row"><span class="status-label">Date:</span> <span id="date">March 1, 2026</span></div>
                 <div class="status-row"><span class="status-label">Weather:</span> <span id="weather">clear</span></div>
-                <div class="status-row"><span class="status-label">Spirits:</span> <strong id="health">Hopeful</strong></div>
+                <div class="status-row"><span class="status-label">Travel needs:</span> <strong id="health">Ready to travel</strong></div>
                 <div class="status-row"><span class="status-label">Food:</span> <strong id="food">0</strong> meals</div>
                 <div class="status-row"><span class="status-label">Next stop:</span> <strong id="next-lm">0</strong> miles</div>
                 <div class="status-row"><span class="status-label">Miles traveled:</span> <strong id="miles">0</strong> miles</div>
@@ -207,6 +234,7 @@
 
             <!-- HOPE Score -->
             <div id="hope-score-bar">
+                <span>First-answer story matches:</span>
                 <span class="hope-marker h-marker" title="Motivation">❤️ <strong id="score-m">0</strong></span>
                 <span class="hope-marker o-marker" title="Belief">🌿 <strong id="score-o">0</strong></span>
                 <span class="hope-marker p-marker" title="Plans">🗺️ <strong id="score-p">0</strong></span>
@@ -224,7 +252,7 @@
                 <ol class="menu-list" id="center-items"></ol>
             </div>
             <div class="ornament">───────✿───────</div>
-            <p class="prompt" id="center-msg">&nbsp;</p>
+            <p class="prompt" id="center-msg" role="status">&nbsp;</p>
         </div>
 
         <!-- MAP SCREEN -->

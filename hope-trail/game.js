@@ -105,7 +105,6 @@ const VEHICLE_CONFIG = {
         milesMult: 1.0,
         fuelChance: 0.35,      // chance per turn to consume fuel
         canChangePace: true,
-        hopeBonus: null,
         description: 'Reliable and familiar, but burns fossil fuels.',
     },
     ev: {
@@ -117,8 +116,7 @@ const VEHICLE_CONFIG = {
         milesMult: 1.0,
         fuelChance: 0.45,      // EVs need charging more often
         canChangePace: true,
-        hopeBonus: { h: 1, o: 1 },  // Motivation + Belief
-        description: 'Zero emissions! But you need to find chargers.',
+        description: 'No tailpipe emissions; electricity and manufacturing still have impacts. You need chargers.',
     },
     transit: {
         name: 'Public Transit',
@@ -129,7 +127,6 @@ const VEHICLE_CONFIG = {
         milesMult: 0.65,       // slower travel
         fuelChance: 0,         // no fuel needed
         canChangePace: false,   // fixed pace
-        hopeBonus: { p: 1, e: 1 },  // Plans + Agency
         description: 'Cheapest option but slower. Meet people along the way!',
     },
 };
@@ -293,12 +290,12 @@ const HOPE_CHALLENGES_NORTH = [
     },
     {
         location: 'University of Minnesota',
-        story: 'On the U of M campus, your family meets a professor studying climate-resilient crops. "We\'re developing wheat that can survive droughts and floods," she explains. "Farmers across the Midwest are already testing it. When I see my students dedicating their careers to this, I know we\'ll find answers."',
-        question: 'The professor saying her students\' dedication gives her confidence is:',
+        story: 'On the U of M campus, your family meets a fictional professor studying climate-resilient crops. "We are testing wheat under drought and flood conditions," she explains. "Seeing my students care about farmers gives me a reason to keep working on this problem, even though we do not know which approach will work."',
+        question: 'The professor describing her reason for wanting to continue this work shows:',
         options: ['Motivation for Change', 'Belief that Change is Possible', 'Plans for a Path Forward', 'Agency to Take Action'],
         correct: 0,
         marker: 'h',
-        explanation: 'Seeing the next generation commit to solving the problem gives her the emotional drive — that\'s Motivation for Change.'
+        explanation: 'Her reason for wanting to continue is the intended Motivation for Change cue. The passage does not claim that concern guarantees success.'
     },
     {
         location: 'Glacier National Park',
@@ -327,13 +324,34 @@ let HOPE_CHALLENGES = HOPE_CHALLENGES_SOUTH;
 // =====================
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
-let soundOn = true;
+let soundOn = false;
+let trailVisible = true;
 
-function ensureAudio() { if (!audioCtx) audioCtx = new AudioCtx(); }
+function reportAudioError(error) {
+    console.error('Trail audio unavailable:', error);
+    soundOn = false;
+    updateSoundControls();
+    document.getElementById('trail-audio-status').textContent = 'Sound is unavailable. You can keep playing silently.';
+}
+
+function ensureAudio() {
+    if (!AudioCtx) {
+        reportAudioError(new Error('Web Audio is not supported.'));
+        return false;
+    }
+    try {
+        if (!audioCtx) audioCtx = new AudioCtx();
+    } catch (error) {
+        reportAudioError(error);
+        return false;
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume().catch(reportAudioError);
+    return true;
+}
 
 function playTone(freq, duration, type, volume) {
-    if (!soundOn) return;
-    ensureAudio();
+    if (!soundOn || !trailVisible) return;
+    if (!ensureAudio()) return;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = type || 'square';
@@ -631,14 +649,12 @@ function drawWeatherOverlay(ctx, w, h, skyH, weather, time) {
 // --- VAN MOOD INDICATOR ---
 function drawVanMood(ctx, x, y, scale) {
     const s = scale || 1;
-    const spirits = typeof getSpirits === 'function' && game.party ? getSpirits() : 'Okay';
+    const spirits = typeof getSpirits === 'function' && game.party ? getSpirits() : 'Ready to travel';
     let emoji, color;
     switch (spirits) {
-        case 'Hopeful':    emoji = '😊'; color = '#34d399'; break;
-        case 'Okay':       emoji = '😐'; color = '#fbbf24'; break;
-        case 'Worried':    emoji = '😟'; color = '#ff6b6b'; break;
-        case 'Despairing': emoji = '😢'; color = '#ff4444'; break;
-        default:           emoji = '😐'; color = '#fbbf24'; break;
+        case 'Food needed': emoji = 'F'; color = '#cbd5e1'; break;
+        case 'Rest needed': emoji = 'R'; color = '#cbd5e1'; break;
+        default: emoji = '✓'; color = '#cbd5e1'; break;
     }
     // Speech bubble
     const bx = x - 2 * s, by = y - 28 * s;
@@ -1205,6 +1221,8 @@ let travelResume = null;
 let travelPauseStarted = null;
 
 function setTrailVisible(active) {
+    active = active && !game.sessionPaused;
+    trailVisible = active;
     if (!active && travelAnim !== null) {
         cancelAnimationFrame(travelAnim);
         travelAnim = null;
@@ -1499,6 +1517,61 @@ let store = { money: 500, gas: 0, food: 0, supplies: 0 };
 let hopeScore = { h: 0, o: 0, p: 0, e: 0 };
 let communityTrust = 3;  // 0-10 scale, start neutral
 let challengeIndex = 0;
+let trailGrade = 'middle';
+
+function setTrailGrade(grade) {
+    const prompts = {
+        elementary: 'Read with a partner if useful. Find words showing a reason for change, evidence of possibility, next steps, or work already done.',
+        middle: 'Cite a phrase for your choice. Compare a reason for change with evidence of possibility, and intended steps with enacted work.',
+        high: 'Justify your choice with textual evidence. Compare a plausible alternative marker and identify what the passage leaves uncertain.'
+    };
+    if (!Object.hasOwn(prompts, grade)) {
+        console.error('Unsupported Trail grade:', grade);
+        return;
+    }
+    trailGrade = grade;
+    document.getElementById('trail-grade-label').textContent = `Reading support: ${grade === 'high' ? 'High School' : grade === 'middle' ? 'Middle' : 'Elementary'}. The route and answer keys are shared.`;
+    document.getElementById('trail-grade-prompt').textContent = prompts[grade];
+    document.getElementById('trail-reading-support').open = grade === 'elementary';
+}
+
+function startShortSession(route) {
+    setSeason(2);
+    setRoute(route);
+    Object.assign(game, { shortSession: true, food: 40, gas: 3, money: 300, supplies: 1 });
+    showHopeChallenge(HOPE_CHALLENGES[0], null);
+}
+
+function pauseTrailSession() {
+    if (!game.party || game.gameOver) {
+        console.warn('There is no active Trail session to pause.');
+        return;
+    }
+    game.resumeScreen = document.querySelector('.screen.active').id;
+    game.sessionPaused = true;
+    document.getElementById('trail-pause').disabled = true;
+    setTrailVisible(false);
+    document.getElementById('checkpoint-message').textContent =
+        `Session paused: ${game.challengeAnswers.size} story questions explored, ${Math.floor(game.miles)} miles traveled. Progress stays in this page only; refreshing clears it.`;
+    document.getElementById('trail-resume').textContent = 'Resume where I paused';
+    showScreen('checkpoint-screen');
+}
+
+function resumeTrailSession() {
+    game.sessionPaused = false;
+    document.getElementById('trail-pause').disabled = false;
+    if (game.shortComplete) {
+        game.shortComplete = false;
+        game.shortSession = false;
+        showScreen('game-screen');
+        updateUI();
+        showEvent('Full journey ready', 'Start the route with 40 meals, 3 fuel tanks, $300, and 1 supply kit. Your two story answers remain recorded; revisiting them cannot add another match.');
+        showGameMenu();
+    } else {
+        showScreen(game.resumeScreen);
+    }
+    setTrailVisible(true);
+}
 
 // =====================
 // SCREEN MANAGEMENT
@@ -1515,7 +1588,7 @@ function showScreen(id) {
 function prepareTrailControls(root) {
     root.querySelectorAll('span.menu-option').forEach(control => {
         control.setAttribute('role', 'button');
-        control.setAttribute('tabindex', '0');
+        control.setAttribute('tabindex', control.getAttribute('aria-disabled') === 'true' ? '-1' : '0');
     });
 }
 
@@ -1532,7 +1605,7 @@ function handleTrailKeydown(event) {
     }
     if (!control) return;
     event.preventDefault();
-    if (!event.repeat) control.click();
+    if (!event.repeat && control.getAttribute('aria-disabled') !== 'true') control.click();
 }
 
 function goBackToHOPE() {
@@ -1561,8 +1634,17 @@ function menuChoice(n) {
 
 function toggleSound() {
     soundOn = !soundOn;
-    document.getElementById('sound-toggle-label').textContent = soundOn ? 'off' : 'on';
+    updateSoundControls();
+    if (!soundOn && audioCtx) audioCtx.suspend().catch(reportAudioError);
+    document.getElementById('trail-audio-status').textContent = '';
     if (soundOn) sfx_select();
+}
+
+function updateSoundControls() {
+    document.getElementById('sound-toggle-label').textContent = soundOn ? 'off' : 'on';
+    const toggle = document.getElementById('trail-sound-toggle');
+    toggle.textContent = soundOn ? 'Game sound: on' : 'Game sound: off';
+    toggle.setAttribute('aria-pressed', String(soundOn));
 }
 
 // =====================
@@ -1577,6 +1659,7 @@ function goToGuide() {
 function goToPack() {
     sfx_select();
     store = { money: 500, gas: 0, food: 0, supplies: 0 };
+    document.getElementById('store-msg').textContent = '';
     updateStoreUI();
     showScreen('supply-screen');
 }
@@ -1609,10 +1692,6 @@ function updateStoreUI() {
 
 function leaveStore() {
     sfx_select();
-    if (store.gas < 1) {
-        document.getElementById('store-msg').textContent = 'You need at least 1 tank of gas! (or choose Public Transit later)';
-        sfx_bad(); return;
-    }
     if (store.food < 10) {
         document.getElementById('store-msg').textContent = 'Buy more food! (at least 10 meals)';
         sfx_bad(); return;
@@ -1625,6 +1704,7 @@ function leaveStore() {
 // =====================
 function setSeason(monthIndex) {
     sfx_select();
+    document.getElementById('vehicle-msg').textContent = '';
 
     const defaults = ['Alex', 'Jordan', 'Riley', 'Buddy'];
     const roles = ['Leader', 'Partner', 'Child', 'Pet'];
@@ -1632,7 +1712,7 @@ function setSeason(monthIndex) {
     for (let i = 0; i < 4; i++) {
         const input = document.getElementById(`name-${i}`);
         const name = input.value.trim() || defaults[i];
-        party.push({ name, status: 'healthy', role: roles[i] });
+        party.push({ name, status: 'rested', role: roles[i] });
     }
 
     game = {
@@ -1642,9 +1722,11 @@ function setSeason(monthIndex) {
         pace: 'steady', nextLandmark: 1,
         gameOver: false, party: party, weather: 'clear',
         vehicle: 'van',
+        challengeAnswers: new Map(),
     };
 
     hopeScore = { h: 0, o: 0, p: 0, e: 0 };
+    document.getElementById('trail-pause').disabled = false;
     communityTrust = 3;
     challengeIndex = 0;
 
@@ -1667,10 +1749,15 @@ function setRoute(route) {
         REGIONS = REGIONS_SOUTH;
     }
 
+    updateChallengeProgress();
     showScreen('vehicle-screen');
 }
 
 function setVehicle(type) {
+    if (type !== 'transit' && game.gas < 1) {
+        document.getElementById('vehicle-msg').textContent = 'This vehicle needs fuel. Return to packing to buy at least one tank, or choose Public Transit.';
+        return;
+    }
     sfx_select();
     game.vehicle = type;
 
@@ -1685,13 +1772,6 @@ function setVehicle(type) {
     // EV converts gas tanks to charges (same count, cheaper refills)
     if (type === 'ev') {
         // Relabel fuel — keep same count
-    }
-
-    // Apply initial HOPE bonus for eco-friendly choices
-    if (vc.hopeBonus) {
-        for (const [key, val] of Object.entries(vc.hopeBonus)) {
-            hopeScore[key] += val;
-        }
     }
 
     drawTownScene(document.getElementById('town-canvas'));
@@ -1744,10 +1824,6 @@ function updateUI() {
     const level = getSpirits();
     healthEl.textContent = level;
     healthEl.className = '';
-    if (level === 'Hopeful') healthEl.classList.add('spirits-hopeful');
-    else if (level === 'Okay') healthEl.classList.add('spirits-okay');
-    else if (level === 'Worried') healthEl.classList.add('spirits-worried');
-    else healthEl.classList.add('spirits-despairing');
 
     const nextLm = LANDMARKS[game.nextLandmark];
     if (nextLm) {
@@ -1762,8 +1838,7 @@ function updateUI() {
     for (const member of game.party) {
         const span = document.createElement('span');
         span.className = `party-member ${member.status}`;
-        const icon = member.status === 'healthy' ? '♥' :
-                     member.status === 'worried' ? '▼' : '✝';
+        const icon = member.status === 'rested' ? '●' : '○';
         span.textContent = `${icon}${member.name} `;
         partyList.appendChild(span);
     }
@@ -1788,13 +1863,9 @@ function updateUI() {
 }
 
 function getSpirits() {
-    const total = hopeScore.h + hopeScore.o + hopeScore.p + hopeScore.e;
-    const worried = game.party.filter(m => m.status === 'worried').length;
-    if (total >= 6 && worried === 0) return 'Hopeful';
-    if (total >= 3) return 'Okay';
-    if (worried >= 2) return 'Worried';
-    if (game.food <= 0) return 'Despairing';
-    return 'Okay';
+    if (game.food <= 0) return 'Food needed';
+    if (game.party.some(member => member.status === 'tired')) return 'Rest needed';
+    return 'Ready to travel';
 }
 
 // =====================
@@ -1880,7 +1951,7 @@ function doTravel() {
     const vc = VEHICLE_CONFIG[game.vehicle];
     const pace = PACE_CONFIG[game.pace];
     const baseMiles = pace.milesMin + Math.floor(Math.random() * (pace.milesMax - pace.milesMin));
-    const worried = game.party.filter(m => m.status === 'worried').length;
+    const worried = game.party.filter(m => m.status === 'tired').length;
     const milesGained = Math.max(10, Math.floor((baseMiles - worried * 5) * vc.milesMult));
 
     game.miles += milesGained;
@@ -1914,10 +1985,10 @@ function doTravel() {
 
     // Fast pace stress (van and EV only)
     if (vc.canChangePace && Math.random() < pace.stressChance) {
-        const healthy = game.party.filter(m => m.status === 'healthy');
+        const healthy = game.party.filter(m => m.status === 'rested');
         if (healthy.length > 0) {
             const victim = healthy[Math.floor(Math.random() * healthy.length)];
-            if (victim.role !== 'Pet') victim.status = 'worried';
+            if (victim.role !== 'Pet') victim.status = 'tired';
         }
     }
 
@@ -2007,11 +2078,10 @@ function doRest() {
     game.food -= alive * 0.5;
     if (game.food < 0) game.food = 0;
 
-    // Rest heals worry
-    const worried = game.party.filter(m => m.status === 'worried');
-    if (worried.length > 0 && Math.random() < 0.5) {
-        worried[0].status = 'healthy';
-        showEvent('Rest stop', `${worried[0].name} feels better after resting. The family talks and shares stories of hope.`);
+    const worried = game.party.filter(m => m.status === 'tired');
+    if (worried.length > 0) {
+        worried.forEach(member => { member.status = 'rested'; });
+        showEvent('Rest stop', 'Your party rested. Travel fatigue is cleared; this is not a rating of anyone\'s feelings.');
         sfx_good();
     } else {
         showEvent('Rest stop', 'Your family takes a break. Everyone feels a little refreshed.');
@@ -2034,12 +2104,12 @@ function doStatus() {
     text += `Gas: ${game.gas} tanks<br>`;
     text += `Money: $${Math.floor(game.money)}<br>`;
     text += `Supplies: ${game.supplies}<br>`;
-    text += `Spirits: ${getSpirits()}<br><br>`;
-    text += `HOPE Score: ❤️${hopeScore.h} 🌿${hopeScore.o} 🗺️${hopeScore.p} ⚡${hopeScore.e}<br>`;
+    text += `Travel needs: ${getSpirits()}<br><br>`;
+    text += `First-answer matches: ❤️${hopeScore.h} 🌿${hopeScore.o} 🗺️${hopeScore.p} ⚡${hopeScore.e}<br>`;
     text += `Community Trust: 🤝 ${communityTrust}/10<br><br>`;
     text += 'Family: ';
     for (const m of game.party) {
-        const icon = m.status === 'healthy' ? '♥' : m.status === 'worried' ? '▼' : '✝';
+        const icon = m.status === 'rested' ? '●' : '○';
         text += `${icon}${m.name}(${m.status}) `;
     }
     showEvent('Status', text);
@@ -2051,36 +2121,33 @@ function doStatus() {
 // =====================
 function openCenter(name) {
     sfx_coin();
-    showScreen('center-screen');
     document.getElementById('center-title').textContent = name;
     document.getElementById('center-money').textContent = '$' + Math.floor(game.money);
     document.getElementById('center-msg').innerHTML = '&nbsp;';
 
-    const hasWorried = game.party.some(m => m.status === 'worried');
     const vc = VEHICLE_CONFIG[game.vehicle];
 
     // Trust affects prices
-    const trustMult = communityTrust >= 7 ? 0.75 : communityTrust <= 2 ? 1.5 : 1.0;
+    const trustMult = communityTrust >= 7 ? 0.75 : 1.0;
     const foodPrice = Math.round(10 * trustMult);
     const bigFoodPrice = Math.round(25 * trustMult);
-    const counselPrice = Math.round(15 * trustMult);
     const fuelPrice = Math.round((vc.fuelCost || 50) * trustMult);
     const suppliesPrice = Math.round(30 * trustMult);
 
-    const trustNote = communityTrust >= 7 ? '<p style="font-size:8px;color:#34d399;margin:4px 0;">🤝 Your good reputation earns a 25% discount!</p>' :
-                      communityTrust <= 2 ? '<p style="font-size:8px;color:#ff6b6b;margin:4px 0;">😐 People here seem wary of you. Prices are 50% higher.</p>' : '';
+    const trustNote = communityTrust >= 7 ? '<p>Simulation perk: 25% community discount. Essential help is available regardless of trust.</p>' : '<p>Essential help is available regardless of trust.</p>';
 
     const fuelLabel = vc.fuelName ? `${vc.fuelName} ........... $${fuelPrice}` : null;
     document.getElementById('center-items').innerHTML = `
         ${trustNote}
         <li><span class="menu-option" onclick="centerBuy('food')">Meals (5) ......... $${foodPrice}</span></li>
         <li><span class="menu-option" onclick="centerBuy('bigfood')">Meals (15) ........ $${bigFoodPrice}</span></li>
-        ${hasWorried ? `<li><span class="menu-option" onclick="centerBuy('counsel')">Counseling ........ $${counselPrice}</span></li>` : ''}
+        <li><span class="menu-option" onclick="centerBuy('counsel')">Optional counselor conversation (free; no game-stat effect)</span></li>
         ${fuelLabel ? `<li><span class="menu-option" onclick="centerBuy('gas')">${fuelLabel}</span></li>` : ''}
         <li><span class="menu-option" onclick="centerBuy('supplies')">Supplies .......... $${suppliesPrice}</span></li>
         <li><span class="menu-option" onclick="showVehicleSwitch()">Switch vehicle (${vc.icon} ${vc.name})</span></li>
         <li><span class="menu-option" onclick="leaveCenter()">Leave</span></li>
     `;
+    showScreen('center-screen');
 }
 
 function centerBuy(item) {
@@ -2089,8 +2156,8 @@ function centerBuy(item) {
     const gasCost = vc.fuelCost || 50;
 
     // Trust affects prices: high trust = discount, low trust = markup
-    const trustMult = communityTrust >= 7 ? 0.75 : communityTrust <= 2 ? 1.5 : 1.0;
-    const basePrices = { food: 10, bigfood: 25, counsel: 15, gas: gasCost, supplies: 30 };
+    const trustMult = communityTrust >= 7 ? 0.75 : 1.0;
+    const basePrices = { food: 10, bigfood: 25, counsel: 0, gas: gasCost, supplies: 30 };
     const prices = {};
     for (const [k, v] of Object.entries(basePrices)) {
         prices[k] = Math.round(v * trustMult);
@@ -2106,16 +2173,12 @@ function centerBuy(item) {
     if (item === 'gas')       { game.gas += 1;   msg.textContent = `Got 1 ${vc.fuelName || 'fuel'}.`; }
     if (item === 'supplies')  { game.supplies += 1; msg.textContent = 'Got camping supplies.'; }
     if (item === 'counsel') {
-        const worried = game.party.find(m => m.status === 'worried');
-        if (worried) {
-            worried.status = 'healthy';
-            msg.textContent = `${worried.name} talked with a counselor and feels hopeful again.`;
-            sfx_good();
-        }
+        msg.textContent = `${game.party[0].name} talked with a counselor.`;
     }
 
-    document.getElementById('center-money').textContent = '$' + Math.floor(game.money);
+    const message = msg.textContent;
     openCenter(document.getElementById('center-title').textContent);
+    msg.textContent = message;
 }
 
 function leaveCenter() {
@@ -2146,9 +2209,12 @@ function showVehicleSwitch() {
         ${options}
         <li><span class="menu-option" onclick="openCenter(document.getElementById('center-title').textContent)">Back</span></li>
     `;
+    prepareTrailControls(document.getElementById('center-items'));
+    document.querySelector('#center-items .menu-option').focus();
 }
 
 function switchVehicle(type) {
+    if (type === game.vehicle) return;
     sfx_select();
     const oldVc = VEHICLE_CONFIG[game.vehicle];
     const newVc = VEHICLE_CONFIG[type];
@@ -2172,18 +2238,10 @@ function switchVehicle(type) {
 
     game.vehicle = type;
 
-    // HOPE bonus for switching to eco-friendly options
-    if (newVc.hopeBonus) {
-        for (const [key, val] of Object.entries(newVc.hopeBonus)) {
-            hopeScore[key] += val;
-        }
-        const bonusText = Object.entries(newVc.hopeBonus)
-            .map(([k, v]) => `+${v} ${k.toUpperCase()}`).join(', ');
-        document.getElementById('center-msg').textContent += ` (${bonusText})`;
-    }
-
     // Refresh center with new vehicle
+    const message = document.getElementById('center-msg').textContent;
     openCenter(document.getElementById('center-title').textContent);
+    document.getElementById('center-msg').textContent = message;
 }
 
 // =====================
@@ -2191,7 +2249,6 @@ function switchVehicle(type) {
 // =====================
 function showHopeChallenge(challenge, landmark) {
     sfx_hope();
-    showScreen('hope-challenge-screen');
     document.getElementById('challenge-title').textContent = '🌱 Hope Moment — ' + challenge.location;
     document.getElementById('challenge-story').textContent = challenge.story;
     document.getElementById('challenge-question').textContent = challenge.question;
@@ -2199,43 +2256,85 @@ function showHopeChallenge(challenge, landmark) {
 
     const optionsList = document.getElementById('challenge-options');
     optionsList.innerHTML = '';
-    const markers = ['h', 'o', 'p', 'e'];
     const icons = ['❤️', '🌿', '🗺️', '⚡'];
 
     challenge.options.forEach((opt, i) => {
         const li = document.createElement('li');
-        li.innerHTML = `<span class="menu-option" onclick="answerChallenge(${i}, ${challenge.correct}, '${challenge.marker}')">${icons[i]} ${opt}</span>`;
+        li.innerHTML = `<button type="button" class="menu-option" onclick="answerChallenge(${i})">${icons[i]} ${opt}</button>`;
         optionsList.appendChild(li);
     });
 
     // Store current challenge/landmark for after answer
     game._currentChallenge = challenge;
     game._currentLandmark = landmark;
+    game._challengeContinued = false;
+    if (game.challengeAnswers.has(challenge)) {
+        renderChallengeAnswer(game.challengeAnswers.get(challenge));
+    }
+    showScreen('hope-challenge-screen');
+    if (game.challengeAnswers.has(challenge)) document.getElementById('challenge-continue').focus();
 }
 
-function answerChallenge(chosen, correct, marker) {
+function answerChallenge(chosen) {
+    const challenge = game._currentChallenge;
+    if (game.challengeAnswers.has(challenge)) return;
+    if (!challenge || !Number.isInteger(chosen) || chosen < 0 || chosen >= challenge.options.length) {
+        console.error('Invalid Trail challenge answer:', chosen);
+        return;
+    }
+    game.challengeAnswers.set(challenge, chosen);
+    if (chosen === challenge.correct) hopeScore[challenge.marker] += 1;
+    updateChallengeProgress();
+    renderChallengeAnswer(chosen);
+    document.getElementById('challenge-continue').focus();
+}
+
+function updateChallengeProgress() {
+    const answers = [...game.challengeAnswers];
+    const correct = answers.filter(([challenge, chosen]) => chosen === challenge.correct).length;
+    document.getElementById('trail-challenge-progress').textContent =
+        `Story questions: ${answers.length} of ${HOPE_CHALLENGES.length} answered; ${correct} correct on the first answer. Travel choices and resources are separate; this is practice, not a hope or mastery rating.`;
+}
+
+function renderChallengeAnswer(chosen) {
     const feedback = document.getElementById('challenge-feedback');
     const challenge = game._currentChallenge;
-    const landmark = game._currentLandmark;
-
-    if (chosen === correct) {
+    if (chosen === challenge.correct) {
         sfx_hope();
-        hopeScore[marker] += 2;
-        feedback.innerHTML = `<span style="color: var(--hope-green)">✓ Correct!</span> +2 HOPE points!<br>${challenge.explanation}<br><br><span class="menu-option" onclick="afterChallenge()">Continue journey</span>`;
+        feedback.innerHTML = `<span style="color: var(--hope-green)">Your answer matches the intended cue.</span><br>${challenge.explanation}<br><br><button type="button" class="menu-option" id="challenge-continue" onclick="afterChallenge()">Continue journey</button>`;
     } else {
         sfx_bad();
-        hopeScore[marker] += 1;
-        feedback.innerHTML = `<span style="color: var(--hope-yellow)">Not quite.</span> +1 HOPE point for trying!<br>${challenge.explanation}<br><br><span class="menu-option" onclick="afterChallenge()">Continue journey</span>`;
+        feedback.innerHTML = `<span style="color: var(--hope-yellow)">Consider this reading.</span><br>${challenge.explanation}<br><br><button type="button" class="menu-option" id="challenge-continue" onclick="afterChallenge()">Continue journey</button>`;
     }
     // Disable options
     document.querySelectorAll('#challenge-options .menu-option').forEach(el => {
+        el.disabled = true;
+        el.setAttribute('aria-disabled', 'true');
+        el.tabIndex = -1;
         el.style.pointerEvents = 'none';
         el.style.opacity = '0.5';
     });
 }
 
 function afterChallenge() {
+    if (game._challengeContinued || !game.challengeAnswers.has(game._currentChallenge)) return;
+    game._challengeContinued = true;
     sfx_select();
+    if (game.shortSession) {
+        if (game.challengeAnswers.size < 2) {
+            showHopeChallenge(HOPE_CHALLENGES[game.challengeAnswers.size], null);
+        } else {
+            game.shortComplete = true;
+            game.sessionPaused = true;
+            document.getElementById('trail-pause').disabled = true;
+            setTrailVisible(false);
+            document.getElementById('checkpoint-message').textContent =
+                'Short session complete: two fictional story questions explored. Explain one answer using a phrase from the story. You may stop here or continue the full route from its start with 40 meals, 3 fuel tanks, $300, and 1 supply kit. Your answers remain recorded in this page only.';
+            document.getElementById('trail-resume').textContent = 'Continue as a supplied full journey';
+            showScreen('checkpoint-screen');
+        }
+        return;
+    }
     const landmark = game._currentLandmark;
     if (landmark && landmark.center) {
         openCenter(landmark.name);
@@ -2295,14 +2394,12 @@ function eventBadWeather() {
 
 function eventBeautifulView() {
     sfx_good();
-    showEvent('🌄 Beautiful view!', 'Your family stops at a scenic overlook. The beauty of nature lifts everyone\'s spirits.');
-    const worried = game.party.find(m => m.status === 'worried');
-    if (worried) { worried.status = 'healthy'; appendEvent(`${worried.name} feels hopeful again.`); }
+    showEvent('🌄 Beautiful view!', 'Your family stops at a scenic overlook. People can respond to the view in different ways.');
     updateUI(); showGameMenu();
 }
 
 function eventPollutedArea() {
-    showEvent('Pollution', 'You drive through an area with heavy air pollution. A factory spews smoke into the sky. Your family feels sad about the damage.');
+    showEvent('Pollution', 'You drive through an area with heavy air pollution. A factory spews smoke into the sky. The detour adds travel fatigue.');
     sfx_bad();
     stressRandomMember();
     updateUI(); checkGameOver(); if (!game.gameOver) showGameMenu();
@@ -2310,16 +2407,13 @@ function eventPollutedArea() {
 
 function eventCommunityCleanup() {
     sfx_hope();
-    hopeScore.e += 1;
-    showEvent('🌿 Community cleanup!', 'You pass a group of volunteers cleaning a beach! Your child waves and they wave back. Seeing people take action gives your family hope. (+1 Agency)');
+    showEvent('🌿 Community cleanup!', 'You pass volunteers cleaning a beach. Watching is not the same as carrying out their action. This encounter does not change your story-question results.');
     updateUI(); showGameMenu();
 }
 
 function eventWildlife() {
     sfx_good();
     showEvent('🦌 Wildlife sighting', 'A family of deer crosses the road ahead. Your family watches in wonder. Nature persists.');
-    hopeScore.o += 1;
-    appendEvent('+1 Belief — nature finds a way!');
     updateUI(); showGameMenu();
 }
 
@@ -2348,8 +2442,6 @@ function eventFarmersMarket() {
     if (game.money < 15) {
         sfx_select();
         showEvent('🌽 Farmers market!', 'You stop at a local farmers market, but you can\'t afford anything. The farmer gives your child a free apple and tells them about sustainable farming.');
-        hopeScore.p += 1;
-        appendEvent('+1 Plans — sustainable farming is a path forward!');
         updateUI(); showGameMenu();
         return;
     }
@@ -2358,8 +2450,6 @@ function eventFarmersMarket() {
     game.food += meals;
     game.money -= 15;
     showEvent('🌽 Farmers market!', `You stop at a local farmers market and buy ${meals} fresh meals for $15. The farmer tells you about sustainable agriculture.`);
-    hopeScore.p += 1;
-    appendEvent('+1 Plans — sustainable farming is a path forward!');
     updateUI(); showGameMenu();
 }
 
@@ -2367,24 +2457,18 @@ function eventForestFire() {
     showEvent('🔥 Forest fire detour', 'A wildfire forces a long detour. You see scorched land but also new green growth pushing through the ash.');
     game.miles -= 20; if (game.miles < 0) game.miles = 0;
     sfx_bad();
-    hopeScore.o += 1;
-    appendEvent('+1 Belief — new growth through the ash shows nature recovers.');
     updateUI(); showGameMenu();
 }
 
 function eventRecyclingCenter() {
     sfx_hope();
-    hopeScore.h += 1;
     showEvent('♻️ Recycling center', 'You pass a massive recycling facility. A sign reads: "You can make a difference." Your child says they want to recycle more at home.');
-    appendEvent('+1 Motivation — the desire to change!');
     updateUI(); showGameMenu();
 }
 
 function eventSchoolVisit() {
     sfx_hope();
-    hopeScore.e += 1;
     showEvent('🏫 School visit', 'At a rest stop, you see a school group planting trees. The kids are laughing and covered in dirt. "We planted 50 today!" one shouts.');
-    appendEvent('+1 Agency — kids taking real action!');
     updateUI(); showGameMenu();
 }
 
@@ -2411,7 +2495,7 @@ function eventChargerNotFound() {
 
 function eventRangeAnxiety() {
     sfx_bad();
-    showEvent('🔋 Range anxiety!', 'The battery is lower than expected. Your family gets nervous about making it to the next charger.');
+    showEvent('🔋 Charging detour', 'The battery is lower than expected. Searching for a charger adds travel fatigue.');
     stressRandomMember();
     updateUI(); checkGameOver(); if (!game.gameOver) showGameMenu();
 }
@@ -2420,18 +2504,12 @@ function eventFreeCharger() {
     sfx_good();
     showEvent('⚡ Free charging station!', 'A solar-powered charging station offers free charges! Your family charges up while enjoying the sunshine.');
     game.gas += 2;
-    hopeScore.o += 1;
-    appendEvent('+1 Belief — clean energy is real and growing!');
     updateUI(); showGameMenu();
 }
 
 function eventEVMeetup() {
     sfx_good();
     showEvent('🚗 EV meetup!', 'You meet other EV drivers at a rest stop. They share tips about charger locations ahead and your family feels part of a community.');
-    hopeScore.h += 1;
-    appendEvent('+1 Motivation — you\'re not alone in making change!');
-    const worried = game.party.find(m => m.status === 'worried');
-    if (worried) { worried.status = 'healthy'; appendEvent(`${worried.name} feels inspired.`); }
     updateUI(); showGameMenu();
 }
 
@@ -2463,19 +2541,12 @@ function eventMissedConnection() {
 function eventBusFriend() {
     sfx_good();
     showEvent('🤝 Bus friendship!', 'You sit next to an environmental scientist on the bus. They share fascinating stories about restoration projects.');
-    hopeScore.p += 1;
-    hopeScore.e += 1;
-    appendEvent('+1 Plans and +1 Agency — real experts with real solutions!');
-    const worried = game.party.find(m => m.status === 'worried');
-    if (worried) { worried.status = 'healthy'; appendEvent(`${worried.name} feels hopeful after the conversation.`); }
     updateUI(); showGameMenu();
 }
 
 function eventScenicBusRoute() {
     sfx_good();
     showEvent('🪟 Scenic route!', 'The bus takes a scenic detour through beautiful countryside. Your family enjoys views you\'d never see from the highway.');
-    hopeScore.o += 1;
-    appendEvent('+1 Belief — seeing the beauty of nature renews hope.');
     updateUI(); showGameMenu();
 }
 
@@ -2496,12 +2567,18 @@ const _dilemmaChoices = {};
 let _dilemmaId = 0;
 
 function showDilemma(title, story, choices) {
+    Object.keys(_dilemmaChoices).forEach(key => { delete _dilemmaChoices[key]; });
+    let chosen = false;
     showEvent(title, story);
     const container = document.getElementById('actions');
     let html = '<ol class="menu-list">';
     for (const choice of choices) {
         const id = '_dc' + (++_dilemmaId);
-        _dilemmaChoices[id] = choice.action;
+        _dilemmaChoices[id] = () => {
+            if (chosen) return;
+            chosen = true;
+            choice.action();
+        };
         html += `<li><span class="menu-option" onclick="_dilemmaChoices['${id}']()">${choice.label}</span></li>`;
     }
     html += '</ol><p class="action-prompt">What do you choose? <span class="blink">_</span></p>';
@@ -2512,39 +2589,52 @@ function changeTrust(amount) {
     communityTrust = Math.max(0, Math.min(10, communityTrust + amount));
 }
 
+function canShareMeals(amount) {
+    const reserve = game.party.filter(member => member.status !== 'left').length * PACE_CONFIG[game.pace].foodMult;
+    return game.food - amount >= reserve;
+}
+
+function spendVolunteerDay() {
+    const meals = game.party.filter(member => member.status !== 'left').length;
+    if (!canShareMeals(meals)) {
+        showEvent('Keep your travel reserve', 'This activity needs one day and a meal per party member, plus meals reserved for the next travel turn. You can continue without a trust penalty.');
+        updateUI(); showGameMenu();
+        return false;
+    }
+    game.food -= meals;
+    advanceDay(1);
+    return true;
+}
+
 function dilemmaStrandedFamily() {
-    const canShare = game.food >= 5;
+    const canShare = canShareMeals(5);
     showDilemma(
         '🆘 Stranded family!',
         'You see a family on the roadside with a broken-down car. They look exhausted and hungry. You could share some of your food and supplies — or keep driving.',
         [
             {
-                label: canShare ? 'Share 5 meals and help (cooperative)' : 'Share meals (not enough food!)',
+                label: canShare ? 'Share 5 meals; keep a next-turn food reserve (+2 trust)' : 'Sharing 5 meals would use your next-turn food reserve',
                 action: function() {
-                    if (game.food < 5) {
+                    if (!canShareMeals(5)) {
                         sfx_bad();
                         showEvent('Not enough food', 'You want to help, but you only have ' + Math.floor(game.food) + ' meals — not enough to share. Your family needs to eat too.');
-                        appendEvent('Find more food and try to help next time.');
+                        appendEvent('Protecting your party\'s food reserve carries no penalty.');
                         updateUI(); showGameMenu();
                         return;
                     }
                     sfx_good();
                     game.food -= 5;
                     changeTrust(2);
-                    hopeScore.e += 1;
                     showEvent('🤝 You helped!', 'You shared meals and helped fix their car. The family is deeply grateful. "We won\'t forget this," they say. Word of your kindness spreads.');
-                    appendEvent('+2 Community Trust, +1 Agency');
+                    appendEvent('+2 Community Trust. Story-question results are unchanged.');
                     updateUI(); checkGameOver(); if (!game.gameOver) showGameMenu();
                 }
             },
             {
-                label: 'Keep driving (self-interest)',
+                label: 'Keep your supplies and continue (no trust penalty)',
                 action: function() {
                     sfx_select();
-                    changeTrust(-1);
-                    showEvent('Drove past...', 'You drove past the stranded family. Your supplies are safe, but your child looks back through the window with a sad face.');
-                    appendEvent('-1 Community Trust');
-                    stressRandomMember();
+                    showEvent('Continuing', 'You keep your supplies for your party. People have different needs and limits; declining does not reduce trust.');
                     updateUI(); checkGameOver(); if (!game.gameOver) showGameMenu();
                 }
             }
@@ -2554,28 +2644,30 @@ function dilemmaStrandedFamily() {
 
 function dilemmaSharedWell() {
     showDilemma(
-        '💧 Shared water well',
-        'You stop at a small town with a community well. There\'s a sign: "Please take only what you need — drought conditions." You could fill up extra containers, or take just enough.',
+        'Community pantry',
+        'A staffed pantry offers 3 meals per traveling party. Surplus meals are also available: 3 more for $6. Buying surplus does not reduce anyone else\'s free allocation.',
         [
             {
-                label: 'Take only what you need (commons)',
+                label: 'Take the allocated 3 meals (free)',
                 action: function() {
                     sfx_good();
-                    changeTrust(1);
-                    hopeScore.p += 1;
-                    showEvent('🌊 Responsible choice', 'You take only what your family needs. A local farmer nods approvingly. "Thank you for thinking of the community."');
-                    appendEvent('+1 Community Trust, +1 Plans');
+                    game.food += 3;
+                    showEvent('Pantry visit', 'You accept your party\'s 3-meal allocation. Trust and story-question results are unchanged.');
                     updateUI(); showGameMenu();
                 }
             },
             {
-                label: 'Fill up extra containers (exploit)',
+                label: 'Take the 3-meal allocation and buy 3 surplus meals ($6)',
                 action: function() {
                     sfx_select();
-                    game.food += 3;
-                    changeTrust(-2);
-                    showEvent('Took extra...', 'You filled extra containers. Other families arriving later find the well running low. A child cries because there\'s no water left for them.');
-                    appendEvent('+3 meals, but -2 Community Trust');
+                    if (game.money < 6) {
+                        game.food += 3;
+                        showEvent('Pantry visit', 'You cannot afford the surplus meals, but still receive your free 3-meal allocation. No penalty.');
+                    } else {
+                        game.food += 6;
+                        game.money -= 6;
+                        showEvent('Pantry visit', 'You receive 6 meals and pay $6 for the surplus portion. Trust and story-question results are unchanged.');
+                    }
                     updateUI(); showGameMenu();
                 }
             }
@@ -2586,26 +2678,25 @@ function dilemmaSharedWell() {
 function dilemmaCommunityGarden() {
     showDilemma(
         '🌱 Community garden',
-        'You pass a community garden that\'s short on volunteers. They\'re asking travelers to help plant for an hour in exchange for fresh produce. It would cost you travel time.',
+        'A community garden offers a one-day planting visit. Cost: one day and one meal per party member, while keeping a next-turn travel reserve. Receive 8 meals and +2 community trust. Declining has no penalty.',
         [
             {
-                label: 'Stop and help plant (cooperate)',
+                label: 'Volunteer for one day (meal cost shown above)',
                 action: function() {
+                    if (!spendVolunteerDay()) return;
                     sfx_good();
                     game.food += 8;
                     changeTrust(2);
-                    hopeScore.h += 1;
-                    advanceDay();
-                    showEvent('🌻 Time well spent!', 'Your family spent an hour planting vegetables. The gardeners gave you fresh produce and seeds. Your child learned about growing food!');
-                    appendEvent('+8 meals, +2 Community Trust, +1 Motivation');
+                    showEvent('Garden visit', 'Your party spent one day planting and used one meal each. The gardeners shared 8 meals.');
+                    appendEvent('+2 Community Trust. Story-question results are unchanged.');
                     updateUI(); showGameMenu();
                 }
             },
             {
-                label: 'No time, keep moving (self-interest)',
+                label: 'Continue your journey (no penalty)',
                 action: function() {
                     sfx_select();
-                    showEvent('Kept driving', 'You drove past the garden. You saved time, but missed a chance to connect.');
+                    showEvent('Continuing', 'You keep your time and supplies for the journey.');
                     updateUI(); showGameMenu();
                 }
             }
@@ -2615,28 +2706,22 @@ function dilemmaCommunityGarden() {
 
 function dilemmaHitchhiker() {
     showDilemma(
-        '👋 Hitchhiker',
-        'A young environmental science student is hitchhiking to a conservation conference. They promise to share knowledge about local ecosystems if you give them a ride to the next stop.',
+        'Public community-center conversation',
+        'At a staffed community center, a student offers to discuss fictional restoration projects. You may join the public conversation or continue. Neither choice changes resources, trust, fatigue, or story-question results.',
         [
             {
-                label: 'Give them a ride (cooperate)',
+                label: 'Join the public conversation',
                 action: function() {
                     sfx_good();
-                    changeTrust(1);
-                    hopeScore.o += 1;
-                    hopeScore.p += 1;
-                    showEvent('🎓 Great conversation!', 'The student shared stories about ecosystem restoration projects across the country. Your family learned about wetland recovery, urban forests, and coral reef rebuilding.');
-                    appendEvent('+1 Community Trust, +1 Belief, +1 Plans');
-                    const worried = game.party.find(m => m.status === 'worried');
-                    if (worried) { worried.status = 'healthy'; appendEvent(`${worried.name} feels inspired by the stories.`); }
+                    showEvent('Public conversation', 'The student discussed restoration projects in the staffed center. Listening does not establish that the party can identify or enact a marker.');
                     updateUI(); showGameMenu();
                 }
             },
             {
-                label: 'Drive on by (self-interest)',
+                label: 'Continue your journey (no penalty)',
                 action: function() {
                     sfx_select();
-                    showEvent('Passed by', 'You kept driving. The student looked disappointed but waved anyway.');
+                    showEvent('Continuing', 'You choose not to join the conversation. No penalty applies.');
                     updateUI(); showGameMenu();
                 }
             }
@@ -2645,40 +2730,38 @@ function dilemmaHitchhiker() {
 }
 
 function dilemmaFoodBank() {
-    const can8 = game.food >= 8;
-    const can3 = game.food >= 3;
+    const can8 = canShareMeals(8);
+    const can3 = canShareMeals(3);
     showDilemma(
         '🏦 Local food bank',
         'You pass a food bank that\'s running low. A volunteer asks if you can spare any meals. "We have families who haven\'t eaten today," she says.' +
         (game.food < 3 ? ' You check your supplies — you barely have enough for your own family.' : ''),
         [
             {
-                label: can8 ? 'Donate 8 meals (generous)' : 'Donate 8 meals (not enough!)',
+                label: can8 ? 'Donate 8 meals (+3 trust; travel reserve kept)' : '8-meal donation would use your travel reserve',
                 action: function() {
-                    if (game.food < 8) {
+                    if (!canShareMeals(8)) {
                         sfx_bad();
                         showEvent('Not enough food', 'You want to give generously, but you only have ' + Math.floor(game.food) + ' meals. Your family would go hungry.');
-                        appendEvent('You need at least 8 meals to make a big donation.');
+                        appendEvent('Keeping your next-turn travel reserve carries no penalty.');
                         updateUI(); showGameMenu();
                         return;
                     }
                     sfx_good();
                     game.food -= 8;
                     changeTrust(3);
-                    hopeScore.h += 1;
-                    hopeScore.e += 1;
                     showEvent('💛 Generous gift!', 'The volunteer\'s eyes fill with tears. "You have no idea what this means." She gives you a card with food bank locations along your route in case you ever need help.');
-                    appendEvent('+3 Community Trust, +1 Motivation, +1 Agency');
+                    appendEvent('+3 Community Trust. Story-question results are unchanged.');
                     updateUI(); checkGameOver(); if (!game.gameOver) showGameMenu();
                 }
             },
             {
-                label: can3 ? 'Donate 3 meals (small help)' : 'Donate 3 meals (not enough!)',
+                label: can3 ? 'Donate 3 meals (+1 trust; travel reserve kept)' : '3-meal donation would use your travel reserve',
                 action: function() {
-                    if (game.food < 3) {
+                    if (!canShareMeals(3)) {
                         sfx_bad();
                         showEvent('Not enough food', 'You barely have enough meals for your own family. You can\'t spare any right now.');
-                        appendEvent('Stock up on food when you can.');
+                        appendEvent('Keeping your next-turn travel reserve carries no penalty.');
                         updateUI(); showGameMenu();
                         return;
                     }
@@ -2691,12 +2774,10 @@ function dilemmaFoodBank() {
                 }
             },
             {
-                label: 'Sorry, we can\'t spare any (keep)',
+                label: 'Keep your supplies (no trust penalty)',
                 action: function() {
                     sfx_select();
-                    changeTrust(-1);
-                    showEvent('Kept supplies', 'You apologized and moved on. Your partner says quietly, "I wish we could have helped."');
-                    appendEvent('-1 Community Trust');
+                    showEvent('Kept supplies', 'You keep the food your party needs. No trust penalty applies.');
                     updateUI(); showGameMenu();
                 }
             }
@@ -2707,23 +2788,21 @@ function dilemmaFoodBank() {
 function dilemmaTrailCleanup() {
     showDilemma(
         '🗑️ Trail cleanup needed',
-        'A beautiful trail is covered in litter from recent storms. Park rangers are asking visitors to help collect trash for 30 minutes. It would delay your trip but help the ecosystem.',
+        'Rangers offer a one-day cleanup. Cost: one day and one meal per party member, while keeping a next-turn travel reserve. The visit adds +2 community trust. Declining has no penalty.',
         [
             {
-                label: 'Help clean up (cooperate)',
+                label: 'Volunteer for one day (meal cost shown above)',
                 action: function() {
+                    if (!spendVolunteerDay()) return;
                     sfx_good();
                     changeTrust(2);
-                    hopeScore.e += 1;
                     showEvent('🧹 Clean trail!', 'Your family filled 3 bags of trash. A ranger gave your child a Junior Ranger badge. "You made a real difference today," she said.');
-                    appendEvent('+2 Community Trust, +1 Agency');
-                    const worried = game.party.find(m => m.status === 'worried');
-                    if (worried) { worried.status = 'healthy'; appendEvent(`${worried.name} feels proud and hopeful.`); }
+                    appendEvent('One day and one meal per party member used; +2 Community Trust. Story-question results are unchanged.');
                     updateUI(); showGameMenu();
                 }
             },
             {
-                label: 'No time, keep driving (self-interest)',
+                label: 'Continue your journey (no penalty)',
                 action: function() {
                     sfx_select();
                     showEvent('Drove past', 'You kept driving. The litter stays on the trail.');
@@ -2751,30 +2830,14 @@ function eventTrustReciprocity() {
                 appendEvent('+$50. Your reputation precedes you!');
             },
             () => {
-                const worried = game.party.filter(m => m.status === 'worried');
-                worried.forEach(m => m.status = 'healthy');
-                hopeScore.h += 1;
-                showEvent('🌟 Community welcome!', 'A local community heard about your family\'s kindness. They organized a small welcome party with food, music, and stories. Everyone feels renewed.');
-                appendEvent('All family members feel hopeful! +1 Motivation');
+                showEvent('Community welcome', 'A community hosts a public gathering with music and stories. Participants may respond differently; no fatigue or literacy result changes.');
             },
         ];
         helps[Math.floor(Math.random() * helps.length)]();
     } else if (communityTrust <= 2) {
-        // Low trust — community is cold
-        sfx_bad();
-        const colds = [
-            () => {
-                game.money -= 30; if (game.money < 0) game.money = 0;
-                showEvent('😐 Cold reception', 'At a rest stop, people seem to avoid your family. A mechanic charges you extra for a simple repair. "We heard you don\'t help others around here," he mutters.');
-                appendEvent('-$30. Your reputation works both ways.');
-            },
-            () => {
-                showEvent('🚪 Turned away', 'A community shelter turns your family away. "We save our resources for people who contribute to the community," the volunteer says, looking uncomfortable.');
-                stressRandomMember();
-                appendEvent('Someone in your family feels discouraged.');
-            },
-        ];
-        colds[Math.floor(Math.random() * colds.length)]();
+        sfx_select();
+        game.food += 3;
+        showEvent('Community support', 'A staffed shelter welcomes your party and shares 3 meals. Essential help is not conditional on donations or community trust.');
     } else {
         // Neutral — small random event
         sfx_select();
@@ -2786,16 +2849,16 @@ function eventTrustReciprocity() {
 // =====================
 // UTILITY
 // =====================
-function advanceDay() {
-    game.day += 2;
+function advanceDay(days = 2) {
+    game.day += days;
     if (game.day > 28) { game.day = 1; game.month++; if (game.month > 11) { game.month = 0; game.year++; } }
 }
 
 function stressRandomMember() {
-    const healthy = game.party.filter(m => m.status === 'healthy' && m.role !== 'Pet');
+    const healthy = game.party.filter(m => m.status === 'rested' && m.role !== 'Pet');
     if (healthy.length > 0) {
         const victim = healthy[Math.floor(Math.random() * healthy.length)];
-        victim.status = 'worried';
+        victim.status = 'tired';
     }
 }
 
@@ -2814,51 +2877,34 @@ function winGame() {
     sfx_win();
     game.gameOver = true;
     const total = hopeScore.h + hopeScore.o + hopeScore.p + hopeScore.e;
-    const combined = total + communityTrust;
-
-    let rating;
-    if (combined >= 28) rating = '🌟 HOPE Champion!';
-    else if (combined >= 20) rating = '🌿 Hope Builder';
-    else if (combined >= 12) rating = '🌱 Hope Seeker';
-    else rating = '💚 Hope Beginner';
-
-    let trustVerdict;
-    if (communityTrust >= 8) trustVerdict = 'Your kindness echoed across the country. Communities remember you.';
-    else if (communityTrust >= 5) trustVerdict = 'You balanced self-care with helping others.';
-    else if (communityTrust >= 3) trustVerdict = 'You kept to yourself mostly. Some missed connections along the way.';
-    else trustVerdict = 'Your family survived, but bridges were burned. Cooperation would have made the journey easier.';
-
     document.getElementById('end-title').textContent = '🎉 You made it!';
-    document.getElementById('end-message').innerHTML =
-        `The ${game.party[0].name} family arrived at Hope Valley, Oregon!<br><br>` +
-        `Along the way, you found hope in stories of change, recovery, plans, and action.<br><br>` +
-        `${trustVerdict}<br><br>` +
-        `Your HOPE rating: <strong>${rating}</strong>`;
+    document.getElementById('end-message').textContent =
+        `The ${game.party[0].name} party arrived at Hope Valley after ${Math.floor(game.miles)} miles. ` +
+        'Journey completion describes travel, not hopefulness or literacy mastery. Explain one story cue and a plausible alternative reading.';
     document.getElementById('end-hope-summary').innerHTML =
         `<p>❤️ Motivation: ${hopeScore.h} &nbsp; 🌿 Belief: ${hopeScore.o} &nbsp; 🗺️ Plans: ${hopeScore.p} &nbsp; ⚡ Agency: ${hopeScore.e}</p>` +
         `<p>🤝 Community Trust: ${communityTrust}/10</p>` +
-        `<p>Total HOPE + Trust: ${combined}</p>`;
+        `<p>${total} first-answer matches across ${game.challengeAnswers.size} story questions. Resource choices are separate.</p>`;
+    document.getElementById('trail-pause').disabled = true;
     showScreen('end-screen');
+    updateChallengeProgress();
 }
 
 function loseGame() {
     game.gameOver = true;
     const total = hopeScore.h + hopeScore.o + hopeScore.p + hopeScore.e;
 
-    let trustNote = '';
-    if (communityTrust <= 2) {
-        trustNote = '<br>Low community trust made the journey harder. Cooperation could have helped.';
-    }
-
     document.getElementById('end-title').textContent = 'Journey paused...';
-    document.getElementById('end-message').innerHTML =
-        `The ${game.party[0].name} family ran out of resources at mile ${Math.floor(game.miles)}.<br><br>` +
-        `But every journey toward hope has setbacks. The markers you found still matter.${trustNote}<br><br>` +
-        `You collected ${total} HOPE points. Try again and find even more!`;
+    document.getElementById('end-message').textContent =
+        `The ${game.party[0].name} party ran out of travel resources at mile ${Math.floor(game.miles)}. ` +
+        `You made ${total} first-answer matches across ${game.challengeAnswers.size} story questions. ` +
+        'Resource shortages do not rate your feelings or erase your practice. You can restart or use the short story session without resource management.';
+    document.getElementById('trail-pause').disabled = true;
     document.getElementById('end-hope-summary').innerHTML =
         `<p>❤️ Motivation: ${hopeScore.h} &nbsp; 🌿 Belief: ${hopeScore.o} &nbsp; 🗺️ Plans: ${hopeScore.p} &nbsp; ⚡ Agency: ${hopeScore.e}</p>` +
         `<p>🤝 Community Trust: ${communityTrust}/10</p>`;
     showScreen('end-screen');
+    updateChallengeProgress();
 }
 
 // =====================
@@ -3082,13 +3128,33 @@ function closeMap() {
 }
 
 prepareTrailControls(document);
+document.getElementById('trail-sound-toggle').addEventListener('click', toggleSound);
+document.getElementById('trail-restart').addEventListener('click', () => {
+    if (window.confirm('Restart this journey? Your journey progress will be cleared.')) window.location.reload();
+});
+document.getElementById('back-to-packing').addEventListener('click', () => {
+    store = { money: game.money, gas: game.gas, food: game.food, supplies: game.supplies };
+    updateStoreUI();
+    showScreen('supply-screen');
+});
+if (window.parent !== window) {
+    new ResizeObserver(() => {
+        const height = Math.ceil(document.getElementById('game-container').getBoundingClientRect().height + 20);
+        window.parent.postMessage({ type: 'hope-trail-size', height }, window.location.origin);
+    }).observe(document.getElementById('game-container'));
+}
 new MutationObserver(() => prepareTrailControls(document)).observe(
     document.getElementById('game-container'), { childList: true, subtree: true }
 );
 document.addEventListener('keydown', handleTrailKeydown);
 window.addEventListener('message', event => {
     if (event.source === window.parent && event.origin === window.location.origin &&
+        event.data?.type === 'hope-trail-grade') {
+        setTrailGrade(event.data.grade);
+    }
+    if (event.source === window.parent && event.origin === window.location.origin &&
         event.data?.type === 'hope-trail-visibility' && typeof event.data.active === 'boolean') {
         setTrailVisible(event.data.active);
     }
 });
+setTrailGrade(new URLSearchParams(window.location.search).get('grade') || 'middle');
